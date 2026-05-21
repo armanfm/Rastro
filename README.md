@@ -1,196 +1,121 @@
-# RASTRO
+# FundChain: Protocolo Descentralizado de Crowdfunding
 
-Plataforma de due diligence ambiental verificável para exportadores EUDR — construída com Chainlink CRE, smart contracts e dados oficiais brasileiros.
+Protocolo Web3 para financiamento coletivo de pequenos negocios de tecnologia e inovacao.
 
----
+Desenvolvido como projeto final da Unidade 1, Capitulo 5, da Residencia em TIC 29 (Web 3.0).
 
-## O que é
+## Problema
 
-O RASTRO permite que qualquer pessoa no mundo verifique o status de compliance EUDR de uma propriedade rural brasileira sem login, sem wallet, sem gas. O status é calculado onchain com regra fixa baseada em dados oficiais — sem IA na decisão regulatória.
+Pequenos negocios de tecnologia e inovacao enfrentam barreiras para acessar financiamento. Bancos exigem garantias que empreendedores em estagio inicial nao possuem. Plataformas centralizadas de crowdfunding cobram taxas elevadas e nao oferecem transparencia nem participacao aos apoiadores.
 
-Desenvolvido por **Izabela Fernandes + Armando Freire** para o HackaNation 2026.
+## Solucao
 
----
-
-## O problema que resolve
-
-Exportadores europeus precisam provar que os produtos que importam não vêm de áreas desmatadas após 31/12/2020 (EUDR Art. 3). Hoje isso é feito manualmente, com laudos em PDF e planilhas. O RASTRO automatiza a verificação com dados de satélite (MapBiomas) e registros oficiais (IBAMA), registra tudo onchain e gera um laudo auditável por qualquer regulador.
-
----
-
-## Stack
-
-| Camada | Tecnologia |
-|--------|-----------|
-| Smart contract | Solidity 0.8.20 — Ethereum Sepolia |
-| Oráculos | Chainlink CRE (dois workflows TypeScript) |
-| Dados ambientais | MapBiomas Alerta GraphQL |
-| Dados de embargo | IBAMA PAMGIA ArcGIS REST |
-| Armazenamento de laudos | IPFS via Pinata |
-| Narrativa do laudo | Gemini 2.0 Flash (leitor, não juiz) |
-
----
+Uma plataforma descentralizada onde empreendedores submetem projetos, apoiadores contribuem com tokens, recebem certificados (NFTs) e participam das decisoes por meio de governanca on-chain (DAO).
 
 ## Arquitetura
 
-O sistema é composto por um smart contract e dois workflows CRE independentes.
+O protocolo e composto por 4 contratos inteligentes:
 
-### Smart Contract — Rastro.sol
+| Contrato | Padrao | Funcao |
+|----------|--------|--------|
+| FundToken | ERC-20 | Moeda da plataforma (compra, staking, votacao) |
+| FundNFT | ERC-721 | Certificado unico de apoiador |
+| FundStaking | Custom | Staking com recompensa ajustada por oraculo Chainlink |
+| FundDAO | Custom | Governanca descentralizada (criar/votar propostas) |
 
-Gerencia o ciclo de vida das fazendas: cadastro, validação, verificação ambiental e cadeia de custódia. O status EUDR é calculado internamente com regra fixa — nenhuma IA participa da decisão.
+## Fluxo
 
-**Status possíveis:**
+1. Empreendedor submete projeto
+2. DAO vota pela aprovacao
+3. Apoiadores compram FundTokens e apoiam o projeto
+4. Apoiadores recebem NFT como certificado
+5. Tokens podem ser travados no staking para gerar recompensas
+6. Detentores de tokens votam nas decisoes da plataforma
 
-| Status | Significado |
-|--------|-------------|
-| `PENDING` | Cadastrada, aguardando validação |
-| `LOW_RISK` | Todas as verificações EUDR passaram |
-| `INCOMPLETE` | Ambiental ok, falta cadeia de custódia |
-| `FLAGGED` | Desmatamento detectado ou embargo ativo |
+## Tecnologias
 
-**Regra fixa no contrato:**
+- Solidity ^0.8.20
+- OpenZeppelin Contracts
+- Chainlink Price Feed (ETH/USD)
+- Hardhat (compilacao, testes, deploy)
+- ethers.js (integracao Web3)
+- Sepolia Testnet
 
-```
-desmatamento OU embargo ativo → FLAGGED
-ambiental ok + sem cadeia de custódia → INCOMPLETE
-tudo ok → LOW_RISK
-```
-
-**Três CIDs IPFS por fazenda:**
-
-| CID | Gerado por | Mutabilidade | Conteúdo |
-|-----|-----------|-------------|----------|
-| `cidTerritorial` | Workflow Registro | Imutável | boundingBox, área, estado |
-| `cidAnalise` | Workflow Análise | Atualiza toda semana | alertas, embargos, timestamp |
-| `cidGemini` | Workflow Análise | Atualiza quando muda | narrativa textual do laudo |
-
----
-
-## Diagrama do Sistema
-<img width="1062" height="951" alt="image" src="https://github.com/user-attachments/assets/687da22c-130b-4825-93a2-0d91b0124fab" />
-
-
-
-### Workflow 1 — Registro (`patrol-registro`)
-
-**Trigger:** Cron horário (`0 * * * *`)  
-**Responsabilidade:** Validar existência do CAR e registrar dados territoriais imutáveis  
-**Filtro:** Processa apenas fazendas com `cidTerritorial` vazio — cada CAR é processado uma única vez
-
-**Fluxo:**
-```
-1. Lê cidTerritorial onchain (só RPC)
-   → preenchido → pula
-   → vazio → processa
-
-2. Consulta MapBiomas Alerta (ruralProperty)
-   → null → invalidarCAR() → burn NFT
-   → existe → coleta boundingBox, área, estado
-
-3. Pina laudo territorial no IPFS
-
-4. Chama registrarTerritorial(car, cid) onchain
-```
-
----
-
-### Workflow 2 — Análise (`patrol-analise`)
-
-**Trigger:** Cron semanal toda segunda-feira (`0 0 * * 1`)  
-**Responsabilidade:** Verificação EUDR completa — alertas, embargos, narrativa Gemini  
-**Filtro:** Processa apenas fazendas com `cidTerritorial` preenchido
-
-O ciclo semanal serve a dois propósitos: pegar novos CARs registrados durante a semana e reanalisar fazendas já analisadas, capturando mudanças de alerta ou embargo desde a última verificação.
-
-**Por que reanalisar semanalmente?**
-
-O MapBiomas Alerta publica novos alertas com atualização semanal — o RASTRO está sincronizado com isso. O IBAMA é independente e burocrático: um embargo pode ser emitido semanas após o alerta, e pode continuar ativo mesmo depois que o alerta foi cancelado no MapBiomas. Verificar semanalmente garante que ambas as fontes sejam checadas regularmente.
-
-**Otimização de calls:**
+## Estrutura do Projeto
 
 ```
-Fase 1 — só RPC:
-  filtra CARs com cidTerritorial
-  nenhum tem → encerra (zero calls de API)
-
-Fase 2 — login MapBiomas UMA VEZ:
-  token reutilizado em todos os CARs do loop
-
-Fase 3 — por CAR:
-  sem mudança + menos de 7 dias → pula (2 calls: login + MapBiomas)
-  mudou ou passou 7 dias → análise completa (6 calls)
+contracts/
+  FundToken.sol       # Token ERC-20
+  FundNFT.sol         # NFT ERC-721
+  FundStaking.sol     # Staking + oraculo Chainlink
+  FundDAO.sol         # Governanca (DAO)
+scripts/
+  deploy.js           # Script de deploy na Sepolia
+  interact.js         # Demonstracao: mint NFT, stake, votacao
+test/                 # Testes automatizados
+hardhat.config.js     # Configuracao do Hardhat
+README.md             # Este arquivo
 ```
 
-**Calls por situação:**
+## Seguranca
 
-| Situação | RPC | MapBiomas | IBAMA | Pinata | Gemini |
-|----------|-----|-----------|-------|--------|--------|
-| Sem territorial | 2 | 0 | 0 | 0 | 0 |
-| Com territorial, sem mudança | 3–4 | 1 | 0 | 0 | 0 |
-| CAR novo ou mudou ou 7 dias | 3–4 | 1 | 1 | 2 | 1 |
+- ReentrancyGuard (OpenZeppelin) no contrato de staking
+- Ownable (OpenZeppelin) em todos os contratos
+- Solidity ^0.8.20 com protecao nativa contra overflow/underflow
+- Validacoes com require() em todas as funcoes
+- Auditoria com Slither e Mythril
 
----
+## Deploy (Sepolia Testnet)
 
-## Três tipos de dado
+| Contrato | Endereco |
+|----------|----------|
+| FundToken | _a ser preenchido apos deploy_ |
+| FundNFT | _a ser preenchido apos deploy_ |
+| FundStaking | _a ser preenchido apos deploy_ |
+| FundDAO | _a ser preenchido apos deploy_ |
 
-| Tipo | Origem | Exemplo |
-|------|--------|---------|
-| **Oficial** | MapBiomas, IBAMA, SICAR | alertas, embargos, localização |
-| **Declarado** | Exportador via frontend | cadeia de custódia, hash NF-e |
-| **Calculado** | Smart contract (regra fixa) | LOW_RISK / INCOMPLETE / FLAGGED |
+Chainlink ETH/USD Price Feed (Sepolia): `0x694AA1769357215DE4FAC081bf1f309aDC325306`
 
----
+## Como Executar
 
-## O papel do Gemini
+### Requisitos
+- Node.js v18+
+- MetaMask com ETH de teste na Sepolia
 
-O Gemini gera exclusivamente narrativa textual para o `cidGemini`:
+### Instalacao
 
-- `justificativa` — resumo executivo
-- `compliance` — análise EUDR Art. 3 e Art. 10
-- `interpretacao` — interpretação dos dados ambientais
-- `resumo` — linguagem clara para o importador europeu
+```bash
+git clone https://github.com/seu-usuario/fundchain.git
+cd fundchain
+npm install
+```
 
-O Gemini não decide status, não calcula risco, não emite score. A decisão regulatória é do contrato.
+### Compilar
 
----
+```bash
+npx hardhat compile
+```
 
-## Funções públicas do contrato
+### Testar
 
-Todas são `view` — sem gas, sem login, sem wallet.
+```bash
+npx hardhat test
+```
 
-| Função | Retorna |
-|--------|---------|
-| `verify(car)` | `VerifyResult` struct completo |
-| `verifyEnvironmental(car)` | status + dados ambientais |
-| `verifyDocuments(car)` | 3 CIDs IPFS |
-| `getStatus(car)` | status + reason (leve, para listagens) |
-| `getVerificationHistory(car)` | histórico auditável de verificações |
-| `getSupplyChain(car)` | cadeia de custódia declarada |
+### Deploy na Sepolia
 
----
+```bash
+npx hardhat run scripts/deploy.js --network sepolia
+```
 
-## Cobertura EUDR
+### Interagir com os contratos
 
-| Verificação | Fonte | Artigo EUDR |
-|-------------|-------|-------------|
-| Desmatamento pós-2020 | MapBiomas Alerta | Art. 3(a) |
-| Embargos ambientais | IBAMA PAMGIA | Art. 3(b) |
-| Geolocalização da propriedade | MapBiomas (boundingBox) | Art. 9 |
-| Cadeia de custódia | Declaratória pelo exportador | Art. 9/10 |
+```bash
+npx hardhat run scripts/interact.js --network sepolia
+```
 
----
+## Autora
 
-## Auditoria de segurança
+Iza Fernandes
 
-O contrato foi auditado com três ferramentas antes do deploy:
-
-| Ferramenta | Resultado |
-|-----------|-----------|
-| Foundry (`forge build`) | Compilação sem erros |
-| Slither | 0 vulnerabilidades reais |
-| Mythril | No issues were detected |
-
----
-
-*RASTRO © 2026 · Izabela Fernandes + Armando Freire · HackaNation 2026*
-
+Residencia em TIC 29 - Web 3.0 | Prof. Bruno Portes
