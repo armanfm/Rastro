@@ -1,0 +1,9 @@
+{
+  "schedule": "0 0 * * *",
+  "rastroContractAddress": "0x58663CB3946B11F8BaA54163d5f2C2afF841e759",
+  "privateKey": "",
+  "geminiKey": "AIzaSyD7Ogf04SSFbwHiV6HLiqrtd8KCszATWbc",
+  "pinataJwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJmYjU4NDYwMy1kZWExLTQwNjgtYTEwZS0xM2M0YjM3NzJkZDAiLCJlbWFpbCI6ImFybWFuZm1AZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6IjIzZDY5MjYyODUwYmE3NWFlNmNhIiwic2NvcGVkS2V5U2VjcmV0IjoiYWM5ZGM1NDRkMWU5YWE3ZmU5ZDM0ZWEyM2EyN2Y0ZjExNjUxMmE5YTY4MmM0MTM1YTg4ZjJiNjliMmRhZGNiMiIsImV4cCI6MTgwOTgxNDc5MX0.nFxCy7_mGGZPLKjDXP0p6WKm8IJfaHiH_jwx3T6K59s",
+  "mapbiomasEmail": "armanfm@gmail.com",
+  "mapbiomasPassword": "$Olange2274"
+}
