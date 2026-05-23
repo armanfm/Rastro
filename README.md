@@ -502,4 +502,4 @@ Funções de escrita (requerem gas):
 
 ---
 
-RASTRO © 2026 · Izabela Fernandes + Armando Freire · HackaNation 2026 · All rights reserved
+RASTRO © 2026 All rights reserved
