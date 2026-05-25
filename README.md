@@ -494,12 +494,5 @@ Funções de escrita (requerem gas):
 
 **Fase 3 (12-24 meses):** Expansão geográfica (Colômbia, Indonésia, Costa do Marfim), zkProofs para computação verificável, governança aberta, integração automática NF-e via certificado digital, CSRD/CBAM como camadas regulatórias, minerais críticos (CRMA), verificação de volume e anti-fraude.
 
-### Time
-
-**Izabela Fernandes** — Legal, estratégia, EUDR/CSRD/CBAM, inteligência regulatória, pitch. Advogada de direito internacional e tributário (OAB/MG). Pesquisadora no ITS Rio. Fundadora da IusChain.
-
-**Armando Freire** — Smart contract, Chainlink CRE, deploy, arquitetura técnica. Desenvolvedor blockchain Solidity/TypeScript.
-
----
 
 RASTRO © 2026 All rights reserved
