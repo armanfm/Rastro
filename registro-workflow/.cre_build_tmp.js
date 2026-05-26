@@ -467,7 +467,6 @@ var init_sha2 = __esm(() => {
   sha256 = /* @__PURE__ */ createHasher(() => new SHA256);
 });
 var HMAC;
-<<<<<<< HEAD
 var hmac = (hash2, key, message) => new HMAC(hash2, key).update(message).digest();
 var init_hmac = __esm(() => {
   init_utils();
@@ -479,38 +478,17 @@ var init_hmac = __esm(() => {
       ahash(hash2);
       const key = toBytes2(_key);
       this.iHash = hash2.create();
-=======
-var hmac = (hash, key, message) => new HMAC(hash, key).update(message).digest();
-var init_hmac = __esm(() => {
-  init_utils();
-  HMAC = class HMAC2 extends Hash {
-    constructor(hash, _key) {
-      super();
-      this.finished = false;
-      this.destroyed = false;
-      ahash(hash);
-      const key = toBytes2(_key);
-      this.iHash = hash.create();
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
       if (typeof this.iHash.update !== "function")
         throw new Error("Expected instance of class which extends utils.Hash");
       this.blockLen = this.iHash.blockLen;
       this.outputLen = this.iHash.outputLen;
       const blockLen = this.blockLen;
       const pad2 = new Uint8Array(blockLen);
-<<<<<<< HEAD
       pad2.set(key.length > blockLen ? hash2.create().update(key).digest() : key);
       for (let i = 0;i < pad2.length; i++)
         pad2[i] ^= 54;
       this.iHash.update(pad2);
       this.oHash = hash2.create();
-=======
-      pad2.set(key.length > blockLen ? hash.create().update(key).digest() : key);
-      for (let i = 0;i < pad2.length; i++)
-        pad2[i] ^= 54;
-      this.iHash.update(pad2);
-      this.oHash = hash.create();
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
       for (let i = 0;i < pad2.length; i++)
         pad2[i] ^= 54 ^ 92;
       this.oHash.update(pad2);
@@ -556,11 +534,7 @@ var init_hmac = __esm(() => {
       this.iHash.destroy();
     }
   };
-<<<<<<< HEAD
   hmac.create = (hash2, key) => new HMAC(hash2, key);
-=======
-  hmac.create = (hash, key) => new HMAC(hash, key);
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 });
 function _abool2(value, title = "") {
   if (typeof value !== "boolean") {
@@ -1969,13 +1943,8 @@ function ecdh(Point, ecdhOpts = {}) {
   };
   return Object.freeze({ getPublicKey, getSharedSecret, keygen, Point, utils, lengths });
 }
-<<<<<<< HEAD
 function ecdsa(Point, hash2, ecdsaOpts = {}) {
   ahash(hash2);
-=======
-function ecdsa(Point, hash, ecdsaOpts = {}) {
-  ahash(hash);
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   _validateObject(ecdsaOpts, {}, {
     hmac: "function",
     lowS: "boolean",
@@ -1984,11 +1953,7 @@ function ecdsa(Point, hash, ecdsaOpts = {}) {
     bits2int_modN: "function"
   });
   const randomBytes2 = ecdsaOpts.randomBytes || randomBytes;
-<<<<<<< HEAD
   const hmac2 = ecdsaOpts.hmac || ((key, ...msgs) => hmac(hash2, key, concatBytes(...msgs)));
-=======
-  const hmac2 = ecdsaOpts.hmac || ((key, ...msgs) => hmac(hash, key, concatBytes(...msgs)));
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   const { Fp, Fn } = Point;
   const { ORDER: CURVE_ORDER, BITS: fnBits } = Fn;
   const { keygen, getPublicKey, getSharedSecret, utils, lengths } = ecdh(Point, ecdsaOpts);
@@ -2128,11 +2093,7 @@ function ecdsa(Point, hash, ecdsaOpts = {}) {
   }
   function validateMsgAndHash(message, prehash) {
     _abytes2(message, undefined, "message");
-<<<<<<< HEAD
     return prehash ? _abytes2(hash2(message), undefined, "prehashed message") : message;
-=======
-    return prehash ? _abytes2(hash(message), undefined, "prehashed message") : message;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   }
   function prepSig(message, privateKey, opts) {
     if (["recovered", "canonical"].some((k) => (k in opts)))
@@ -2173,11 +2134,7 @@ function ecdsa(Point, hash, ecdsaOpts = {}) {
   function sign(message, secretKey, opts = {}) {
     message = ensureBytes("message", message);
     const { seed, k2sig } = prepSig(message, secretKey, opts);
-<<<<<<< HEAD
     const drbg = createHmacDrbg(hash2.outputLen, Fn.BYTES, hmac2);
-=======
-    const drbg = createHmacDrbg(hash.outputLen, Fn.BYTES, hmac2);
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
     const sig = drbg(seed, k2sig);
     return sig;
   }
@@ -2251,11 +2208,7 @@ function ecdsa(Point, hash, ecdsaOpts = {}) {
     verify,
     recoverPublicKey,
     Signature,
-<<<<<<< HEAD
     hash: hash2
-=======
-    hash
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   });
 }
 function _weierstrass_legacy_opts_to_new(c) {
@@ -2306,15 +2259,9 @@ function _ecdsa_new_output_to_legacy(c, _ecdsa) {
   });
 }
 function weierstrass(c) {
-<<<<<<< HEAD
   const { CURVE, curveOpts, hash: hash2, ecdsaOpts } = _ecdsa_legacy_opts_to_new(c);
   const Point = weierstrassN(CURVE, curveOpts);
   const signs = ecdsa(Point, hash2, ecdsaOpts);
-=======
-  const { CURVE, curveOpts, hash, ecdsaOpts } = _ecdsa_legacy_opts_to_new(c);
-  const Point = weierstrassN(CURVE, curveOpts);
-  const signs = ecdsa(Point, hash, ecdsaOpts);
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   return _ecdsa_new_output_to_legacy(c, signs);
 }
 var divNearest = (num, den) => (num + (num >= 0 ? den : -den) / _2n3) / den;
@@ -2437,11 +2384,7 @@ var init_weierstrass = __esm(() => {
   _4n2 = BigInt(4);
 });
 function createCurve(curveDef, defHash) {
-<<<<<<< HEAD
   const create3 = (hash2) => weierstrass({ ...curveDef, hash: hash2 });
-=======
-  const create3 = (hash) => weierstrass({ ...curveDef, hash });
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   return { ...create3(defHash), create: create3 };
 }
 var init__shortw_utils = __esm(() => {
@@ -2518,11 +2461,7 @@ function hash_to_field(msg, count, options) {
     k: "number",
     hash: "function"
   });
-<<<<<<< HEAD
   const { p, k, m, hash: hash2, expand, DST } = options;
-=======
-  const { p, k, m, hash, expand, DST } = options;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   if (!isHash(options.hash))
     throw new Error("expected valid hash");
   abytes(msg);
@@ -2532,15 +2471,9 @@ function hash_to_field(msg, count, options) {
   const len_in_bytes = count * m * L;
   let prb;
   if (expand === "xmd") {
-<<<<<<< HEAD
     prb = expand_message_xmd(msg, DST, len_in_bytes, hash2);
   } else if (expand === "xof") {
     prb = expand_message_xof(msg, DST, len_in_bytes, k, hash2);
-=======
-    prb = expand_message_xmd(msg, DST, len_in_bytes, hash);
-  } else if (expand === "xof") {
-    prb = expand_message_xof(msg, DST, len_in_bytes, k, hash);
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   } else if (expand === "_internal_pass") {
     prb = msg;
   } else {
@@ -6658,6 +6591,26 @@ var Mode;
   Mode2[Mode2["NODE"] = 2] = "NODE";
 })(Mode || (Mode = {}));
 var file_tools_generator_v1alpha_cre_metadata = /* @__PURE__ */ fileDesc("Cip0b29scy9nZW5lcmF0b3IvdjFhbHBoYS9jcmVfbWV0YWRhdGEucHJvdG8SF3Rvb2xzLmdlbmVyYXRvci52MWFscGhhIoQBCgtTdHJpbmdMYWJlbBJECghkZWZhdWx0cxgBIAMoCzIyLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLlN0cmluZ0xhYmVsLkRlZmF1bHRzRW50cnkaLwoNRGVmYXVsdHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIogBCgtVaW50NjRMYWJlbBJECghkZWZhdWx0cxgBIAMoCzIyLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLlVpbnQ2NExhYmVsLkRlZmF1bHRzRW50cnkaMwoNRGVmYXVsdHNFbnRyeRILCgNrZXkYASABKAkSEQoFdmFsdWUYAiABKARCAjAAOgI4ASKEAQoLVWludDMyTGFiZWwSRAoIZGVmYXVsdHMYASADKAsyMi50b29scy5nZW5lcmF0b3IudjFhbHBoYS5VaW50MzJMYWJlbC5EZWZhdWx0c0VudHJ5Gi8KDURlZmF1bHRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgNOgI4ASKGAQoKSW50NjRMYWJlbBJDCghkZWZhdWx0cxgBIAMoCzIxLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLkludDY0TGFiZWwuRGVmYXVsdHNFbnRyeRozCg1EZWZhdWx0c0VudHJ5EgsKA2tleRgBIAEoCRIRCgV2YWx1ZRgCIAEoA0ICMAA6AjgBIoIBCgpJbnQzMkxhYmVsEkMKCGRlZmF1bHRzGAEgAygLMjEudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuSW50MzJMYWJlbC5EZWZhdWx0c0VudHJ5Gi8KDURlZmF1bHRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgFOgI4ASLBAgoFTGFiZWwSPAoMc3RyaW5nX2xhYmVsGAEgASgLMiQudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuU3RyaW5nTGFiZWxIABI8Cgx1aW50NjRfbGFiZWwYAiABKAsyJC50b29scy5nZW5lcmF0b3IudjFhbHBoYS5VaW50NjRMYWJlbEgAEjoKC2ludDY0X2xhYmVsGAMgASgLMiMudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuSW50NjRMYWJlbEgAEjwKDHVpbnQzMl9sYWJlbBgEIAEoCzIkLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLlVpbnQzMkxhYmVsSAASOgoLaW50MzJfbGFiZWwYBSABKAsyIy50b29scy5nZW5lcmF0b3IudjFhbHBoYS5JbnQzMkxhYmVsSABCBgoEa2luZCLkAQoSQ2FwYWJpbGl0eU1ldGFkYXRhEh8KBG1vZGUYASABKA4yES5zZGsudjFhbHBoYS5Nb2RlEhUKDWNhcGFiaWxpdHlfaWQYAiABKAkSRwoGbGFiZWxzGAMgAygLMjcudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuQ2FwYWJpbGl0eU1ldGFkYXRhLkxhYmVsc0VudHJ5Gk0KC0xhYmVsc0VudHJ5EgsKA2tleRgBIAEoCRItCgV2YWx1ZRgCIAEoCzIeLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLkxhYmVsOgI4ASI2ChhDYXBhYmlsaXR5TWV0aG9kTWV0YWRhdGESGgoSbWFwX3RvX3VudHlwZWRfYXBpGAEgASgIOm4KCmNhcGFiaWxpdHkSHy5nb29nbGUucHJvdG9idWYuU2VydmljZU9wdGlvbnMY0IYDIAEoCzIrLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLkNhcGFiaWxpdHlNZXRhZGF0YVIKY2FwYWJpbGl0eTprCgZtZXRob2QSHi5nb29nbGUucHJvdG9idWYuTWV0aG9kT3B0aW9ucxjRhgMgASgLMjEudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuQ2FwYWJpbGl0eU1ldGhvZE1ldGFkYXRhUgZtZXRob2RCrwEKG2NvbS50b29scy5nZW5lcmF0b3IudjFhbHBoYUIQQ3JlTWV0YWRhdGFQcm90b1ABogIDVEdYqgIXVG9vbHMuR2VuZXJhdG9yLlYxYWxwaGHKAhhUb29sc1xHZW5lcmF0b3JfXFYxYWxwaGHiAiRUb29sc1xHZW5lcmF0b3JfXFYxYWxwaGFcR1BCTWV0YWRhdGHqAhlUb29sczo6R2VuZXJhdG9yOjpWMWFscGhhYgZwcm90bzM", [file_google_protobuf_descriptor, file_sdk_v1alpha_sdk]);
+var file_capabilities_blockchain_evm_v1alpha_client = /* @__PURE__ */ fileDesc("CjBjYXBhYmlsaXRpZXMvYmxvY2tjaGFpbi9ldm0vdjFhbHBoYS9jbGllbnQucHJvdG8SI2NhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhIh0KC1RvcGljVmFsdWVzEg4KBnZhbHVlcxgBIAMoDCK4AQoXRmlsdGVyTG9nVHJpZ2dlclJlcXVlc3QSEQoJYWRkcmVzc2VzGAEgAygMEkAKBnRvcGljcxgCIAMoCzIwLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLlRvcGljVmFsdWVzEkgKCmNvbmZpZGVuY2UYAyABKA4yNC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5Db25maWRlbmNlTGV2ZWwiegoTQ2FsbENvbnRyYWN0UmVxdWVzdBI6CgRjYWxsGAEgASgLMiwuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuQ2FsbE1zZxInCgxibG9ja19udW1iZXIYAiABKAsyES52YWx1ZXMudjEuQmlnSW50IiEKEUNhbGxDb250cmFjdFJlcGx5EgwKBGRhdGEYASABKAwiWwoRRmlsdGVyTG9nc1JlcXVlc3QSRgoMZmlsdGVyX3F1ZXJ5GAEgASgLMjAuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRmlsdGVyUXVlcnkiSQoPRmlsdGVyTG9nc1JlcGx5EjYKBGxvZ3MYASADKAsyKC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5Mb2cixwEKA0xvZxIPCgdhZGRyZXNzGAEgASgMEg4KBnRvcGljcxgCIAMoDBIPCgd0eF9oYXNoGAMgASgMEhIKCmJsb2NrX2hhc2gYBCABKAwSDAoEZGF0YRgFIAEoDBIRCglldmVudF9zaWcYBiABKAwSJwoMYmxvY2tfbnVtYmVyGAcgASgLMhEudmFsdWVzLnYxLkJpZ0ludBIQCgh0eF9pbmRleBgIIAEoDRINCgVpbmRleBgJIAEoDRIPCgdyZW1vdmVkGAogASgIIjEKB0NhbGxNc2cSDAoEZnJvbRgBIAEoDBIKCgJ0bxgCIAEoDBIMCgRkYXRhGAMgASgMIr0BCgtGaWx0ZXJRdWVyeRISCgpibG9ja19oYXNoGAEgASgMEiUKCmZyb21fYmxvY2sYAiABKAsyES52YWx1ZXMudjEuQmlnSW50EiMKCHRvX2Jsb2NrGAMgASgLMhEudmFsdWVzLnYxLkJpZ0ludBIRCglhZGRyZXNzZXMYBCADKAwSOwoGdG9waWNzGAUgAygLMisuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuVG9waWNzIhcKBlRvcGljcxINCgV0b3BpYxgBIAMoDCJMChBCYWxhbmNlQXRSZXF1ZXN0Eg8KB2FjY291bnQYASABKAwSJwoMYmxvY2tfbnVtYmVyGAIgASgLMhEudmFsdWVzLnYxLkJpZ0ludCI0Cg5CYWxhbmNlQXRSZXBseRIiCgdiYWxhbmNlGAEgASgLMhEudmFsdWVzLnYxLkJpZ0ludCJPChJFc3RpbWF0ZUdhc1JlcXVlc3QSOQoDbXNnGAEgASgLMiwuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuQ2FsbE1zZyIjChBFc3RpbWF0ZUdhc1JlcGx5Eg8KA2dhcxgBIAEoBEICMAAiKwobR2V0VHJhbnNhY3Rpb25CeUhhc2hSZXF1ZXN0EgwKBGhhc2gYASABKAwiYgoZR2V0VHJhbnNhY3Rpb25CeUhhc2hSZXBseRJFCgt0cmFuc2FjdGlvbhgBIAEoCzIwLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLlRyYW5zYWN0aW9uIqEBCgtUcmFuc2FjdGlvbhIRCgVub25jZRgBIAEoBEICMAASDwoDZ2FzGAIgASgEQgIwABIKCgJ0bxgDIAEoDBIMCgRkYXRhGAQgASgMEgwKBGhhc2gYBSABKAwSIAoFdmFsdWUYBiABKAsyES52YWx1ZXMudjEuQmlnSW50EiQKCWdhc19wcmljZRgHIAEoCzIRLnZhbHVlcy52MS5CaWdJbnQiLAocR2V0VHJhbnNhY3Rpb25SZWNlaXB0UmVxdWVzdBIMCgRoYXNoGAEgASgMIlsKGkdldFRyYW5zYWN0aW9uUmVjZWlwdFJlcGx5Ej0KB3JlY2VpcHQYASABKAsyLC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5SZWNlaXB0IpkCCgdSZWNlaXB0EhIKBnN0YXR1cxgBIAEoBEICMAASFAoIZ2FzX3VzZWQYAiABKARCAjAAEhQKCHR4X2luZGV4GAMgASgEQgIwABISCgpibG9ja19oYXNoGAQgASgMEjYKBGxvZ3MYBiADKAsyKC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5Mb2cSDwoHdHhfaGFzaBgHIAEoDBIuChNlZmZlY3RpdmVfZ2FzX3ByaWNlGAggASgLMhEudmFsdWVzLnYxLkJpZ0ludBInCgxibG9ja19udW1iZXIYCSABKAsyES52YWx1ZXMudjEuQmlnSW50EhgKEGNvbnRyYWN0X2FkZHJlc3MYCiABKAwiQAoVSGVhZGVyQnlOdW1iZXJSZXF1ZXN0EicKDGJsb2NrX251bWJlchgBIAEoCzIRLnZhbHVlcy52MS5CaWdJbnQiUgoTSGVhZGVyQnlOdW1iZXJSZXBseRI7CgZoZWFkZXIYASABKAsyKy5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5IZWFkZXIiawoGSGVhZGVyEhUKCXRpbWVzdGFtcBgBIAEoBEICMAASJwoMYmxvY2tfbnVtYmVyGAIgASgLMhEudmFsdWVzLnYxLkJpZ0ludBIMCgRoYXNoGAMgASgMEhMKC3BhcmVudF9oYXNoGAQgASgMIqsBChJXcml0ZVJlcG9ydFJlcXVlc3QSEAoIcmVjZWl2ZXIYASABKAwSKwoGcmVwb3J0GAIgASgLMhsuc2RrLnYxYWxwaGEuUmVwb3J0UmVzcG9uc2USRwoKZ2FzX2NvbmZpZxgDIAEoCzIuLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLkdhc0NvbmZpZ0gAiAEBQg0KC19nYXNfY29uZmlnIiIKCUdhc0NvbmZpZxIVCglnYXNfbGltaXQYASABKARCAjAAIocDChBXcml0ZVJlcG9ydFJlcGx5EkAKCXR4X3N0YXR1cxgBIAEoDjItLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLlR4U3RhdHVzEnUKInJlY2VpdmVyX2NvbnRyYWN0X2V4ZWN1dGlvbl9zdGF0dXMYAiABKA4yRC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5SZWNlaXZlckNvbnRyYWN0RXhlY3V0aW9uU3RhdHVzSACIAQESFAoHdHhfaGFzaBgDIAEoDEgBiAEBEi8KD3RyYW5zYWN0aW9uX2ZlZRgEIAEoCzIRLnZhbHVlcy52MS5CaWdJbnRIAogBARIaCg1lcnJvcl9tZXNzYWdlGAUgASgJSAOIAQFCJQojX3JlY2VpdmVyX2NvbnRyYWN0X2V4ZWN1dGlvbl9zdGF0dXNCCgoIX3R4X2hhc2hCEgoQX3RyYW5zYWN0aW9uX2ZlZUIQCg5fZXJyb3JfbWVzc2FnZSppCg9Db25maWRlbmNlTGV2ZWwSGQoVQ09ORklERU5DRV9MRVZFTF9TQUZFEAASGwoXQ09ORklERU5DRV9MRVZFTF9MQVRFU1QQARIeChpDT05GSURFTkNFX0xFVkVMX0ZJTkFMSVpFRBACKoIBCh9SZWNlaXZlckNvbnRyYWN0RXhlY3V0aW9uU3RhdHVzEi4KKlJFQ0VJVkVSX0NPTlRSQUNUX0VYRUNVVElPTl9TVEFUVVNfU1VDQ0VTUxAAEi8KK1JFQ0VJVkVSX0NPTlRSQUNUX0VYRUNVVElPTl9TVEFUVVNfUkVWRVJURUQQASpOCghUeFN0YXR1cxITCg9UWF9TVEFUVVNfRkFUQUwQABIWChJUWF9TVEFUVVNfUkVWRVJURUQQARIVChFUWF9TVEFUVVNfU1VDQ0VTUxACMtIYCgZDbGllbnQSgAEKDENhbGxDb250cmFjdBI4LmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLkNhbGxDb250cmFjdFJlcXVlc3QaNi5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5DYWxsQ29udHJhY3RSZXBseRJ6CgpGaWx0ZXJMb2dzEjYuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRmlsdGVyTG9nc1JlcXVlc3QaNC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5GaWx0ZXJMb2dzUmVwbHkSdwoJQmFsYW5jZUF0EjUuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuQmFsYW5jZUF0UmVxdWVzdBozLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLkJhbGFuY2VBdFJlcGx5En0KC0VzdGltYXRlR2FzEjcuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRXN0aW1hdGVHYXNSZXF1ZXN0GjUuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRXN0aW1hdGVHYXNSZXBseRKYAQoUR2V0VHJhbnNhY3Rpb25CeUhhc2gSQC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5HZXRUcmFuc2FjdGlvbkJ5SGFzaFJlcXVlc3QaPi5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5HZXRUcmFuc2FjdGlvbkJ5SGFzaFJlcGx5EpsBChVHZXRUcmFuc2FjdGlvblJlY2VpcHQSQS5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5HZXRUcmFuc2FjdGlvblJlY2VpcHRSZXF1ZXN0Gj8uY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuR2V0VHJhbnNhY3Rpb25SZWNlaXB0UmVwbHkShgEKDkhlYWRlckJ5TnVtYmVyEjouY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuSGVhZGVyQnlOdW1iZXJSZXF1ZXN0GjguY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuSGVhZGVyQnlOdW1iZXJSZXBseRJ2CgpMb2dUcmlnZ2VyEjwuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRmlsdGVyTG9nVHJpZ2dlclJlcXVlc3QaKC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5Mb2cwARJ9CgtXcml0ZVJlcG9ydBI3LmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLldyaXRlUmVwb3J0UmVxdWVzdBo1LmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLldyaXRlUmVwb3J0UmVwbHkalw+CtRiSDwgBEglldm1AMS4wLjAagg8KDUNoYWluU2VsZWN0b3IS8A4S7Q4KFwoLYWRpLW1haW5uZXQQ/PDmwrfn3ao4ChgKC2FkaS10ZXN0bmV0EP2myPr5hozaggEKJAoXYXBlY2hhaW4tdGVzdG5ldC1jdXJ0aXMQwcO0+I3EkrKJAQoXCgthcmMtdGVzdG5ldBDnxoye19fQjSoKHQoRYXZhbGFuY2hlLW1haW5uZXQQ1eeKwOHVmKRZCiMKFmF2YWxhbmNoZS10ZXN0bmV0LWZ1amkQm/n8kKLjqPjMAQooChtiaW5hbmNlX3NtYXJ0X2NoYWluLW1haW5uZXQQz/eU8djtlbidAQooChtiaW5hbmNlX3NtYXJ0X2NoYWluLXRlc3RuZXQQ+62+nICu5Iq4AQoYCgxjZWxvLW1haW5uZXQQhtTo2IaTiNcSChgKDGNlbG8tc2Vwb2xpYRDEw/yL/OedmjQKGgoOY3Jvbm9zLXRlc3RuZXQQ/dnureDe2sgpCiIKFWR0Y2MtdGVzdG5ldC1hbmRlc2l0ZRDSg+PQmZblpNcBChwKEGV0aGVyZXVtLW1haW5uZXQQlfbx5M+ypsJFCicKG2V0aGVyZXVtLW1haW5uZXQtYXJiaXRydW0tMRDE6I3Njpuh10QKJAoXZXRoZXJldW0tbWFpbm5ldC1iYXNlLTEQgv+rov65kNPdAQoiChZldGhlcmV1bS1tYWlubmV0LWluay0xEKCwpum35qqEMAokChhldGhlcmV1bS1tYWlubmV0LWxpbmVhLTEQtrrpmMu9sJtACiUKGWV0aGVyZXVtLW1haW5uZXQtbWFudGxlLTEQiue0leewg8wVCicKG2V0aGVyZXVtLW1haW5uZXQtb3B0aW1pc20tMRC4lY/D9/7Q6TMKJgoZZXRoZXJldW0tbWFpbm5ldC1zY3JvbGwtMRC4vOTrxL7In7cBCikKHWV0aGVyZXVtLW1haW5uZXQtd29ybGRjaGFpbi0xEIfvurfFtsK4HAolChlldGhlcmV1bS1tYWlubmV0LXhsYXllci0xEJal/JymqO/tKQolChlldGhlcmV1bS1tYWlubmV0LXprc3luYy0xEJTul9nttLHXFQolChhldGhlcmV1bS10ZXN0bmV0LXNlcG9saWEQ2bXkzvzJ7qDeAQovCiNldGhlcmV1bS10ZXN0bmV0LXNlcG9saWEtYXJiaXRydW0tMRDqzu7/6raEozAKLAofZXRoZXJldW0tdGVzdG5ldC1zZXBvbGlhLWJhc2UtMRC4yrnv9pCuyI8BCiwKIGV0aGVyZXVtLXRlc3RuZXQtc2Vwb2xpYS1saW5lYS0xEOuq1P6C+eavTwotCiFldGhlcmV1bS10ZXN0bmV0LXNlcG9saWEtbWFudGxlLTEQ1ca47s328qZyCi8KI2V0aGVyZXVtLXRlc3RuZXQtc2Vwb2xpYS1vcHRpbWlzbS0xEJ+GxaG+2MPASAotCiFldGhlcmV1bS10ZXN0bmV0LXNlcG9saWEtc2Nyb2xsLTEQi+m0vtu67dEfCjAKI2V0aGVyZXVtLXRlc3RuZXQtc2Vwb2xpYS11bmljaGFpbi0xELTe/uDsl6mWxAEKMQolZXRoZXJldW0tdGVzdG5ldC1zZXBvbGlhLXdvcmxkY2hhaW4tMRC63+DFx6nzxUkKLQohZXRoZXJldW0tdGVzdG5ldC1zZXBvbGlhLXprc3luYy0xELfB/P3yxIDeXwogChRnbm9zaXNfY2hhaW4tbWFpbm5ldBD0kq3a8qKuugYKJwobZ25vc2lzX2NoYWluLXRlc3RuZXQtY2hpYWRvELOxgtCbpY+PewofChNoeXBlcmxpcXVpZC1tYWlubmV0EKez+N3O0enyIQofChNoeXBlcmxpcXVpZC10ZXN0bmV0EIjO3ciX4Mm9OwogChNpbmstdGVzdG5ldC1zZXBvbGlhEOj0p6Xz5pbAhwEKGQoNam92YXktbWFpbm5ldBC1w8SaoYDfkhUKGQoNam92YXktdGVzdG5ldBDkz4qE3rLejg0KGwoPbWVnYWV0aC1tYWlubmV0EOqVtsi85KbIVAoeChFtZWdhZXRoLXRlc3RuZXQtMhDjjd6IsY/9k/0BCiQKF3BoYXJvcy1hdGxhbnRpYy10ZXN0bmV0EMyZ7eDOvK+03wEKGgoOcGhhcm9zLW1haW5uZXQQyMGHnvXvzaFsChsKDnBsYXNtYS1tYWlubmV0EPib8dHaydXGgQEKGgoOcGxhc21hLXRlc3RuZXQQ1Zu/pcO0mYc3ChsKD3BvbHlnb24tbWFpbm5ldBCxq+TwmpKGnTgKIQoUcG9seWdvbi10ZXN0bmV0LWFtb3kQzY/W3/HHkPrhAQokChhwcml2YXRlLXRlc3RuZXQtYW5kZXNpdGUQ1KaYpcGP3PxfChkKDXNvbmljLW1haW5uZXQQ0bLl7dmgsp0XChkKDXNvbmljLXRlc3RuZXQQyIj71LTG+rwYChgKC3RhYy10ZXN0bmV0ENXbjeP7n5PXgwEKGwoOeGxheWVyLXRlc3RuZXQQyb6htK3MvN2NAULlAQonY29tLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhQgtDbGllbnRQcm90b1ABogIDQ0JFqgIjQ2FwYWJpbGl0aWVzLkJsb2NrY2hhaW4uRXZtLlYxYWxwaGHKAiNDYXBhYmlsaXRpZXNcQmxvY2tjaGFpblxFdm1cVjFhbHBoYeICL0NhcGFiaWxpdGllc1xCbG9ja2NoYWluXEV2bVxWMWFscGhhXEdQQk1ldGFkYXRh6gImQ2FwYWJpbGl0aWVzOjpCbG9ja2NoYWluOjpFdm06OlYxYWxwaGFiBnByb3RvMw", [file_sdk_v1alpha_sdk, file_tools_generator_v1alpha_cre_metadata, file_values_v1_values]);
+var FilterLogTriggerRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 1);
+var CallContractRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 2);
+var CallContractReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 3);
+var FilterLogsRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 4);
+var FilterLogsReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 5);
+var LogSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 6);
+var BalanceAtRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 10);
+var BalanceAtReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 11);
+var EstimateGasRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 12);
+var EstimateGasReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 13);
+var GetTransactionByHashRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 14);
+var GetTransactionByHashReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 15);
+var GetTransactionReceiptRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 17);
+var GetTransactionReceiptReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 18);
+var HeaderByNumberRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 20);
+var HeaderByNumberReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 21);
+var WriteReportRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 23);
+var GasConfigSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 24);
+var WriteReportReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 25);
 var ConfidenceLevel;
 (function(ConfidenceLevel2) {
   ConfidenceLevel2[ConfidenceLevel2["SAFE"] = 0] = "SAFE";
@@ -6675,7 +6628,6 @@ var TxStatus;
   TxStatus2[TxStatus2["REVERTED"] = 1] = "REVERTED";
   TxStatus2[TxStatus2["SUCCESS"] = 2] = "SUCCESS";
 })(TxStatus || (TxStatus = {}));
-<<<<<<< HEAD
 function formatAbiItem(abiItem, { includeName = false } = {}) {
   if (abiItem.type !== "function" && abiItem.type !== "event" && abiItem.type !== "error")
     throw new InvalidDefinitionTypeError(abiItem.type);
@@ -6704,8 +6656,6 @@ function size(value) {
     return Math.ceil((value.length - 2) / 2);
   return value.length;
 }
-=======
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 var version = "2.34.0";
 var errorConfig = {
   getDocsUrl: ({ docsBaseUrl, docsPath = "", docsSlug }) => docsPath ? `${docsBaseUrl ?? "https://viem.sh"}${docsPath}${docsSlug ? `#${docsSlug}` : ""}` : undefined,
@@ -6792,7 +6742,6 @@ function walk(err, fn) {
   return fn ? null : err;
 }
 
-<<<<<<< HEAD
 class AbiDecodingDataSizeTooSmallError extends BaseError {
   constructor({ data, params, size: size2 }) {
     super([`Data size of ${size2} bytes is too small for given parameters.`].join(`
@@ -6944,8 +6893,6 @@ class InvalidDefinitionTypeError extends BaseError {
   }
 }
 
-=======
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 class InvalidAddressError extends BaseError {
   constructor({ address }) {
     super(`Address "${address}" is invalid.`, {
@@ -6957,7 +6904,6 @@ class InvalidAddressError extends BaseError {
     });
   }
 }
-<<<<<<< HEAD
 
 class SliceOffsetOutOfBoundsError extends BaseError {
   constructor({ offset, position, size: size2 }) {
@@ -7000,57 +6946,11 @@ function padBytes(bytes, { dir, size: size2 = 32 } = {}) {
   for (let i = 0;i < size2; i++) {
     const padEnd = dir === "right";
     paddedBytes[padEnd ? i : size2 - i - 1] = bytes[padEnd ? i : bytes.length - i - 1];
-=======
-function isHex(value, { strict = true } = {}) {
-  if (!value)
-    return false;
-  if (typeof value !== "string")
-    return false;
-  return strict ? /^0x[0-9a-fA-F]*$/.test(value) : value.startsWith("0x");
-}
-
-class SizeExceedsPaddingSizeError extends BaseError {
-  constructor({ size, targetSize, type }) {
-    super(`${type.charAt(0).toUpperCase()}${type.slice(1).toLowerCase()} size (${size}) exceeds padding size (${targetSize}).`, { name: "SizeExceedsPaddingSizeError" });
-  }
-}
-function pad(hexOrBytes, { dir, size = 32 } = {}) {
-  if (typeof hexOrBytes === "string")
-    return padHex(hexOrBytes, { dir, size });
-  return padBytes(hexOrBytes, { dir, size });
-}
-function padHex(hex_, { dir, size = 32 } = {}) {
-  if (size === null)
-    return hex_;
-  const hex = hex_.replace("0x", "");
-  if (hex.length > size * 2)
-    throw new SizeExceedsPaddingSizeError({
-      size: Math.ceil(hex.length / 2),
-      targetSize: size,
-      type: "hex"
-    });
-  return `0x${hex[dir === "right" ? "padEnd" : "padStart"](size * 2, "0")}`;
-}
-function padBytes(bytes, { dir, size = 32 } = {}) {
-  if (size === null)
-    return bytes;
-  if (bytes.length > size)
-    throw new SizeExceedsPaddingSizeError({
-      size: bytes.length,
-      targetSize: size,
-      type: "bytes"
-    });
-  const paddedBytes = new Uint8Array(size);
-  for (let i = 0;i < size; i++) {
-    const padEnd = dir === "right";
-    paddedBytes[padEnd ? i : size - i - 1] = bytes[padEnd ? i : bytes.length - i - 1];
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   }
   return paddedBytes;
 }
 
 class IntegerOutOfRangeError extends BaseError {
-<<<<<<< HEAD
   constructor({ max, min, signed, size: size2, value }) {
     super(`Number "${value}" is not in safe ${size2 ? `${size2 * 8}-bit ${signed ? "signed" : "unsigned"} ` : ""}integer range ${max ? `(${min} to ${max})` : `(above ${min})`}`, { name: "IntegerOutOfRangeError" });
   }
@@ -7061,10 +6961,6 @@ class InvalidBytesBooleanError extends BaseError {
     super(`Bytes value "${bytes}" is not a valid boolean. The bytes array must contain a single byte of either a 0 or 1 value.`, {
       name: "InvalidBytesBooleanError"
     });
-=======
-  constructor({ max, min, signed, size, value }) {
-    super(`Number "${value}" is not in safe ${size ? `${size * 8}-bit ${signed ? "signed" : "unsigned"} ` : ""}integer range ${max ? `(${min} to ${max})` : `(above ${min})`}`, { name: "IntegerOutOfRangeError" });
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   }
 }
 
@@ -7073,7 +6969,6 @@ class SizeOverflowError extends BaseError {
     super(`Size cannot exceed ${maxSize} bytes. Given size: ${givenSize} bytes.`, { name: "SizeOverflowError" });
   }
 }
-<<<<<<< HEAD
 function trim(hexOrBytes, { dir = "left" } = {}) {
   let data = typeof hexOrBytes === "string" ? hexOrBytes.replace("0x", "") : hexOrBytes;
   let sliceLength = 0;
@@ -7090,12 +6985,6 @@ function trim(hexOrBytes, { dir = "left" } = {}) {
     return `0x${data.length % 2 === 1 ? `0${data}` : data}`;
   }
   return data;
-=======
-function size(value) {
-  if (isHex(value, { strict: false }))
-    return Math.ceil((value.length - 2) / 2);
-  return value.length;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 }
 function assertSize(hexOrBytes, { size: size2 }) {
   if (size(hexOrBytes) > size2)
@@ -7514,7 +7403,6 @@ function getAddress(address, chainId) {
     throw new InvalidAddressError({ address });
   return checksumAddress(address, chainId);
 }
-<<<<<<< HEAD
 
 class NegativeOffsetError extends BaseError {
   constructor({ offset }) {
@@ -8463,19 +8351,12 @@ function encodeFunctionData(parameters) {
   const data = "inputs" in abiItem && abiItem.inputs ? encodeAbiParameters(abiItem.inputs, args ?? []) : undefined;
   return concatHex([signature, data ?? "0x"]);
 }
-=======
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 function publicKeyToAddress(publicKey) {
   const address = keccak256(`0x${publicKey.substring(4)}`).substring(26);
   return checksumAddress(`0x${address}`);
 }
-<<<<<<< HEAD
 async function recoverPublicKey({ hash: hash2, signature }) {
   const hashHex = isHex(hash2) ? hash2 : toHex(hash2);
-=======
-async function recoverPublicKey({ hash, signature }) {
-  const hashHex = isHex(hash) ? hash : toHex(hash);
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   const { secp256k1: secp256k12 } = await Promise.resolve().then(() => (init_secp256k1(), exports_secp256k1));
   const signature_ = (() => {
     if (typeof signature === "object" && "r" in signature && "s" in signature) {
@@ -8503,16 +8384,8 @@ function toRecoveryBit(yParityOrV) {
     return 1;
   throw new Error("Invalid yParityOrV value");
 }
-<<<<<<< HEAD
 async function recoverAddress({ hash: hash2, signature }) {
   return publicKeyToAddress(await recoverPublicKey({ hash: hash2, signature }));
-=======
-async function recoverAddress({ hash, signature }) {
-  return publicKeyToAddress(await recoverPublicKey({ hash, signature }));
-}
-function concatHex(values) {
-  return `0x${values.reduce((acc, x) => acc + x.replace("0x", ""), "")}`;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 }
 function productionEnvironment() {
   return {
@@ -9059,6 +8932,342 @@ class Report {
     return this.report;
   }
 }
+var hexToBytes3 = (hexStr) => {
+  if (!hexStr.startsWith("0x")) {
+    throw new Error(`Invalid hex string: ${hexStr}`);
+  }
+  if (!/^0x[0-9a-fA-F]*$/.test(hexStr)) {
+    throw new Error(`Invalid hex string: ${hexStr}`);
+  }
+  if ((hexStr.length - 2) % 2 !== 0) {
+    throw new Error(`Hex string must have an even number of characters: ${hexStr}`);
+  }
+  const hex = hexStr.slice(2);
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0;i < hex.length; i += 2) {
+    bytes[i / 2] = Number.parseInt(hex.slice(i, i + 2), 16);
+  }
+  return bytes;
+};
+function createWriteCreReportRequest(input) {
+  return {
+    receiver: hexToBytes3(input.receiver),
+    report: input.report,
+    gasConfig: input.gasConfig !== undefined ? fromJson(GasConfigSchema, input.gasConfig) : undefined,
+    $report: true
+  };
+}
+function x_generatedCodeOnly_unwrap_WriteCreReportRequest(input) {
+  return create(WriteReportRequestSchema, {
+    receiver: input.receiver,
+    report: input.report !== undefined ? input.report.x_generatedCodeOnly_unwrap() : undefined,
+    gasConfig: input.gasConfig
+  });
+}
+
+class ClientCapability {
+  ChainSelector;
+  static CAPABILITY_ID = "evm@1.0.0";
+  static CAPABILITY_NAME = "evm";
+  static CAPABILITY_VERSION = "1.0.0";
+  static SUPPORTED_CHAIN_SELECTORS = {
+    "adi-mainnet": 4059281736450291836n,
+    "adi-testnet": 9418205736192840573n,
+    "apechain-testnet-curtis": 9900119385908781505n,
+    "arc-testnet": 3034092155422581607n,
+    "avalanche-mainnet": 6433500567565415381n,
+    "avalanche-testnet-fuji": 14767482510784806043n,
+    "binance_smart_chain-mainnet": 11344663589394136015n,
+    "binance_smart_chain-testnet": 13264668187771770619n,
+    "celo-mainnet": 1346049177634351622n,
+    "celo-sepolia": 3761762704474186180n,
+    "cronos-testnet": 2995292832068775165n,
+    "dtcc-testnet-andesite": 15513093881969820114n,
+    "ethereum-mainnet": 5009297550715157269n,
+    "ethereum-mainnet-arbitrum-1": 4949039107694359620n,
+    "ethereum-mainnet-base-1": 15971525489660198786n,
+    "ethereum-mainnet-ink-1": 3461204551265785888n,
+    "ethereum-mainnet-linea-1": 4627098889531055414n,
+    "ethereum-mainnet-mantle-1": 1556008542357238666n,
+    "ethereum-mainnet-optimism-1": 3734403246176062136n,
+    "ethereum-mainnet-scroll-1": 13204309965629103672n,
+    "ethereum-mainnet-worldchain-1": 2049429975587534727n,
+    "ethereum-mainnet-xlayer-1": 3016212468291539606n,
+    "ethereum-mainnet-zksync-1": 1562403441176082196n,
+    "ethereum-testnet-sepolia": 16015286601757825753n,
+    "ethereum-testnet-sepolia-arbitrum-1": 3478487238524512106n,
+    "ethereum-testnet-sepolia-base-1": 10344971235874465080n,
+    "ethereum-testnet-sepolia-linea-1": 5719461335882077547n,
+    "ethereum-testnet-sepolia-mantle-1": 8236463271206331221n,
+    "ethereum-testnet-sepolia-optimism-1": 5224473277236331295n,
+    "ethereum-testnet-sepolia-scroll-1": 2279865765895943307n,
+    "ethereum-testnet-sepolia-unichain-1": 14135854469784514356n,
+    "ethereum-testnet-sepolia-worldchain-1": 5299555114858065850n,
+    "ethereum-testnet-sepolia-zksync-1": 6898391096552792247n,
+    "gnosis_chain-mainnet": 465200170687744372n,
+    "gnosis_chain-testnet-chiado": 8871595565390010547n,
+    "hyperliquid-mainnet": 2442541497099098535n,
+    "hyperliquid-testnet": 4286062357653186312n,
+    "ink-testnet-sepolia": 9763904284804119144n,
+    "jovay-mainnet": 1523760397290643893n,
+    "jovay-testnet": 945045181441419236n,
+    "megaeth-mainnet": 6093540873831549674n,
+    "megaeth-testnet-2": 18241817625092392675n,
+    "pharos-atlantic-testnet": 16098325658947243212n,
+    "pharos-mainnet": 7801139999541420232n,
+    "plasma-mainnet": 9335212494177455608n,
+    "plasma-testnet": 3967220077692964309n,
+    "polygon-mainnet": 4051577828743386545n,
+    "polygon-testnet-amoy": 16281711391670634445n,
+    "private-testnet-andesite": 6915682381028791124n,
+    "sonic-mainnet": 1673871237479749969n,
+    "sonic-testnet": 1763698235108410440n,
+    "tac-testnet": 9488606126177218005n,
+    "xlayer-testnet": 10212741611335999305n
+  };
+  constructor(ChainSelector) {
+    this.ChainSelector = ChainSelector;
+  }
+  callContract(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(CallContractRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "CallContract",
+      payload,
+      inputSchema: CallContractRequestSchema,
+      outputSchema: CallContractReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  filterLogs(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(FilterLogsRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "FilterLogs",
+      payload,
+      inputSchema: FilterLogsRequestSchema,
+      outputSchema: FilterLogsReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  balanceAt(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(BalanceAtRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "BalanceAt",
+      payload,
+      inputSchema: BalanceAtRequestSchema,
+      outputSchema: BalanceAtReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  estimateGas(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(EstimateGasRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "EstimateGas",
+      payload,
+      inputSchema: EstimateGasRequestSchema,
+      outputSchema: EstimateGasReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  getTransactionByHash(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(GetTransactionByHashRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "GetTransactionByHash",
+      payload,
+      inputSchema: GetTransactionByHashRequestSchema,
+      outputSchema: GetTransactionByHashReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  getTransactionReceipt(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(GetTransactionReceiptRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "GetTransactionReceipt",
+      payload,
+      inputSchema: GetTransactionReceiptRequestSchema,
+      outputSchema: GetTransactionReceiptReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  headerByNumber(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(HeaderByNumberRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "HeaderByNumber",
+      payload,
+      inputSchema: HeaderByNumberRequestSchema,
+      outputSchema: HeaderByNumberReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  logTrigger(config) {
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    return new ClientLogTrigger(config, capabilityId, "LogTrigger", this.ChainSelector);
+  }
+  writeReport(runtime, input) {
+    let payload;
+    if (input.$report) {
+      payload = x_generatedCodeOnly_unwrap_WriteCreReportRequest(input);
+    } else {
+      payload = x_generatedCodeOnly_unwrap_WriteCreReportRequest(createWriteCreReportRequest(input));
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "WriteReport",
+      payload,
+      inputSchema: WriteReportRequestSchema,
+      outputSchema: WriteReportReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+}
+
+class ClientLogTrigger {
+  _capabilityId;
+  _method;
+  ChainSelector;
+  config;
+  constructor(config, _capabilityId, _method, ChainSelector) {
+    this._capabilityId = _capabilityId;
+    this._method = _method;
+    this.ChainSelector = ChainSelector;
+    this.config = config.$typeName ? config : fromJson(FilterLogTriggerRequestSchema, config);
+  }
+  capabilityId() {
+    return this._capabilityId;
+  }
+  method() {
+    return this._method;
+  }
+  outputSchema() {
+    return LogSchema;
+  }
+  configAsAny() {
+    return anyPack(FilterLogTriggerRequestSchema, this.config);
+  }
+  adapt(rawOutput) {
+    return rawOutput;
+  }
+}
+var file_capabilities_networking_confidentialhttp_v1alpha_client = /* @__PURE__ */ fileDesc("Cj1jYXBhYmlsaXRpZXMvbmV0d29ya2luZy9jb25maWRlbnRpYWxodHRwL3YxYWxwaGEvY2xpZW50LnByb3RvEjBjYXBhYmlsaXRpZXMubmV0d29ya2luZy5jb25maWRlbnRpYWxodHRwLnYxYWxwaGEiUAoQU2VjcmV0SWRlbnRpZmllchILCgNrZXkYASABKAkSEQoJbmFtZXNwYWNlGAIgASgJEhIKBW93bmVyGAMgASgJSACIAQFCCAoGX293bmVyIh4KDEhlYWRlclZhbHVlcxIOCgZ2YWx1ZXMYASADKAki1wQKC0hUVFBSZXF1ZXN0EgsKA3VybBgBIAEoCRIOCgZtZXRob2QYAiABKAkSFQoLYm9keV9zdHJpbmcYAyABKAlIABIUCgpib2R5X2J5dGVzGAggASgMSAASZgoNbXVsdGlfaGVhZGVycxgEIAMoCzJPLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5IVFRQUmVxdWVzdC5NdWx0aUhlYWRlcnNFbnRyeRJ3ChZ0ZW1wbGF0ZV9wdWJsaWNfdmFsdWVzGAUgAygLMlcuY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuY29uZmlkZW50aWFsaHR0cC52MWFscGhhLkhUVFBSZXF1ZXN0LlRlbXBsYXRlUHVibGljVmFsdWVzRW50cnkSHwoXY3VzdG9tX3Jvb3RfY2FfY2VydF9wZW0YBiABKAwSKgoHdGltZW91dBgHIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhIWCg5lbmNyeXB0X291dHB1dBgJIAEoCBpzChFNdWx0aUhlYWRlcnNFbnRyeRILCgNrZXkYASABKAkSTQoFdmFsdWUYAiABKAsyPi5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5jb25maWRlbnRpYWxodHRwLnYxYWxwaGEuSGVhZGVyVmFsdWVzOgI4ARo7ChlUZW1wbGF0ZVB1YmxpY1ZhbHVlc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAFCBgoEYm9keSKPAgoMSFRUUFJlc3BvbnNlEhMKC3N0YXR1c19jb2RlGAEgASgNEgwKBGJvZHkYAiABKAwSZwoNbXVsdGlfaGVhZGVycxgDIAMoCzJQLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5IVFRQUmVzcG9uc2UuTXVsdGlIZWFkZXJzRW50cnkacwoRTXVsdGlIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEk0KBXZhbHVlGAIgASgLMj4uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuY29uZmlkZW50aWFsaHR0cC52MWFscGhhLkhlYWRlclZhbHVlczoCOAEiyAEKF0NvbmZpZGVudGlhbEhUVFBSZXF1ZXN0El0KEXZhdWx0X2Rvbl9zZWNyZXRzGAEgAygLMkIuY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuY29uZmlkZW50aWFsaHR0cC52MWFscGhhLlNlY3JldElkZW50aWZpZXISTgoHcmVxdWVzdBgCIAEoCzI9LmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5IVFRQUmVxdWVzdDLKAQoGQ2xpZW50EpgBCgtTZW5kUmVxdWVzdBJJLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5Db25maWRlbnRpYWxIVFRQUmVxdWVzdBo+LmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5IVFRQUmVzcG9uc2UaJYK1GCEIARIdY29uZmlkZW50aWFsLWh0dHBAMS4wLjAtYWxwaGFCpgIKNGNvbS5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5jb25maWRlbnRpYWxodHRwLnYxYWxwaGFCC0NsaWVudFByb3RvUAGiAgNDTkOqAjBDYXBhYmlsaXRpZXMuTmV0d29ya2luZy5Db25maWRlbnRpYWxodHRwLlYxYWxwaGHKAjBDYXBhYmlsaXRpZXNcTmV0d29ya2luZ1xDb25maWRlbnRpYWxodHRwXFYxYWxwaGHiAjxDYXBhYmlsaXRpZXNcTmV0d29ya2luZ1xDb25maWRlbnRpYWxodHRwXFYxYWxwaGFcR1BCTWV0YWRhdGHqAjNDYXBhYmlsaXRpZXM6Ok5ldHdvcmtpbmc6OkNvbmZpZGVudGlhbGh0dHA6OlYxYWxwaGFiBnByb3RvMw", [file_google_protobuf_duration, file_tools_generator_v1alpha_cre_metadata]);
+var HTTPResponseSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_confidentialhttp_v1alpha_client, 3);
+var ConfidentialHTTPRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_confidentialhttp_v1alpha_client, 4);
+
+class ClientCapability2 {
+  static CAPABILITY_ID = "confidential-http@1.0.0-alpha";
+  static CAPABILITY_NAME = "confidential-http";
+  static CAPABILITY_VERSION = "1.0.0-alpha";
+  sendRequest(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(ConfidentialHTTPRequestSchema, input);
+    }
+    const capabilityId = ClientCapability2.CAPABILITY_ID;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "SendRequest",
+      payload,
+      inputSchema: ConfidentialHTTPRequestSchema,
+      outputSchema: HTTPResponseSchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+}
 var file_capabilities_networking_http_v1alpha_client = /* @__PURE__ */ fileDesc("CjFjYXBhYmlsaXRpZXMvbmV0d29ya2luZy9odHRwL3YxYWxwaGEvY2xpZW50LnByb3RvEiRjYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEiSgoNQ2FjaGVTZXR0aW5ncxINCgVzdG9yZRgBIAEoCBIqCgdtYXhfYWdlGAIgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uIh4KDEhlYWRlclZhbHVlcxIOCgZ2YWx1ZXMYASADKAki7wMKB1JlcXVlc3QSCwoDdXJsGAEgASgJEg4KBm1ldGhvZBgCIAEoCRJPCgdoZWFkZXJzGAMgAygLMjouY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLlJlcXVlc3QuSGVhZGVyc0VudHJ5QgIYARIMCgRib2R5GAQgASgMEioKB3RpbWVvdXQYBSABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SSwoOY2FjaGVfc2V0dGluZ3MYBiABKAsyMy5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuQ2FjaGVTZXR0aW5ncxJWCg1tdWx0aV9oZWFkZXJzGAcgAygLMj8uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLlJlcXVlc3QuTXVsdGlIZWFkZXJzRW50cnkaLgoMSGVhZGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEaZwoRTXVsdGlIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEkEKBXZhbHVlGAIgASgLMjIuY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLkhlYWRlclZhbHVlczoCOAEi8QIKCFJlc3BvbnNlEhMKC3N0YXR1c19jb2RlGAEgASgNElAKB2hlYWRlcnMYAiADKAsyOy5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuUmVzcG9uc2UuSGVhZGVyc0VudHJ5QgIYARIMCgRib2R5GAMgASgMElcKDW11bHRpX2hlYWRlcnMYBCADKAsyQC5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuUmVzcG9uc2UuTXVsdGlIZWFkZXJzRW50cnkaLgoMSGVhZGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEaZwoRTXVsdGlIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEkEKBXZhbHVlGAIgASgLMjIuY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLkhlYWRlclZhbHVlczoCOAEymAEKBkNsaWVudBJsCgtTZW5kUmVxdWVzdBItLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5SZXF1ZXN0Gi4uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLlJlc3BvbnNlGiCCtRgcCAISGGh0dHAtYWN0aW9uc0AxLjAuMC1hbHBoYULqAQooY29tLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYUILQ2xpZW50UHJvdG9QAaICA0NOSKoCJENhcGFiaWxpdGllcy5OZXR3b3JraW5nLkh0dHAuVjFhbHBoYcoCJENhcGFiaWxpdGllc1xOZXR3b3JraW5nXEh0dHBcVjFhbHBoYeICMENhcGFiaWxpdGllc1xOZXR3b3JraW5nXEh0dHBcVjFhbHBoYVxHUEJNZXRhZGF0YeoCJ0NhcGFiaWxpdGllczo6TmV0d29ya2luZzo6SHR0cDo6VjFhbHBoYWIGcHJvdG8z", [file_google_protobuf_duration, file_tools_generator_v1alpha_cre_metadata]);
 var RequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_client, 2);
 var ResponseSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_client, 3);
@@ -9075,7 +9284,7 @@ class SendRequester {
   }
 }
 
-class ClientCapability {
+class ClientCapability3 {
   static CAPABILITY_ID = "http-actions@1.0.0-alpha";
   static CAPABILITY_NAME = "http-actions";
   static CAPABILITY_VERSION = "1.0.0-alpha";
@@ -9094,7 +9303,7 @@ class ClientCapability {
     } else {
       payload = fromJson(RequestSchema, input);
     }
-    const capabilityId = ClientCapability.CAPABILITY_ID;
+    const capabilityId = ClientCapability3.CAPABILITY_ID;
     const capabilityResponse = runtime.callCapability({
       capabilityId,
       method: "SendRequest",
@@ -9117,11 +9326,50 @@ class ClientCapability {
     return runtime.runInNodeMode(wrappedFn, consensusAggregation, unwrapOptions);
   }
 }
+var file_capabilities_networking_http_v1alpha_trigger = /* @__PURE__ */ fileDesc("CjJjYXBhYmlsaXRpZXMvbmV0d29ya2luZy9odHRwL3YxYWxwaGEvdHJpZ2dlci5wcm90bxIkY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhIlYKBkNvbmZpZxJMCg9hdXRob3JpemVkX2tleXMYASADKAsyMy5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuQXV0aG9yaXplZEtleSJaCgdQYXlsb2FkEg0KBWlucHV0GAEgASgMEkAKA2tleRgCIAEoCzIzLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5BdXRob3JpemVkS2V5ImAKDUF1dGhvcml6ZWRLZXkSOwoEdHlwZRgBIAEoDjItLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5LZXlUeXBlEhIKCnB1YmxpY19rZXkYAiABKAkqOwoHS2V5VHlwZRIYChRLRVlfVFlQRV9VTlNQRUNJRklFRBAAEhYKEktFWV9UWVBFX0VDRFNBX0VWTRABMpIBCgRIVFRQEmgKB1RyaWdnZXISLC5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuQ29uZmlnGi0uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLlBheWxvYWQwARoggrUYHAgBEhhodHRwLXRyaWdnZXJAMS4wLjAtYWxwaGFC6wEKKGNvbS5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGFCDFRyaWdnZXJQcm90b1ABogIDQ05IqgIkQ2FwYWJpbGl0aWVzLk5ldHdvcmtpbmcuSHR0cC5WMWFscGhhygIkQ2FwYWJpbGl0aWVzXE5ldHdvcmtpbmdcSHR0cFxWMWFscGhh4gIwQ2FwYWJpbGl0aWVzXE5ldHdvcmtpbmdcSHR0cFxWMWFscGhhXEdQQk1ldGFkYXRh6gInQ2FwYWJpbGl0aWVzOjpOZXR3b3JraW5nOjpIdHRwOjpWMWFscGhhYgZwcm90bzM", [file_tools_generator_v1alpha_cre_metadata]);
+var ConfigSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_trigger, 0);
+var PayloadSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_trigger, 1);
 var KeyType;
 (function(KeyType2) {
   KeyType2[KeyType2["UNSPECIFIED"] = 0] = "UNSPECIFIED";
   KeyType2[KeyType2["ECDSA_EVM"] = 1] = "ECDSA_EVM";
 })(KeyType || (KeyType = {}));
+
+class HTTPCapability {
+  static CAPABILITY_ID = "http-trigger@1.0.0-alpha";
+  static CAPABILITY_NAME = "http-trigger";
+  static CAPABILITY_VERSION = "1.0.0-alpha";
+  trigger(config) {
+    const capabilityId = HTTPCapability.CAPABILITY_ID;
+    return new HTTPTrigger(config, capabilityId, "Trigger");
+  }
+}
+
+class HTTPTrigger {
+  _capabilityId;
+  _method;
+  config;
+  constructor(config, _capabilityId, _method) {
+    this._capabilityId = _capabilityId;
+    this._method = _method;
+    this.config = config.$typeName ? config : fromJson(ConfigSchema, config);
+  }
+  capabilityId() {
+    return this._capabilityId;
+  }
+  method() {
+    return this._method;
+  }
+  outputSchema() {
+    return PayloadSchema;
+  }
+  configAsAny() {
+    return anyPack(ConfigSchema, this.config);
+  }
+  adapt(rawOutput) {
+    return rawOutput;
+  }
+}
 var file_capabilities_scheduler_cron_v1_trigger = /* @__PURE__ */ fileDesc("CixjYXBhYmlsaXRpZXMvc2NoZWR1bGVyL2Nyb24vdjEvdHJpZ2dlci5wcm90bxIeY2FwYWJpbGl0aWVzLnNjaGVkdWxlci5jcm9uLnYxIhoKBkNvbmZpZxIQCghzY2hlZHVsZRgBIAEoCSJHCgdQYXlsb2FkEjwKGHNjaGVkdWxlZF9leGVjdXRpb25fdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiNQoNTGVnYWN5UGF5bG9hZBIgChhzY2hlZHVsZWRfZXhlY3V0aW9uX3RpbWUYASABKAk6AhgBMvUBCgRDcm9uElwKB1RyaWdnZXISJi5jYXBhYmlsaXRpZXMuc2NoZWR1bGVyLmNyb24udjEuQ29uZmlnGicuY2FwYWJpbGl0aWVzLnNjaGVkdWxlci5jcm9uLnYxLlBheWxvYWQwARJzCg1MZWdhY3lUcmlnZ2VyEiYuY2FwYWJpbGl0aWVzLnNjaGVkdWxlci5jcm9uLnYxLkNvbmZpZxotLmNhcGFiaWxpdGllcy5zY2hlZHVsZXIuY3Jvbi52MS5MZWdhY3lQYXlsb2FkIgmIAgGKtRgCCAEwARoagrUYFggBEhJjcm9uLXRyaWdnZXJAMS4wLjBCzQEKImNvbS5jYXBhYmlsaXRpZXMuc2NoZWR1bGVyLmNyb24udjFCDFRyaWdnZXJQcm90b1ABogIDQ1NDqgIeQ2FwYWJpbGl0aWVzLlNjaGVkdWxlci5Dcm9uLlYxygIeQ2FwYWJpbGl0aWVzXFNjaGVkdWxlclxDcm9uXFYx4gIqQ2FwYWJpbGl0aWVzXFNjaGVkdWxlclxDcm9uXFYxXEdQQk1ldGFkYXRh6gIhQ2FwYWJpbGl0aWVzOjpTY2hlZHVsZXI6OkNyb246OlYxYgZwcm90bzM", [file_google_protobuf_timestamp, file_tools_generator_v1alpha_cre_metadata]);
 var ConfigSchema2 = /* @__PURE__ */ messageDesc(file_capabilities_scheduler_cron_v1_trigger, 0);
 var PayloadSchema2 = /* @__PURE__ */ messageDesc(file_capabilities_scheduler_cron_v1_trigger, 1);
@@ -10474,11 +10722,7 @@ function notimpl(name) {
 var resolveObjectURL = notimpl("resolveObjectURL");
 var isUtf8 = notimpl("isUtf8");
 var transcode = notimpl("transcode");
-<<<<<<< HEAD
 var { URL: URL2, URLSearchParams } = globalThis;
-=======
-var { URL: URL2, URLSearchParams: URLSearchParams2 } = globalThis;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 function util_isString(arg) {
   return typeof arg === "string";
 }
@@ -10630,15 +10874,9 @@ Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
         esc = escape(ae);
       rest = rest.split(ae).join(esc);
     }
-<<<<<<< HEAD
   var hash2 = rest.indexOf("#");
   if (hash2 !== -1)
     this.hash = rest.substr(hash2), rest = rest.slice(0, hash2);
-=======
-  var hash = rest.indexOf("#");
-  if (hash !== -1)
-    this.hash = rest.substr(hash), rest = rest.slice(0, hash);
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   var qm = rest.indexOf("?");
   if (qm !== -1) {
     if (this.search = rest.substr(qm), this.query = rest.substr(qm + 1), parseQueryString)
@@ -10660,11 +10898,7 @@ Url.prototype.format = function() {
   var auth = this.auth || "";
   if (auth)
     auth = encodeURIComponent(auth), auth = auth.replace(/%3A/i, ":"), auth += "@";
-<<<<<<< HEAD
   var protocol = this.protocol || "", pathname = this.pathname || "", hash2 = this.hash || "", host = false, query = "";
-=======
-  var protocol = this.protocol || "", pathname = this.pathname || "", hash = this.hash || "", host = false, query = "";
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   if (this.host)
     host = auth + this.host;
   else if (this.hostname) {
@@ -10681,22 +10915,13 @@ Url.prototype.format = function() {
       pathname = "/" + pathname;
   } else if (!host)
     host = "";
-<<<<<<< HEAD
   if (hash2 && hash2.charAt(0) !== "#")
     hash2 = "#" + hash2;
-=======
-  if (hash && hash.charAt(0) !== "#")
-    hash = "#" + hash;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   if (search && search.charAt(0) !== "?")
     search = "?" + search;
   return pathname = pathname.replace(/[?#]/g, function(match) {
     return encodeURIComponent(match);
-<<<<<<< HEAD
   }), search = search.replace("#", "%23"), protocol + host + pathname + search + hash2;
-=======
-  }), search = search.replace("#", "%23"), protocol + host + pathname + search + hash;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 };
 Url.prototype.resolve = function(relative) {
   return this.resolveObject(urlParse(relative, false, true)).format();
@@ -10842,17 +11067,23 @@ var prepareRuntime = () => {
   globalThis.atob = atob2;
   globalThis.btoa = btoa;
   globalThis.URL = URL2;
-<<<<<<< HEAD
   globalThis.URLSearchParams = URLSearchParams;
-=======
-  globalThis.URLSearchParams = URLSearchParams2;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 };
 var handler = (trigger, fn) => ({
   trigger,
   fn
 });
 prepareRuntime();
+var cre = {
+  capabilities: {
+    CronCapability,
+    HTTPCapability,
+    ConfidentialHTTPClient: ClientCapability2,
+    HTTPClient: ClientCapability3,
+    EVMClient: ClientCapability
+  },
+  handler
+};
 var LAST_FINALIZED_BLOCK_NUMBER = {
   absVal: Buffer.from([3]).toString("base64"),
   sign: "-1"
@@ -10871,7 +11102,7 @@ function sendRequesterSendReport(report, fn) {
   const request = fn(rawReport);
   return this.sendRequest(request);
 }
-ClientCapability.prototype.sendReport = sendReport;
+ClientCapability3.prototype.sendReport = sendReport;
 SendRequester.prototype.sendReport = sendRequesterSendReport;
 var network = {
   chainId: "1",
@@ -19599,10 +19830,13 @@ class RuntimeImpl extends BaseRuntimeImpl {
       callbackId: id,
       requests: [secretRequest]
     });
-    if (!this.helpers.getSecrets(secretsReq, this.maxResponseSize)) {
+    try {
+      this.helpers.getSecrets(secretsReq, this.maxResponseSize);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
       return {
         result: () => {
-          throw new SecretsError(secretRequest, "host is not making the secrets request");
+          throw new SecretsError(secretRequest, message);
         }
       };
     }
@@ -19612,7 +19846,13 @@ class RuntimeImpl extends BaseRuntimeImpl {
   }
   awaitAndUnwrapSecret(id, secretRequest) {
     const awaitRequest = create(AwaitSecretsRequestSchema, { ids: [id] });
-    const awaitResponse = this.helpers.awaitSecrets(awaitRequest, this.maxResponseSize);
+    let awaitResponse;
+    try {
+      awaitResponse = this.helpers.awaitSecrets(awaitRequest, this.maxResponseSize);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new SecretsError(secretRequest, message);
+    }
     const secretsResponse = awaitResponse.responses[id];
     if (!secretsResponse) {
       throw new SecretsError(secretRequest, "no response");
@@ -19701,7 +19941,7 @@ class WasmRuntimeHelpers {
   }
   getSecrets(request, maxResponseSize) {
     const responseSize = toI32ResponseSize(maxResponseSize);
-    return hostBindings.getSecrets(toBinary(GetSecretsRequestSchema, request), responseSize) >= 0;
+    hostBindings.getSecrets(toBinary(GetSecretsRequestSchema, request), responseSize);
   }
   awaitSecrets(request, maxResponseSize) {
     const responseSize = toI32ResponseSize(maxResponseSize);
@@ -19866,1578 +20106,12 @@ var sendErrorResponse = (error) => {
   }
   hostBindings.sendResponse(payload);
 };
-<<<<<<< HEAD
 var MAPBIOMAS_GQL = "https://plataforma.alerta.mapbiomas.org/api/v2/graphql";
 var RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
 var PINATA_URL = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
+var ETHEREUM_SEPOLIA_SELECTOR = BigInt("16015286601757825753");
 var ABI = [
   {
-=======
-function formatAbiItem(abiItem, { includeName = false } = {}) {
-  if (abiItem.type !== "function" && abiItem.type !== "event" && abiItem.type !== "error")
-    throw new InvalidDefinitionTypeError2(abiItem.type);
-  return `${abiItem.name}(${formatAbiParams(abiItem.inputs, { includeName })})`;
-}
-function formatAbiParams(params, { includeName = false } = {}) {
-  if (!params)
-    return "";
-  return params.map((param) => formatAbiParam(param, { includeName })).join(includeName ? ", " : ",");
-}
-function formatAbiParam(param, { includeName }) {
-  if (param.type.startsWith("tuple")) {
-    return `(${formatAbiParams(param.components, { includeName })})${param.type.slice("tuple".length)}`;
-  }
-  return param.type + (includeName && param.name ? ` ${param.name}` : "");
-}
-function isHex3(value2, { strict = true } = {}) {
-  if (!value2)
-    return false;
-  if (typeof value2 !== "string")
-    return false;
-  return strict ? /^0x[0-9a-fA-F]*$/.test(value2) : value2.startsWith("0x");
-}
-function size3(value2) {
-  if (isHex3(value2, { strict: false }))
-    return Math.ceil((value2.length - 2) / 2);
-  return value2.length;
-}
-var version2 = "2.48.4";
-var errorConfig2 = {
-  getDocsUrl: ({ docsBaseUrl, docsPath = "", docsSlug }) => docsPath ? `${docsBaseUrl ?? "https://viem.sh"}${docsPath}${docsSlug ? `#${docsSlug}` : ""}` : undefined,
-  version: `viem@${version2}`
-};
-
-class BaseError3 extends Error {
-  constructor(shortMessage, args = {}) {
-    const details = (() => {
-      if (args.cause instanceof BaseError3)
-        return args.cause.details;
-      if (args.cause?.message)
-        return args.cause.message;
-      return args.details;
-    })();
-    const docsPath = (() => {
-      if (args.cause instanceof BaseError3)
-        return args.cause.docsPath || args.docsPath;
-      return args.docsPath;
-    })();
-    const docsUrl = errorConfig2.getDocsUrl?.({ ...args, docsPath });
-    const message = [
-      shortMessage || "An error occurred.",
-      "",
-      ...args.metaMessages ? [...args.metaMessages, ""] : [],
-      ...docsUrl ? [`Docs: ${docsUrl}`] : [],
-      ...details ? [`Details: ${details}`] : [],
-      ...errorConfig2.version ? [`Version: ${errorConfig2.version}`] : []
-    ].join(`
-`);
-    super(message, args.cause ? { cause: args.cause } : undefined);
-    Object.defineProperty(this, "details", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    Object.defineProperty(this, "docsPath", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    Object.defineProperty(this, "metaMessages", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    Object.defineProperty(this, "shortMessage", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    Object.defineProperty(this, "version", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    Object.defineProperty(this, "name", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: "BaseError"
-    });
-    this.details = details;
-    this.docsPath = docsPath;
-    this.metaMessages = args.metaMessages;
-    this.name = args.name ?? this.name;
-    this.shortMessage = shortMessage;
-    this.version = version2;
-  }
-  walk(fn) {
-    return walk2(this, fn);
-  }
-}
-function walk2(err, fn) {
-  if (fn?.(err))
-    return err;
-  if (err && typeof err === "object" && "cause" in err && err.cause !== undefined)
-    return walk2(err.cause, fn);
-  return fn ? null : err;
-}
-
-class AbiDecodingDataSizeTooSmallError2 extends BaseError3 {
-  constructor({ data, params, size: size4 }) {
-    super([`Data size of ${size4} bytes is too small for given parameters.`].join(`
-`), {
-      metaMessages: [
-        `Params: (${formatAbiParams(params, { includeName: true })})`,
-        `Data:   ${data} (${size4} bytes)`
-      ],
-      name: "AbiDecodingDataSizeTooSmallError"
-    });
-    Object.defineProperty(this, "data", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    Object.defineProperty(this, "params", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    Object.defineProperty(this, "size", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    this.data = data;
-    this.params = params;
-    this.size = size4;
-  }
-}
-
-class AbiDecodingZeroDataError2 extends BaseError3 {
-  constructor({ cause } = {}) {
-    super('Cannot decode zero data ("0x") with ABI parameters.', {
-      name: "AbiDecodingZeroDataError",
-      cause
-    });
-  }
-}
-
-class AbiEncodingArrayLengthMismatchError2 extends BaseError3 {
-  constructor({ expectedLength, givenLength, type }) {
-    super([
-      `ABI encoding array length mismatch for type ${type}.`,
-      `Expected length: ${expectedLength}`,
-      `Given length: ${givenLength}`
-    ].join(`
-`), { name: "AbiEncodingArrayLengthMismatchError" });
-  }
-}
-
-class AbiEncodingBytesSizeMismatchError2 extends BaseError3 {
-  constructor({ expectedSize, value: value2 }) {
-    super(`Size of bytes "${value2}" (bytes${size3(value2)}) does not match expected size (bytes${expectedSize}).`, { name: "AbiEncodingBytesSizeMismatchError" });
-  }
-}
-
-class AbiEncodingLengthMismatchError2 extends BaseError3 {
-  constructor({ expectedLength, givenLength }) {
-    super([
-      "ABI encoding params/values length mismatch.",
-      `Expected length (params): ${expectedLength}`,
-      `Given length (values): ${givenLength}`
-    ].join(`
-`), { name: "AbiEncodingLengthMismatchError" });
-  }
-}
-
-class AbiFunctionNotFoundError2 extends BaseError3 {
-  constructor(functionName, { docsPath } = {}) {
-    super([
-      `Function ${functionName ? `"${functionName}" ` : ""}not found on ABI.`,
-      "Make sure you are using the correct ABI and that the function exists on it."
-    ].join(`
-`), {
-      docsPath,
-      name: "AbiFunctionNotFoundError"
-    });
-  }
-}
-
-class AbiFunctionOutputsNotFoundError2 extends BaseError3 {
-  constructor(functionName, { docsPath }) {
-    super([
-      `Function "${functionName}" does not contain any \`outputs\` on ABI.`,
-      "Cannot decode function result without knowing what the parameter types are.",
-      "Make sure you are using the correct ABI and that the function exists on it."
-    ].join(`
-`), {
-      docsPath,
-      name: "AbiFunctionOutputsNotFoundError"
-    });
-  }
-}
-
-class AbiItemAmbiguityError extends BaseError3 {
-  constructor(x, y) {
-    super("Found ambiguous types in overloaded ABI items.", {
-      metaMessages: [
-        `\`${x.type}\` in \`${formatAbiItem(x.abiItem)}\`, and`,
-        `\`${y.type}\` in \`${formatAbiItem(y.abiItem)}\``,
-        "",
-        "These types encode differently and cannot be distinguished at runtime.",
-        "Remove one of the ambiguous items in the ABI."
-      ],
-      name: "AbiItemAmbiguityError"
-    });
-  }
-}
-
-class InvalidAbiEncodingTypeError2 extends BaseError3 {
-  constructor(type, { docsPath }) {
-    super([
-      `Type "${type}" is not a valid encoding type.`,
-      "Please provide a valid ABI type."
-    ].join(`
-`), { docsPath, name: "InvalidAbiEncodingType" });
-  }
-}
-
-class InvalidAbiDecodingTypeError2 extends BaseError3 {
-  constructor(type, { docsPath }) {
-    super([
-      `Type "${type}" is not a valid decoding type.`,
-      "Please provide a valid ABI type."
-    ].join(`
-`), { docsPath, name: "InvalidAbiDecodingType" });
-  }
-}
-
-class InvalidArrayError2 extends BaseError3 {
-  constructor(value2) {
-    super([`Value "${value2}" is not a valid array.`].join(`
-`), {
-      name: "InvalidArrayError"
-    });
-  }
-}
-
-class InvalidDefinitionTypeError2 extends BaseError3 {
-  constructor(type) {
-    super([
-      `"${type}" is not a valid definition type.`,
-      'Valid types: "function", "event", "error"'
-    ].join(`
-`), { name: "InvalidDefinitionTypeError" });
-  }
-}
-
-class InvalidAddressError3 extends BaseError3 {
-  constructor({ address }) {
-    super(`Address "${address}" is invalid.`, {
-      metaMessages: [
-        "- Address must be a hex value of 20 bytes (40 hex characters).",
-        "- Address must match its checksum counterpart."
-      ],
-      name: "InvalidAddressError"
-    });
-  }
-}
-
-class SliceOffsetOutOfBoundsError2 extends BaseError3 {
-  constructor({ offset, position, size: size4 }) {
-    super(`Slice ${position === "start" ? "starting" : "ending"} at offset "${offset}" is out-of-bounds (size: ${size4}).`, { name: "SliceOffsetOutOfBoundsError" });
-  }
-}
-
-class SizeExceedsPaddingSizeError3 extends BaseError3 {
-  constructor({ size: size4, targetSize, type }) {
-    super(`${type.charAt(0).toUpperCase()}${type.slice(1).toLowerCase()} size (${size4}) exceeds padding size (${targetSize}).`, { name: "SizeExceedsPaddingSizeError" });
-  }
-}
-function pad3(hexOrBytes, { dir, size: size4 = 32 } = {}) {
-  if (typeof hexOrBytes === "string")
-    return padHex3(hexOrBytes, { dir, size: size4 });
-  return padBytes3(hexOrBytes, { dir, size: size4 });
-}
-function padHex3(hex_, { dir, size: size4 = 32 } = {}) {
-  if (size4 === null)
-    return hex_;
-  const hex = hex_.replace("0x", "");
-  if (hex.length > size4 * 2)
-    throw new SizeExceedsPaddingSizeError3({
-      size: Math.ceil(hex.length / 2),
-      targetSize: size4,
-      type: "hex"
-    });
-  return `0x${hex[dir === "right" ? "padEnd" : "padStart"](size4 * 2, "0")}`;
-}
-function padBytes3(bytes, { dir, size: size4 = 32 } = {}) {
-  if (size4 === null)
-    return bytes;
-  if (bytes.length > size4)
-    throw new SizeExceedsPaddingSizeError3({
-      size: bytes.length,
-      targetSize: size4,
-      type: "bytes"
-    });
-  const paddedBytes = new Uint8Array(size4);
-  for (let i2 = 0;i2 < size4; i2++) {
-    const padEnd = dir === "right";
-    paddedBytes[padEnd ? i2 : size4 - i2 - 1] = bytes[padEnd ? i2 : bytes.length - i2 - 1];
-  }
-  return paddedBytes;
-}
-
-class IntegerOutOfRangeError3 extends BaseError3 {
-  constructor({ max, min, signed, size: size4, value: value2 }) {
-    super(`Number "${value2}" is not in safe ${size4 ? `${size4 * 8}-bit ${signed ? "signed" : "unsigned"} ` : ""}integer range ${max ? `(${min} to ${max})` : `(above ${min})`}`, { name: "IntegerOutOfRangeError" });
-  }
-}
-
-class InvalidBytesBooleanError2 extends BaseError3 {
-  constructor(bytes) {
-    super(`Bytes value "${bytes}" is not a valid boolean. The bytes array must contain a single byte of either a 0 or 1 value.`, {
-      name: "InvalidBytesBooleanError"
-    });
-  }
-}
-
-class SizeOverflowError3 extends BaseError3 {
-  constructor({ givenSize, maxSize }) {
-    super(`Size cannot exceed ${maxSize} bytes. Given size: ${givenSize} bytes.`, { name: "SizeOverflowError" });
-  }
-}
-function trim2(hexOrBytes, { dir = "left" } = {}) {
-  let data = typeof hexOrBytes === "string" ? hexOrBytes.replace("0x", "") : hexOrBytes;
-  let sliceLength = 0;
-  for (let i2 = 0;i2 < data.length - 1; i2++) {
-    if (data[dir === "left" ? i2 : data.length - i2 - 1].toString() === "0")
-      sliceLength++;
-    else
-      break;
-  }
-  data = dir === "left" ? data.slice(sliceLength) : data.slice(0, data.length - sliceLength);
-  if (typeof hexOrBytes === "string") {
-    if (data.length === 1 && dir === "right")
-      data = `${data}0`;
-    return `0x${data.length % 2 === 1 ? `0${data}` : data}`;
-  }
-  return data;
-}
-function assertSize3(hexOrBytes, { size: size4 }) {
-  if (size3(hexOrBytes) > size4)
-    throw new SizeOverflowError3({
-      givenSize: size3(hexOrBytes),
-      maxSize: size4
-    });
-}
-function hexToBigInt3(hex, opts = {}) {
-  const { signed } = opts;
-  if (opts.size)
-    assertSize3(hex, { size: opts.size });
-  const value2 = BigInt(hex);
-  if (!signed)
-    return value2;
-  const size4 = (hex.length - 2) / 2;
-  const max = (1n << BigInt(size4) * 8n - 1n) - 1n;
-  if (value2 <= max)
-    return value2;
-  return value2 - BigInt(`0x${"f".padStart(size4 * 2, "f")}`) - 1n;
-}
-function hexToNumber4(hex, opts = {}) {
-  const value2 = hexToBigInt3(hex, opts);
-  const number = Number(value2);
-  if (!Number.isSafeInteger(number))
-    throw new IntegerOutOfRangeError3({
-      max: `${Number.MAX_SAFE_INTEGER}`,
-      min: `${Number.MIN_SAFE_INTEGER}`,
-      signed: opts.signed,
-      size: opts.size,
-      value: `${value2}n`
-    });
-  return number;
-}
-var hexes3 = /* @__PURE__ */ Array.from({ length: 256 }, (_v, i2) => i2.toString(16).padStart(2, "0"));
-function toHex2(value2, opts = {}) {
-  if (typeof value2 === "number" || typeof value2 === "bigint")
-    return numberToHex2(value2, opts);
-  if (typeof value2 === "string") {
-    return stringToHex2(value2, opts);
-  }
-  if (typeof value2 === "boolean")
-    return boolToHex2(value2, opts);
-  return bytesToHex3(value2, opts);
-}
-function boolToHex2(value2, opts = {}) {
-  const hex = `0x${Number(value2)}`;
-  if (typeof opts.size === "number") {
-    assertSize3(hex, { size: opts.size });
-    return pad3(hex, { size: opts.size });
-  }
-  return hex;
-}
-function bytesToHex3(value2, opts = {}) {
-  let string = "";
-  for (let i2 = 0;i2 < value2.length; i2++) {
-    string += hexes3[value2[i2]];
-  }
-  const hex = `0x${string}`;
-  if (typeof opts.size === "number") {
-    assertSize3(hex, { size: opts.size });
-    return pad3(hex, { dir: "right", size: opts.size });
-  }
-  return hex;
-}
-function numberToHex2(value_, opts = {}) {
-  const { signed, size: size4 } = opts;
-  const value2 = BigInt(value_);
-  let maxValue;
-  if (size4) {
-    if (signed)
-      maxValue = (1n << BigInt(size4) * 8n - 1n) - 1n;
-    else
-      maxValue = 2n ** (BigInt(size4) * 8n) - 1n;
-  } else if (typeof value_ === "number") {
-    maxValue = BigInt(Number.MAX_SAFE_INTEGER);
-  }
-  const minValue = typeof maxValue === "bigint" && signed ? -maxValue - 1n : 0;
-  if (maxValue && value2 > maxValue || value2 < minValue) {
-    const suffix = typeof value_ === "bigint" ? "n" : "";
-    throw new IntegerOutOfRangeError3({
-      max: maxValue ? `${maxValue}${suffix}` : undefined,
-      min: `${minValue}${suffix}`,
-      signed,
-      size: size4,
-      value: `${value_}${suffix}`
-    });
-  }
-  const hex = `0x${(signed && value2 < 0 ? (1n << BigInt(size4 * 8)) + BigInt(value2) : value2).toString(16)}`;
-  if (size4)
-    return pad3(hex, { size: size4 });
-  return hex;
-}
-var encoder3 = /* @__PURE__ */ new TextEncoder;
-function stringToHex2(value_, opts = {}) {
-  const value2 = encoder3.encode(value_);
-  return bytesToHex3(value2, opts);
-}
-var encoder4 = /* @__PURE__ */ new TextEncoder;
-function toBytes3(value2, opts = {}) {
-  if (typeof value2 === "number" || typeof value2 === "bigint")
-    return numberToBytes2(value2, opts);
-  if (typeof value2 === "boolean")
-    return boolToBytes2(value2, opts);
-  if (isHex3(value2))
-    return hexToBytes4(value2, opts);
-  return stringToBytes2(value2, opts);
-}
-function boolToBytes2(value2, opts = {}) {
-  const bytes = new Uint8Array(1);
-  bytes[0] = Number(value2);
-  if (typeof opts.size === "number") {
-    assertSize3(bytes, { size: opts.size });
-    return pad3(bytes, { size: opts.size });
-  }
-  return bytes;
-}
-var charCodeMap2 = {
-  zero: 48,
-  nine: 57,
-  A: 65,
-  F: 70,
-  a: 97,
-  f: 102
-};
-function charCodeToBase162(char) {
-  if (char >= charCodeMap2.zero && char <= charCodeMap2.nine)
-    return char - charCodeMap2.zero;
-  if (char >= charCodeMap2.A && char <= charCodeMap2.F)
-    return char - (charCodeMap2.A - 10);
-  if (char >= charCodeMap2.a && char <= charCodeMap2.f)
-    return char - (charCodeMap2.a - 10);
-  return;
-}
-function hexToBytes4(hex_, opts = {}) {
-  let hex = hex_;
-  if (opts.size) {
-    assertSize3(hex, { size: opts.size });
-    hex = pad3(hex, { dir: "right", size: opts.size });
-  }
-  let hexString = hex.slice(2);
-  if (hexString.length % 2)
-    hexString = `0${hexString}`;
-  const length = hexString.length / 2;
-  const bytes = new Uint8Array(length);
-  for (let index = 0, j = 0;index < length; index++) {
-    const nibbleLeft = charCodeToBase162(hexString.charCodeAt(j++));
-    const nibbleRight = charCodeToBase162(hexString.charCodeAt(j++));
-    if (nibbleLeft === undefined || nibbleRight === undefined) {
-      throw new BaseError3(`Invalid byte sequence ("${hexString[j - 2]}${hexString[j - 1]}" in "${hexString}").`);
-    }
-    bytes[index] = nibbleLeft * 16 + nibbleRight;
-  }
-  return bytes;
-}
-function numberToBytes2(value2, opts) {
-  const hex = numberToHex2(value2, opts);
-  return hexToBytes4(hex);
-}
-function stringToBytes2(value2, opts = {}) {
-  const bytes = encoder4.encode(value2);
-  if (typeof opts.size === "number") {
-    assertSize3(bytes, { size: opts.size });
-    return pad3(bytes, { dir: "right", size: opts.size });
-  }
-  return bytes;
-}
-function keccak2562(value2, to_) {
-  const to = to_ || "hex";
-  const bytes = keccak_256(isHex3(value2, { strict: false }) ? toBytes3(value2) : value2);
-  if (to === "bytes")
-    return bytes;
-  return toHex2(bytes);
-}
-
-class LruMap2 extends Map {
-  constructor(size4) {
-    super();
-    Object.defineProperty(this, "maxSize", {
-      enumerable: true,
-      configurable: true,
-      writable: true,
-      value: undefined
-    });
-    this.maxSize = size4;
-  }
-  get(key) {
-    const value2 = super.get(key);
-    if (super.has(key)) {
-      super.delete(key);
-      super.set(key, value2);
-    }
-    return value2;
-  }
-  set(key, value2) {
-    if (super.has(key))
-      super.delete(key);
-    super.set(key, value2);
-    if (this.maxSize && this.size > this.maxSize) {
-      const firstKey = super.keys().next().value;
-      if (firstKey !== undefined)
-        super.delete(firstKey);
-    }
-    return this;
-  }
-}
-var addressRegex2 = /^0x[a-fA-F0-9]{40}$/;
-var isAddressCache2 = /* @__PURE__ */ new LruMap2(8192);
-function isAddress3(address, options) {
-  const { strict = true } = options ?? {};
-  const cacheKey2 = `${address}.${strict}`;
-  if (isAddressCache2.has(cacheKey2))
-    return isAddressCache2.get(cacheKey2);
-  const result = (() => {
-    if (!addressRegex2.test(address))
-      return false;
-    if (address.toLowerCase() === address)
-      return true;
-    if (strict)
-      return checksumAddress2(address) === address;
-    return true;
-  })();
-  isAddressCache2.set(cacheKey2, result);
-  return result;
-}
-var checksumAddressCache2 = /* @__PURE__ */ new LruMap2(8192);
-function checksumAddress2(address_, chainId) {
-  if (checksumAddressCache2.has(`${address_}.${chainId}`))
-    return checksumAddressCache2.get(`${address_}.${chainId}`);
-  const hexAddress = chainId ? `${chainId}${address_.toLowerCase()}` : address_.substring(2).toLowerCase();
-  const hash = keccak2562(stringToBytes2(hexAddress), "bytes");
-  const address = (chainId ? hexAddress.substring(`${chainId}0x`.length) : hexAddress).split("");
-  for (let i2 = 0;i2 < 40; i2 += 2) {
-    if (hash[i2 >> 1] >> 4 >= 8 && address[i2]) {
-      address[i2] = address[i2].toUpperCase();
-    }
-    if ((hash[i2 >> 1] & 15) >= 8 && address[i2 + 1]) {
-      address[i2 + 1] = address[i2 + 1].toUpperCase();
-    }
-  }
-  const result = `0x${address.join("")}`;
-  checksumAddressCache2.set(`${address_}.${chainId}`, result);
-  return result;
-}
-
-class NegativeOffsetError extends BaseError3 {
-  constructor({ offset }) {
-    super(`Offset \`${offset}\` cannot be negative.`, {
-      name: "NegativeOffsetError"
-    });
-  }
-}
-
-class PositionOutOfBoundsError extends BaseError3 {
-  constructor({ length, position }) {
-    super(`Position \`${position}\` is out of bounds (\`0 < position < ${length}\`).`, { name: "PositionOutOfBoundsError" });
-  }
-}
-
-class RecursiveReadLimitExceededError extends BaseError3 {
-  constructor({ count, limit }) {
-    super(`Recursive read limit of \`${limit}\` exceeded (recursive read count: \`${count}\`).`, { name: "RecursiveReadLimitExceededError" });
-  }
-}
-var staticCursor = {
-  bytes: new Uint8Array,
-  dataView: new DataView(new ArrayBuffer(0)),
-  position: 0,
-  positionReadCount: new Map,
-  recursiveReadCount: 0,
-  recursiveReadLimit: Number.POSITIVE_INFINITY,
-  assertReadLimit() {
-    if (this.recursiveReadCount >= this.recursiveReadLimit)
-      throw new RecursiveReadLimitExceededError({
-        count: this.recursiveReadCount + 1,
-        limit: this.recursiveReadLimit
-      });
-  },
-  assertPosition(position) {
-    if (position < 0 || position > this.bytes.length - 1)
-      throw new PositionOutOfBoundsError({
-        length: this.bytes.length,
-        position
-      });
-  },
-  decrementPosition(offset) {
-    if (offset < 0)
-      throw new NegativeOffsetError({ offset });
-    const position = this.position - offset;
-    this.assertPosition(position);
-    this.position = position;
-  },
-  getReadCount(position) {
-    return this.positionReadCount.get(position || this.position) || 0;
-  },
-  incrementPosition(offset) {
-    if (offset < 0)
-      throw new NegativeOffsetError({ offset });
-    const position = this.position + offset;
-    this.assertPosition(position);
-    this.position = position;
-  },
-  inspectByte(position_) {
-    const position = position_ ?? this.position;
-    this.assertPosition(position);
-    return this.bytes[position];
-  },
-  inspectBytes(length, position_) {
-    const position = position_ ?? this.position;
-    this.assertPosition(position + length - 1);
-    return this.bytes.subarray(position, position + length);
-  },
-  inspectUint8(position_) {
-    const position = position_ ?? this.position;
-    this.assertPosition(position);
-    return this.bytes[position];
-  },
-  inspectUint16(position_) {
-    const position = position_ ?? this.position;
-    this.assertPosition(position + 1);
-    return this.dataView.getUint16(position);
-  },
-  inspectUint24(position_) {
-    const position = position_ ?? this.position;
-    this.assertPosition(position + 2);
-    return (this.dataView.getUint16(position) << 8) + this.dataView.getUint8(position + 2);
-  },
-  inspectUint32(position_) {
-    const position = position_ ?? this.position;
-    this.assertPosition(position + 3);
-    return this.dataView.getUint32(position);
-  },
-  pushByte(byte) {
-    this.assertPosition(this.position);
-    this.bytes[this.position] = byte;
-    this.position++;
-  },
-  pushBytes(bytes) {
-    this.assertPosition(this.position + bytes.length - 1);
-    this.bytes.set(bytes, this.position);
-    this.position += bytes.length;
-  },
-  pushUint8(value2) {
-    this.assertPosition(this.position);
-    this.bytes[this.position] = value2;
-    this.position++;
-  },
-  pushUint16(value2) {
-    this.assertPosition(this.position + 1);
-    this.dataView.setUint16(this.position, value2);
-    this.position += 2;
-  },
-  pushUint24(value2) {
-    this.assertPosition(this.position + 2);
-    this.dataView.setUint16(this.position, value2 >> 8);
-    this.dataView.setUint8(this.position + 2, value2 & ~4294967040);
-    this.position += 3;
-  },
-  pushUint32(value2) {
-    this.assertPosition(this.position + 3);
-    this.dataView.setUint32(this.position, value2);
-    this.position += 4;
-  },
-  readByte() {
-    this.assertReadLimit();
-    this._touch();
-    const value2 = this.inspectByte();
-    this.position++;
-    return value2;
-  },
-  readBytes(length, size4) {
-    this.assertReadLimit();
-    this._touch();
-    const value2 = this.inspectBytes(length);
-    this.position += size4 ?? length;
-    return value2;
-  },
-  readUint8() {
-    this.assertReadLimit();
-    this._touch();
-    const value2 = this.inspectUint8();
-    this.position += 1;
-    return value2;
-  },
-  readUint16() {
-    this.assertReadLimit();
-    this._touch();
-    const value2 = this.inspectUint16();
-    this.position += 2;
-    return value2;
-  },
-  readUint24() {
-    this.assertReadLimit();
-    this._touch();
-    const value2 = this.inspectUint24();
-    this.position += 3;
-    return value2;
-  },
-  readUint32() {
-    this.assertReadLimit();
-    this._touch();
-    const value2 = this.inspectUint32();
-    this.position += 4;
-    return value2;
-  },
-  get remaining() {
-    return this.bytes.length - this.position;
-  },
-  setPosition(position) {
-    const oldPosition = this.position;
-    this.assertPosition(position);
-    this.position = position;
-    return () => this.position = oldPosition;
-  },
-  _touch() {
-    if (this.recursiveReadLimit === Number.POSITIVE_INFINITY)
-      return;
-    const count = this.getReadCount();
-    this.positionReadCount.set(this.position, count + 1);
-    if (count > 0)
-      this.recursiveReadCount++;
-  }
-};
-function createCursor(bytes, { recursiveReadLimit = 8192 } = {}) {
-  const cursor = Object.create(staticCursor);
-  cursor.bytes = bytes;
-  cursor.dataView = new DataView(bytes.buffer ?? bytes, bytes.byteOffset, bytes.byteLength);
-  cursor.positionReadCount = new Map;
-  cursor.recursiveReadLimit = recursiveReadLimit;
-  return cursor;
-}
-function slice2(value2, start, end, { strict } = {}) {
-  if (isHex3(value2, { strict: false }))
-    return sliceHex2(value2, start, end, {
-      strict
-    });
-  return sliceBytes2(value2, start, end, {
-    strict
-  });
-}
-function assertStartOffset(value2, start) {
-  if (typeof start === "number" && start > 0 && start > size3(value2) - 1)
-    throw new SliceOffsetOutOfBoundsError2({
-      offset: start,
-      position: "start",
-      size: size3(value2)
-    });
-}
-function assertEndOffset(value2, start, end) {
-  if (typeof start === "number" && typeof end === "number" && size3(value2) !== end - start) {
-    throw new SliceOffsetOutOfBoundsError2({
-      offset: end,
-      position: "end",
-      size: size3(value2)
-    });
-  }
-}
-function sliceBytes2(value_, start, end, { strict } = {}) {
-  assertStartOffset(value_, start);
-  const value2 = value_.slice(start, end);
-  if (strict)
-    assertEndOffset(value2, start, end);
-  return value2;
-}
-function sliceHex2(value_, start, end, { strict } = {}) {
-  assertStartOffset(value_, start);
-  const value2 = `0x${value_.replace("0x", "").slice((start ?? 0) * 2, (end ?? value_.length) * 2)}`;
-  if (strict)
-    assertEndOffset(value2, start, end);
-  return value2;
-}
-function bytesToBigInt2(bytes, opts = {}) {
-  if (typeof opts.size !== "undefined")
-    assertSize3(bytes, { size: opts.size });
-  const hex = bytesToHex3(bytes, opts);
-  return hexToBigInt3(hex, opts);
-}
-function bytesToBool2(bytes_, opts = {}) {
-  let bytes = bytes_;
-  if (typeof opts.size !== "undefined") {
-    assertSize3(bytes, { size: opts.size });
-    bytes = trim2(bytes);
-  }
-  if (bytes.length > 1 || bytes[0] > 1)
-    throw new InvalidBytesBooleanError2(bytes);
-  return Boolean(bytes[0]);
-}
-function bytesToNumber2(bytes, opts = {}) {
-  if (typeof opts.size !== "undefined")
-    assertSize3(bytes, { size: opts.size });
-  const hex = bytesToHex3(bytes, opts);
-  return hexToNumber4(hex, opts);
-}
-function bytesToString2(bytes_, opts = {}) {
-  let bytes = bytes_;
-  if (typeof opts.size !== "undefined") {
-    assertSize3(bytes, { size: opts.size });
-    bytes = trim2(bytes, { dir: "right" });
-  }
-  return new TextDecoder().decode(bytes);
-}
-function concat2(values) {
-  if (typeof values[0] === "string")
-    return concatHex2(values);
-  return concatBytes4(values);
-}
-function concatBytes4(values) {
-  let length = 0;
-  for (const arr of values) {
-    length += arr.length;
-  }
-  const result = new Uint8Array(length);
-  let offset = 0;
-  for (const arr of values) {
-    result.set(arr, offset);
-    offset += arr.length;
-  }
-  return result;
-}
-function concatHex2(values) {
-  return `0x${values.reduce((acc, x) => acc + x.replace("0x", ""), "")}`;
-}
-var integerRegex = /^(u?int)(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144|152|160|168|176|184|192|200|208|216|224|232|240|248|256)?$/;
-function encodeAbiParameters2(params, values) {
-  if (params.length !== values.length)
-    throw new AbiEncodingLengthMismatchError2({
-      expectedLength: params.length,
-      givenLength: values.length
-    });
-  const preparedParams = prepareParams({
-    params,
-    values
-  });
-  const data = encodeParams(preparedParams);
-  if (data.length === 0)
-    return "0x";
-  return data;
-}
-function prepareParams({ params, values }) {
-  const preparedParams = [];
-  for (let i2 = 0;i2 < params.length; i2++) {
-    preparedParams.push(prepareParam({ param: params[i2], value: values[i2] }));
-  }
-  return preparedParams;
-}
-function prepareParam({ param, value: value2 }) {
-  const arrayComponents = getArrayComponents(param.type);
-  if (arrayComponents) {
-    const [length, type] = arrayComponents;
-    return encodeArray(value2, { length, param: { ...param, type } });
-  }
-  if (param.type === "tuple") {
-    return encodeTuple(value2, {
-      param
-    });
-  }
-  if (param.type === "address") {
-    return encodeAddress(value2);
-  }
-  if (param.type === "bool") {
-    return encodeBool(value2);
-  }
-  if (param.type.startsWith("uint") || param.type.startsWith("int")) {
-    const signed = param.type.startsWith("int");
-    const [, , size4 = "256"] = integerRegex.exec(param.type) ?? [];
-    return encodeNumber(value2, {
-      signed,
-      size: Number(size4)
-    });
-  }
-  if (param.type.startsWith("bytes")) {
-    return encodeBytes(value2, { param });
-  }
-  if (param.type === "string") {
-    return encodeString(value2);
-  }
-  throw new InvalidAbiEncodingTypeError2(param.type, {
-    docsPath: "/docs/contract/encodeAbiParameters"
-  });
-}
-function encodeParams(preparedParams) {
-  let staticSize = 0;
-  for (let i2 = 0;i2 < preparedParams.length; i2++) {
-    const { dynamic, encoded } = preparedParams[i2];
-    if (dynamic)
-      staticSize += 32;
-    else
-      staticSize += size3(encoded);
-  }
-  const staticParams = [];
-  const dynamicParams = [];
-  let dynamicSize = 0;
-  for (let i2 = 0;i2 < preparedParams.length; i2++) {
-    const { dynamic, encoded } = preparedParams[i2];
-    if (dynamic) {
-      staticParams.push(numberToHex2(staticSize + dynamicSize, { size: 32 }));
-      dynamicParams.push(encoded);
-      dynamicSize += size3(encoded);
-    } else {
-      staticParams.push(encoded);
-    }
-  }
-  return concat2([...staticParams, ...dynamicParams]);
-}
-function encodeAddress(value2) {
-  if (!isAddress3(value2))
-    throw new InvalidAddressError3({ address: value2 });
-  return { dynamic: false, encoded: padHex3(value2.toLowerCase()) };
-}
-function encodeArray(value2, { length, param }) {
-  const dynamic = length === null;
-  if (!Array.isArray(value2))
-    throw new InvalidArrayError2(value2);
-  if (!dynamic && value2.length !== length)
-    throw new AbiEncodingArrayLengthMismatchError2({
-      expectedLength: length,
-      givenLength: value2.length,
-      type: `${param.type}[${length}]`
-    });
-  let dynamicChild = false;
-  const preparedParams = [];
-  for (let i2 = 0;i2 < value2.length; i2++) {
-    const preparedParam = prepareParam({ param, value: value2[i2] });
-    if (preparedParam.dynamic)
-      dynamicChild = true;
-    preparedParams.push(preparedParam);
-  }
-  if (dynamic || dynamicChild) {
-    const data = encodeParams(preparedParams);
-    if (dynamic) {
-      const length2 = numberToHex2(preparedParams.length, { size: 32 });
-      return {
-        dynamic: true,
-        encoded: preparedParams.length > 0 ? concat2([length2, data]) : length2
-      };
-    }
-    if (dynamicChild)
-      return { dynamic: true, encoded: data };
-  }
-  return {
-    dynamic: false,
-    encoded: concat2(preparedParams.map(({ encoded }) => encoded))
-  };
-}
-function encodeBytes(value2, { param }) {
-  const [, paramSize] = param.type.split("bytes");
-  const bytesSize = size3(value2);
-  if (!paramSize) {
-    let value_ = value2;
-    if (bytesSize % 32 !== 0)
-      value_ = padHex3(value_, {
-        dir: "right",
-        size: Math.ceil((value2.length - 2) / 2 / 32) * 32
-      });
-    return {
-      dynamic: true,
-      encoded: concat2([padHex3(numberToHex2(bytesSize, { size: 32 })), value_])
-    };
-  }
-  if (bytesSize !== Number.parseInt(paramSize, 10))
-    throw new AbiEncodingBytesSizeMismatchError2({
-      expectedSize: Number.parseInt(paramSize, 10),
-      value: value2
-    });
-  return { dynamic: false, encoded: padHex3(value2, { dir: "right" }) };
-}
-function encodeBool(value2) {
-  if (typeof value2 !== "boolean")
-    throw new BaseError3(`Invalid boolean value: "${value2}" (type: ${typeof value2}). Expected: \`true\` or \`false\`.`);
-  return { dynamic: false, encoded: padHex3(boolToHex2(value2)) };
-}
-function encodeNumber(value2, { signed, size: size4 = 256 }) {
-  if (typeof size4 === "number") {
-    const max = 2n ** (BigInt(size4) - (signed ? 1n : 0n)) - 1n;
-    const min = signed ? -max - 1n : 0n;
-    if (value2 > max || value2 < min)
-      throw new IntegerOutOfRangeError3({
-        max: max.toString(),
-        min: min.toString(),
-        signed,
-        size: size4 / 8,
-        value: value2.toString()
-      });
-  }
-  return {
-    dynamic: false,
-    encoded: numberToHex2(value2, {
-      size: 32,
-      signed
-    })
-  };
-}
-function encodeString(value2) {
-  const hexValue = stringToHex2(value2);
-  const partsLength = Math.ceil(size3(hexValue) / 32);
-  const parts = [];
-  for (let i2 = 0;i2 < partsLength; i2++) {
-    parts.push(padHex3(slice2(hexValue, i2 * 32, (i2 + 1) * 32), {
-      dir: "right"
-    }));
-  }
-  return {
-    dynamic: true,
-    encoded: concat2([
-      padHex3(numberToHex2(size3(hexValue), { size: 32 })),
-      ...parts
-    ])
-  };
-}
-function encodeTuple(value2, { param }) {
-  let dynamic = false;
-  const preparedParams = [];
-  for (let i2 = 0;i2 < param.components.length; i2++) {
-    const param_ = param.components[i2];
-    const index = Array.isArray(value2) ? i2 : param_.name;
-    const preparedParam = prepareParam({
-      param: param_,
-      value: value2[index]
-    });
-    preparedParams.push(preparedParam);
-    if (preparedParam.dynamic)
-      dynamic = true;
-  }
-  return {
-    dynamic,
-    encoded: dynamic ? encodeParams(preparedParams) : concat2(preparedParams.map(({ encoded }) => encoded))
-  };
-}
-function getArrayComponents(type) {
-  const matches = type.match(/^(.*)\[(\d+)?\]$/);
-  return matches ? [matches[2] ? Number(matches[2]) : null, matches[1]] : undefined;
-}
-function decodeAbiParameters2(params, data) {
-  const bytes = typeof data === "string" ? hexToBytes4(data) : data;
-  const cursor = createCursor(bytes);
-  if (size3(bytes) === 0 && params.length > 0)
-    throw new AbiDecodingZeroDataError2;
-  if (size3(data) && size3(data) < 32)
-    throw new AbiDecodingDataSizeTooSmallError2({
-      data: typeof data === "string" ? data : bytesToHex3(data),
-      params,
-      size: size3(data)
-    });
-  let consumed = 0;
-  const values = [];
-  for (let i2 = 0;i2 < params.length; ++i2) {
-    const param = params[i2];
-    cursor.setPosition(consumed);
-    const [data2, consumed_] = decodeParameter(cursor, param, {
-      staticPosition: 0
-    });
-    consumed += consumed_;
-    values.push(data2);
-  }
-  return values;
-}
-function decodeParameter(cursor, param, { staticPosition }) {
-  const arrayComponents = getArrayComponents(param.type);
-  if (arrayComponents) {
-    const [length, type] = arrayComponents;
-    return decodeArray(cursor, { ...param, type }, { length, staticPosition });
-  }
-  if (param.type === "tuple")
-    return decodeTuple(cursor, param, { staticPosition });
-  if (param.type === "address")
-    return decodeAddress(cursor);
-  if (param.type === "bool")
-    return decodeBool(cursor);
-  if (param.type.startsWith("bytes"))
-    return decodeBytes(cursor, param, { staticPosition });
-  if (param.type.startsWith("uint") || param.type.startsWith("int"))
-    return decodeNumber(cursor, param);
-  if (param.type === "string")
-    return decodeString(cursor, { staticPosition });
-  throw new InvalidAbiDecodingTypeError2(param.type, {
-    docsPath: "/docs/contract/decodeAbiParameters"
-  });
-}
-var sizeOfLength = 32;
-var sizeOfOffset = 32;
-function decodeAddress(cursor) {
-  const value2 = cursor.readBytes(32);
-  return [checksumAddress2(bytesToHex3(sliceBytes2(value2, -20))), 32];
-}
-function decodeArray(cursor, param, { length, staticPosition }) {
-  if (!length) {
-    const offset = bytesToNumber2(cursor.readBytes(sizeOfOffset));
-    const start = staticPosition + offset;
-    const startOfData = start + sizeOfLength;
-    cursor.setPosition(start);
-    const length2 = bytesToNumber2(cursor.readBytes(sizeOfLength));
-    const dynamicChild = hasDynamicChild(param);
-    let consumed2 = 0;
-    const value3 = [];
-    for (let i2 = 0;i2 < length2; ++i2) {
-      cursor.setPosition(startOfData + (dynamicChild ? i2 * 32 : consumed2));
-      const [data, consumed_] = decodeParameter(cursor, param, {
-        staticPosition: startOfData
-      });
-      consumed2 += consumed_;
-      value3.push(data);
-    }
-    cursor.setPosition(staticPosition + 32);
-    return [value3, 32];
-  }
-  if (hasDynamicChild(param)) {
-    const offset = bytesToNumber2(cursor.readBytes(sizeOfOffset));
-    const start = staticPosition + offset;
-    const value3 = [];
-    for (let i2 = 0;i2 < length; ++i2) {
-      cursor.setPosition(start + i2 * 32);
-      const [data] = decodeParameter(cursor, param, {
-        staticPosition: start
-      });
-      value3.push(data);
-    }
-    cursor.setPosition(staticPosition + 32);
-    return [value3, 32];
-  }
-  let consumed = 0;
-  const value2 = [];
-  for (let i2 = 0;i2 < length; ++i2) {
-    const [data, consumed_] = decodeParameter(cursor, param, {
-      staticPosition: staticPosition + consumed
-    });
-    consumed += consumed_;
-    value2.push(data);
-  }
-  return [value2, consumed];
-}
-function decodeBool(cursor) {
-  return [bytesToBool2(cursor.readBytes(32), { size: 32 }), 32];
-}
-function decodeBytes(cursor, param, { staticPosition }) {
-  const [_, size4] = param.type.split("bytes");
-  if (!size4) {
-    const offset = bytesToNumber2(cursor.readBytes(32));
-    cursor.setPosition(staticPosition + offset);
-    const length = bytesToNumber2(cursor.readBytes(32));
-    if (length === 0) {
-      cursor.setPosition(staticPosition + 32);
-      return ["0x", 32];
-    }
-    const data = cursor.readBytes(length);
-    cursor.setPosition(staticPosition + 32);
-    return [bytesToHex3(data), 32];
-  }
-  const value2 = bytesToHex3(cursor.readBytes(Number.parseInt(size4, 10), 32));
-  return [value2, 32];
-}
-function decodeNumber(cursor, param) {
-  const signed = param.type.startsWith("int");
-  const size4 = Number.parseInt(param.type.split("int")[1] || "256", 10);
-  const value2 = cursor.readBytes(32);
-  return [
-    size4 > 48 ? bytesToBigInt2(value2, { signed }) : bytesToNumber2(value2, { signed }),
-    32
-  ];
-}
-function decodeTuple(cursor, param, { staticPosition }) {
-  const hasUnnamedChild = param.components.length === 0 || param.components.some(({ name }) => !name);
-  const value2 = hasUnnamedChild ? [] : {};
-  let consumed = 0;
-  if (hasDynamicChild(param)) {
-    const offset = bytesToNumber2(cursor.readBytes(sizeOfOffset));
-    const start = staticPosition + offset;
-    for (let i2 = 0;i2 < param.components.length; ++i2) {
-      const component = param.components[i2];
-      cursor.setPosition(start + consumed);
-      const [data, consumed_] = decodeParameter(cursor, component, {
-        staticPosition: start
-      });
-      consumed += consumed_;
-      value2[hasUnnamedChild ? i2 : component?.name] = data;
-    }
-    cursor.setPosition(staticPosition + 32);
-    return [value2, 32];
-  }
-  for (let i2 = 0;i2 < param.components.length; ++i2) {
-    const component = param.components[i2];
-    const [data, consumed_] = decodeParameter(cursor, component, {
-      staticPosition
-    });
-    value2[hasUnnamedChild ? i2 : component?.name] = data;
-    consumed += consumed_;
-  }
-  return [value2, consumed];
-}
-function decodeString(cursor, { staticPosition }) {
-  const offset = bytesToNumber2(cursor.readBytes(32));
-  const start = staticPosition + offset;
-  cursor.setPosition(start);
-  const length = bytesToNumber2(cursor.readBytes(32));
-  if (length === 0) {
-    cursor.setPosition(staticPosition + 32);
-    return ["", 32];
-  }
-  const data = cursor.readBytes(length, 32);
-  const value2 = bytesToString2(trim2(data));
-  cursor.setPosition(staticPosition + 32);
-  return [value2, 32];
-}
-function hasDynamicChild(param) {
-  const { type } = param;
-  if (type === "string")
-    return true;
-  if (type === "bytes")
-    return true;
-  if (type.endsWith("[]"))
-    return true;
-  if (type === "tuple")
-    return param.components?.some(hasDynamicChild);
-  const arrayComponents = getArrayComponents(param.type);
-  if (arrayComponents && hasDynamicChild({ ...param, type: arrayComponents[1] }))
-    return true;
-  return false;
-}
-var hash = (value2) => keccak2562(toBytes3(value2));
-function hashSignature(sig) {
-  return hash(sig);
-}
-function execTyped(regex, string) {
-  const match = regex.exec(string);
-  return match?.groups;
-}
-var tupleRegex = /^tuple(?<array>(\[(\d*)\])*)$/;
-function formatAbiParameter(abiParameter) {
-  let type = abiParameter.type;
-  if (tupleRegex.test(abiParameter.type) && "components" in abiParameter) {
-    type = "(";
-    const length = abiParameter.components.length;
-    for (let i2 = 0;i2 < length; i2++) {
-      const component = abiParameter.components[i2];
-      type += formatAbiParameter(component);
-      if (i2 < length - 1)
-        type += ", ";
-    }
-    const result = execTyped(tupleRegex, abiParameter.type);
-    type += `)${result?.array || ""}`;
-    return formatAbiParameter({
-      ...abiParameter,
-      type
-    });
-  }
-  if ("indexed" in abiParameter && abiParameter.indexed)
-    type = `${type} indexed`;
-  if (abiParameter.name)
-    return `${type} ${abiParameter.name}`;
-  return type;
-}
-function formatAbiParameters(abiParameters) {
-  let params = "";
-  const length = abiParameters.length;
-  for (let i2 = 0;i2 < length; i2++) {
-    const abiParameter = abiParameters[i2];
-    params += formatAbiParameter(abiParameter);
-    if (i2 !== length - 1)
-      params += ", ";
-  }
-  return params;
-}
-function formatAbiItem2(abiItem) {
-  if (abiItem.type === "function")
-    return `function ${abiItem.name}(${formatAbiParameters(abiItem.inputs)})${abiItem.stateMutability && abiItem.stateMutability !== "nonpayable" ? ` ${abiItem.stateMutability}` : ""}${abiItem.outputs?.length ? ` returns (${formatAbiParameters(abiItem.outputs)})` : ""}`;
-  if (abiItem.type === "event")
-    return `event ${abiItem.name}(${formatAbiParameters(abiItem.inputs)})`;
-  if (abiItem.type === "error")
-    return `error ${abiItem.name}(${formatAbiParameters(abiItem.inputs)})`;
-  if (abiItem.type === "constructor")
-    return `constructor(${formatAbiParameters(abiItem.inputs)})${abiItem.stateMutability === "payable" ? " payable" : ""}`;
-  if (abiItem.type === "fallback")
-    return `fallback() external${abiItem.stateMutability === "payable" ? " payable" : ""}`;
-  return "receive() external payable";
-}
-function normalizeSignature(signature) {
-  let active = true;
-  let current = "";
-  let level = 0;
-  let result = "";
-  let valid = false;
-  for (let i2 = 0;i2 < signature.length; i2++) {
-    const char = signature[i2];
-    if (["(", ")", ","].includes(char))
-      active = true;
-    if (char === "(")
-      level++;
-    if (char === ")")
-      level--;
-    if (!active)
-      continue;
-    if (level === 0) {
-      if (char === " " && ["event", "function", ""].includes(result))
-        result = "";
-      else {
-        result += char;
-        if (char === ")") {
-          valid = true;
-          break;
-        }
-      }
-      continue;
-    }
-    if (char === " ") {
-      if (signature[i2 - 1] !== "," && current !== "," && current !== ",(") {
-        current = "";
-        active = false;
-      }
-      continue;
-    }
-    result += char;
-    current += char;
-  }
-  if (!valid)
-    throw new BaseError3("Unable to normalize signature.");
-  return result;
-}
-var toSignature = (def) => {
-  const def_ = (() => {
-    if (typeof def === "string")
-      return def;
-    return formatAbiItem2(def);
-  })();
-  return normalizeSignature(def_);
-};
-function toSignatureHash(fn) {
-  return hashSignature(toSignature(fn));
-}
-var toEventSelector3 = toSignatureHash;
-var toFunctionSelector3 = (fn) => slice2(toSignatureHash(fn), 0, 4);
-function getAbiItem2(parameters) {
-  const { abi, args = [], name } = parameters;
-  const isSelector = isHex3(name, { strict: false });
-  const abiItems = abi.filter((abiItem) => {
-    if (isSelector) {
-      if (abiItem.type === "function")
-        return toFunctionSelector3(abiItem) === name;
-      if (abiItem.type === "event")
-        return toEventSelector3(abiItem) === name;
-      return false;
-    }
-    return "name" in abiItem && abiItem.name === name;
-  });
-  if (abiItems.length === 0)
-    return;
-  if (abiItems.length === 1)
-    return abiItems[0];
-  let matchedAbiItem;
-  for (const abiItem of abiItems) {
-    if (!("inputs" in abiItem))
-      continue;
-    if (!args || args.length === 0) {
-      if (!abiItem.inputs || abiItem.inputs.length === 0)
-        return abiItem;
-      continue;
-    }
-    if (!abiItem.inputs)
-      continue;
-    if (abiItem.inputs.length === 0)
-      continue;
-    if (abiItem.inputs.length !== args.length)
-      continue;
-    const matched = args.every((arg, index) => {
-      const abiParameter = "inputs" in abiItem && abiItem.inputs[index];
-      if (!abiParameter)
-        return false;
-      return isArgOfType(arg, abiParameter);
-    });
-    if (matched) {
-      if (matchedAbiItem && "inputs" in matchedAbiItem && matchedAbiItem.inputs) {
-        const ambiguousTypes = getAmbiguousTypes(abiItem.inputs, matchedAbiItem.inputs, args);
-        if (ambiguousTypes)
-          throw new AbiItemAmbiguityError({
-            abiItem,
-            type: ambiguousTypes[0]
-          }, {
-            abiItem: matchedAbiItem,
-            type: ambiguousTypes[1]
-          });
-      }
-      matchedAbiItem = abiItem;
-    }
-  }
-  if (matchedAbiItem)
-    return matchedAbiItem;
-  return abiItems[0];
-}
-function isArgOfType(arg, abiParameter) {
-  const argType = typeof arg;
-  const abiParameterType = abiParameter.type;
-  switch (abiParameterType) {
-    case "address":
-      return isAddress3(arg, { strict: false });
-    case "bool":
-      return argType === "boolean";
-    case "function":
-      return argType === "string";
-    case "string":
-      return argType === "string";
-    default: {
-      if (abiParameterType === "tuple" && "components" in abiParameter)
-        return Object.values(abiParameter.components).every((component, index) => {
-          return argType === "object" && isArgOfType(Object.values(arg)[index], component);
-        });
-      if (/^u?int(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144|152|160|168|176|184|192|200|208|216|224|232|240|248|256)?$/.test(abiParameterType))
-        return argType === "number" || argType === "bigint";
-      if (/^bytes([1-9]|1[0-9]|2[0-9]|3[0-2])?$/.test(abiParameterType))
-        return argType === "string" || arg instanceof Uint8Array;
-      if (/[a-z]+[1-9]{0,3}(\[[0-9]{0,}\])+$/.test(abiParameterType)) {
-        return Array.isArray(arg) && arg.every((x) => isArgOfType(x, {
-          ...abiParameter,
-          type: abiParameterType.replace(/(\[[0-9]{0,}\])$/, "")
-        }));
-      }
-      return false;
-    }
-  }
-}
-function getAmbiguousTypes(sourceParameters, targetParameters, args) {
-  for (const parameterIndex in sourceParameters) {
-    const sourceParameter = sourceParameters[parameterIndex];
-    const targetParameter = targetParameters[parameterIndex];
-    if (sourceParameter.type === "tuple" && targetParameter.type === "tuple" && "components" in sourceParameter && "components" in targetParameter)
-      return getAmbiguousTypes(sourceParameter.components, targetParameter.components, args[parameterIndex]);
-    const types4 = [sourceParameter.type, targetParameter.type];
-    const ambiguous = (() => {
-      if (types4.includes("address") && types4.includes("bytes20"))
-        return true;
-      if (types4.includes("address") && types4.includes("string"))
-        return isAddress3(args[parameterIndex], { strict: false });
-      if (types4.includes("address") && types4.includes("bytes"))
-        return isAddress3(args[parameterIndex], { strict: false });
-      return false;
-    })();
-    if (ambiguous)
-      return types4;
-  }
-  return;
-}
-var docsPath = "/docs/contract/decodeFunctionResult";
-function decodeFunctionResult2(parameters) {
-  const { abi, args, functionName, data } = parameters;
-  let abiItem = abi[0];
-  if (functionName) {
-    const item = getAbiItem2({ abi, args, name: functionName });
-    if (!item)
-      throw new AbiFunctionNotFoundError2(functionName, { docsPath });
-    abiItem = item;
-  }
-  if (abiItem.type !== "function")
-    throw new AbiFunctionNotFoundError2(undefined, { docsPath });
-  if (!abiItem.outputs)
-    throw new AbiFunctionOutputsNotFoundError2(abiItem.name, { docsPath });
-  const values = decodeAbiParameters2(abiItem.outputs, data);
-  if (values && values.length > 1)
-    return values;
-  if (values && values.length === 1)
-    return values[0];
-  return;
-}
-var docsPath2 = "/docs/contract/encodeFunctionData";
-function prepareEncodeFunctionData2(parameters) {
-  const { abi, args, functionName } = parameters;
-  let abiItem = abi[0];
-  if (functionName) {
-    const item = getAbiItem2({
-      abi,
-      args,
-      name: functionName
-    });
-    if (!item)
-      throw new AbiFunctionNotFoundError2(functionName, { docsPath: docsPath2 });
-    abiItem = item;
-  }
-  if (abiItem.type !== "function")
-    throw new AbiFunctionNotFoundError2(undefined, { docsPath: docsPath2 });
-  return {
-    abi: [abiItem],
-    functionName: toFunctionSelector3(formatAbiItem(abiItem))
-  };
-}
-function encodeFunctionData2(parameters) {
-  const { args } = parameters;
-  const { abi, functionName } = (() => {
-    if (parameters.abi.length === 1 && parameters.functionName?.startsWith("0x"))
-      return parameters;
-    return prepareEncodeFunctionData2(parameters);
-  })();
-  const abiItem = abi[0];
-  const signature = functionName;
-  const data = "inputs" in abiItem && abiItem.inputs ? encodeAbiParameters2(abiItem.inputs, args ?? []) : undefined;
-  return concatHex2([signature, data ?? "0x"]);
-}
-var MAPBIOMAS_GQL = "https://plataforma.alerta.mapbiomas.org/api/v2/graphql";
-var RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
-var IBAMA_URL = "https://pamgia.ibama.gov.br/server/rest/services/01_Publicacoes_Bases/adm_embargos_ibama_a/FeatureServer/0/query";
-var SICAR_WFS = "https://geoserver.car.gov.br/geoserver/sicar/ows";
-var SETE_DIAS_S = 7 * 24 * 60 * 60;
-var ABI = [
-  {
-    name: "totalFazendas",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ type: "uint256" }]
-  },
-  {
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
     name: "listarTodos",
     type: "function",
     stateMutability: "view",
@@ -21445,90 +20119,128 @@ var ABI = [
     outputs: [{ type: "string[]" }]
   },
   {
-<<<<<<< HEAD
     name: "cidTerritorial",
     type: "function",
     stateMutability: "view",
-    inputs: [
-      {
-        name: "codigoCAR",
-        type: "string"
-      }
-    ],
-    outputs: [{ type: "string" }]
-=======
-    name: "getFazenda",
-    type: "function",
-    stateMutability: "view",
     inputs: [{ name: "codigoCAR", type: "string" }],
-    outputs: [{
-      type: "tuple",
-      components: [
-        { name: "codigoCAR", type: "string" },
-        { name: "dono", type: "address" },
-        { name: "score", type: "uint8" },
-        { name: "risco", type: "uint8" },
-        { name: "atualizadoEm", type: "uint256" },
-        { name: "cid", type: "string" },
-        { name: "existe", type: "bool" },
-        { name: "tokenId", type: "uint256" }
-      ]
-    }]
-  },
-  {
-    name: "registrarVerificacao",
-    type: "function",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "codigoCAR", type: "string" },
-      { name: "score", type: "uint8" },
-      { name: "risco", type: "uint8" },
-      { name: "cid", type: "string" }
-    ],
-    outputs: []
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
-  },
-  {
-    name: "invalidarCAR",
-    type: "function",
-    stateMutability: "nonpayable",
-<<<<<<< HEAD
-    inputs: [
-      {
-        name: "codigoCAR",
-        type: "string"
-      }
-    ],
-    outputs: []
-  },
-  {
-    name: "registrarTerritorial",
-    type: "function",
-    stateMutability: "nonpayable",
-    inputs: [
-      {
-        name: "codigoCAR",
-        type: "string"
-      },
-      {
-        name: "cid",
-        type: "string"
-      }
-    ],
-    outputs: []
+    outputs: [{ type: "string" }]
   }
 ];
-function decodeBody(body) {
-  return JSON.parse(new TextDecoder().decode(body));
-}
+var REPORT_PARAMS = [
+  { name: "action", type: "uint8" },
+  { name: "codigoCAR", type: "string" },
+  { name: "status", type: "uint8" },
+  { name: "cid", type: "string" }
+];
 function encodeBody(data) {
   return new TextEncoder().encode(JSON.stringify(data));
 }
+function decodeBodySeguro(body, contexto) {
+  if (!body) {
+    throw new Error(`${contexto}: resposta HTTP sem body`);
+  }
+  const text = new TextDecoder().decode(body);
+  if (!text) {
+    throw new Error(`${contexto}: resposta HTTP body vazio`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`${contexto}: resposta nao era JSON: ${text.slice(0, 300)}`);
+  }
+}
+function validarRpc(json, contexto) {
+  if (!json) {
+    throw new Error(`${contexto}: JSON vazio`);
+  }
+  if (json.error) {
+    throw new Error(`${contexto}: erro RPC ${JSON.stringify(json.error)}`);
+  }
+  if (!json.result) {
+    throw new Error(`${contexto}: RPC sem result`);
+  }
+  return json.result;
+}
+function safeStringify(value2) {
+  if (value2 === undefined)
+    return "undefined";
+  if (value2 === null)
+    return "null";
+  try {
+    const text = JSON.stringify(value2, (_key, val) => typeof val === "bigint" ? val.toString() : val);
+    return text ?? String(value2);
+  } catch {
+    return String(value2);
+  }
+}
+function txHashToString(txHash) {
+  if (!txHash)
+    return "";
+  if (typeof txHash === "string") {
+    return txHash;
+  }
+  try {
+    return bytesToHex(txHash);
+  } catch {
+    return safeStringify(txHash);
+  }
+}
+function hexToBase642(hex) {
+  const clean2 = hex.startsWith("0x") ? hex.slice(2) : hex;
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const bytes = [];
+  for (let i2 = 0;i2 < clean2.length; i2 += 2) {
+    bytes.push(parseInt(clean2.slice(i2, i2 + 2), 16));
+  }
+  let out = "";
+  for (let i2 = 0;i2 < bytes.length; i2 += 3) {
+    const b1 = bytes[i2];
+    const b2 = bytes[i2 + 1];
+    const b3 = bytes[i2 + 2];
+    out += alphabet[b1 >> 2];
+    out += alphabet[(b1 & 3) << 4 | (b2 ?? 0) >> 4];
+    out += b2 === undefined ? "=" : alphabet[(b2 & 15) << 2 | (b3 ?? 0) >> 6];
+    out += b3 === undefined ? "=" : alphabet[b3 & 63];
+  }
+  return out;
+}
+function lerCidTerritorial(httpClient, nodeRuntime, address, codigoCAR, id) {
+  try {
+    const data = encodeFunctionData({
+      abi: ABI,
+      functionName: "cidTerritorial",
+      args: [codigoCAR]
+    });
+    const resp = httpClient.sendRequest(nodeRuntime, {
+      url: RPC_URL,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: encodeBody({
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [{ to: address, data }, "latest"],
+        id
+      })
+    }).result();
+    const json = decodeBodySeguro(resp?.body, `RPC cidTerritorial ${codigoCAR}`);
+    if (json?.error || !json?.result) {
+      return "";
+    }
+    return decodeFunctionResult({
+      abi: ABI,
+      functionName: "cidTerritorial",
+      data: json.result
+    });
+  } catch {
+    return "";
+  }
+}
 var onFazendaCadastrada = (runtime2) => {
   runtime2.log("PATROL REGISTRO - VERIFICACAO TERRITORIAL");
-  const httpClient = new ClientCapability;
-  return runtime2.runInNodeMode((nodeRuntime) => {
+  const httpClient = new ClientCapability3;
+  const reportData = runtime2.runInNodeMode((nodeRuntime) => {
     const address = runtime2.config.rastroContractAddress;
+    runtime2.log(`Contrato: ${address}`);
     const listarData = encodeFunctionData({
       abi: ABI,
       functionName: "listarTodos"
@@ -21544,103 +20256,21 @@ var onFazendaCadastrada = (runtime2) => {
         id: 1
       })
     }).result();
+    const rpcJson = decodeBodySeguro(rpcResp?.body, "RPC listarTodos");
+    const listarResult = validarRpc(rpcJson, "RPC listarTodos");
     const lista = decodeFunctionResult({
       abi: ABI,
       functionName: "listarTodos",
-      data: decodeBody(rpcResp.body).result
+      data: listarResult
     });
     runtime2.log(`Total fazendas: ${lista.length}`);
-=======
-    inputs: [{ name: "codigoCAR", type: "string" }],
-    outputs: []
-  }
-];
-function rpcCall(runtime2, httpClient, payload) {
-  return runtime2.runInNodeMode((nodeRuntime) => {
-    const dec = new TextDecoder;
-    const enc = new TextEncoder;
-    const resp = httpClient.sendRequest(nodeRuntime, {
-      url: RPC_URL,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: enc.encode(JSON.stringify(payload))
-    }).result();
-    return JSON.parse(dec.decode(resp.body));
-  }, consensusIdenticalAggregation())().result();
-}
-function buscarPoligonoSICAR(httpClient, nodeRuntime, codigoCAR) {
-  const dec = new TextDecoder;
-  try {
-    const params = new URLSearchParams({
-      service: "WFS",
-      version: "1.0.0",
-      request: "GetFeature",
-      typeName: "sicar:car_imovel",
-      CQL_FILTER: `cod_imovel='${codigoCAR}'`,
-      outputFormat: "application/json",
-      srsName: "EPSG:4326"
-    });
-    const resp = httpClient.sendRequest(nodeRuntime, {
-      url: `${SICAR_WFS}?${params.toString()}`,
-      method: "GET",
-      headers: {}
-    }).result();
-    const geojson = JSON.parse(dec.decode(resp.body));
-    const coords = geojson?.features?.[0]?.geometry?.coordinates;
-    if (coords && coords.length > 0) {
-      nodeRuntime.log(`   SICAR: poligono com ${coords[0].length} vertices`);
-      return coords;
+    if (lista.length === 0) {
+      return "SEM_FAZENDAS";
     }
-    return null;
-  } catch {
-    nodeRuntime.log(`   SICAR: falha ao buscar poligono`);
-    return null;
-  }
-}
-function consultarIBAMA(httpClient, nodeRuntime, poligono, lat, lon) {
-  const dec = new TextDecoder;
-  try {
-    let geometry;
-    let geometryType;
-    if (poligono) {
-      geometry = encodeURIComponent(JSON.stringify({
-        rings: poligono.map((anel) => anel.map(([x, y]) => [x, y])),
-        spatialReference: { wkid: 4326 }
-      }));
-      geometryType = "esriGeometryPolygon";
-      nodeRuntime.log(`   IBAMA: consultando por poligono completo`);
-    } else {
-      geometry = encodeURIComponent(JSON.stringify({ x: lon, y: lat }));
-      geometryType = "esriGeometryPoint";
-      nodeRuntime.log(`   IBAMA: consultando por centroide (fallback)`);
-    }
-    const ibamaResp = httpClient.sendRequest(nodeRuntime, {
-      url: `${IBAMA_URL}?geometry=${geometry}&geometryType=${geometryType}&spatialRel=esriSpatialRelIntersects&inSR=4326&outFields=seq_tad,des_area_embargada,dat_tad,des_situacao_tad&f=json&resultRecordCount=20`,
-      method: "GET",
-      headers: {}
-    }).result();
-    const ibamaData = JSON.parse(dec.decode(ibamaResp.body));
-    return (ibamaData?.features || []).map((f) => ({
-      seqTad: f.attributes?.seq_tad,
-      areaHa: f.attributes?.des_area_embargada,
-      dataEmissao: f.attributes?.dat_tad,
-      situacao: f.attributes?.des_situacao_tad
-    }));
-  } catch {
-    nodeRuntime.log(`   IBAMA: erro na consulta`);
-    return [];
-  }
-}
-function analisarCAR(runtime2, httpClient, codigoCAR) {
-  return runtime2.runInNodeMode((nodeRuntime) => {
-    const dec = new TextDecoder;
-    const enc = new TextEncoder;
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
     const authResp = httpClient.sendRequest(nodeRuntime, {
       url: MAPBIOMAS_GQL,
       method: "POST",
       headers: { "Content-Type": "application/json" },
-<<<<<<< HEAD
       body: encodeBody({
         query: `
 mutation {
@@ -21652,7 +20282,11 @@ mutation {
 `
       })
     }).result();
-    const token = decodeBody(authResp.body)?.data?.signIn?.token;
+    const authJson = decodeBodySeguro(authResp?.body, "MapBiomas login");
+    if (authJson?.errors) {
+      throw new Error(`MapBiomas login GraphQL errors: ${JSON.stringify(authJson.errors)}`);
+    }
+    const token = authJson?.data?.signIn?.token;
     if (!token) {
       runtime2.log("ERRO LOGIN MAPBIOMAS");
       return "ERRO_LOGIN";
@@ -21665,29 +20299,9 @@ mutation {
         runtime2.log("CAR vazio");
         continue;
       }
-      const cidData = encodeFunctionData({
-        abi: ABI,
-        functionName: "cidTerritorial",
-        args: [codigoCAR]
-      });
-      const cidResp = httpClient.sendRequest(nodeRuntime, {
-        url: RPC_URL,
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: encodeBody({
-          jsonrpc: "2.0",
-          method: "eth_call",
-          params: [{ to: address, data: cidData }, "latest"],
-          id: 2
-        })
-      }).result();
-      const cidAtual = decodeFunctionResult({
-        abi: ABI,
-        functionName: "cidTerritorial",
-        data: decodeBody(cidResp.body).result
-      });
-      if (cidAtual && cidAtual !== "") {
-        runtime2.log(`   Ja tem CID territorial: ${cidAtual} - pula`);
+      const cidAtual = lerCidTerritorial(httpClient, nodeRuntime, address, codigoCAR, 10 + i2);
+      if (cidAtual) {
+        runtime2.log(`Ja tem CID territorial: ${cidAtual} - pula`);
         continue;
       }
       const propertyResp = httpClient.sendRequest(nodeRuntime, {
@@ -21713,11 +20327,15 @@ query ruralProperty($carCode: String!) {
           variables: { carCode: codigoCAR }
         })
       }).result();
-      const property = decodeBody(propertyResp.body)?.data?.ruralProperty;
+      const propertyJson = decodeBodySeguro(propertyResp?.body, `MapBiomas ruralProperty ${codigoCAR}`);
+      if (propertyJson?.errors) {
+        runtime2.log(`MapBiomas ruralProperty errors: ${JSON.stringify(propertyJson.errors)}`);
+      }
+      const property = propertyJson?.data?.ruralProperty;
       if (!property || !property.propertyCode) {
         runtime2.log("CAR INVALIDO");
-        runtime2.log(`invalidarCAR("${codigoCAR}")`);
-        continue;
+        runtime2.log("Montando report territorial invalido");
+        return encodeAbiParameters(REPORT_PARAMS, [1, codigoCAR, 2, ""]);
       }
       runtime2.log("CAR VALIDO");
       runtime2.log(`Area: ${property.areaHa}ha | Estado: ${property.stateAcronym}`);
@@ -21745,16 +20363,51 @@ query ruralProperty($carCode: String!) {
           }
         })
       }).result();
-      const cidTerritorial = decodeBody(pinataResp.body)?.IpfsHash;
+      const pinataJson = decodeBodySeguro(pinataResp?.body, `Pinata ${codigoCAR}`);
+      const cidTerritorial = pinataJson?.IpfsHash;
       if (!cidTerritorial) {
-        runtime2.log("ERRO IPFS - pula");
+        runtime2.log(`ERRO IPFS - resposta: ${JSON.stringify(pinataJson)}`);
         continue;
       }
       runtime2.log(`CID Territorial: ${cidTerritorial}`);
-      runtime2.log(`registrarTerritorial("${codigoCAR}", "${cidTerritorial}")`);
+      runtime2.log("Montando report territorial valido");
+      return encodeAbiParameters(REPORT_PARAMS, [1, codigoCAR, 1, cidTerritorial]);
     }
-    return "REGISTRO_FINALIZADO";
+    return "NADA_PARA_REGISTRAR";
   }, consensusIdenticalAggregation())().result();
+  if (!reportData || !reportData.startsWith("0x")) {
+    runtime2.log(`Sem escrita on-chain: ${reportData}`);
+    return reportData || "SEM_REPORT";
+  }
+  runtime2.log(`Report territorial hex: ${reportData}`);
+  const reportFn = runtime2.report;
+  runtime2.log(`typeof runtime.report = ${typeof reportFn}`);
+  if (typeof reportFn !== "function") {
+    throw new Error("runtime.report nao existe neste runtime do CRE");
+  }
+  const reportResponse = reportFn.call(runtime2, {
+    encodedPayload: hexToBase642(reportData),
+    encoderName: "evm",
+    signingAlgo: "ecdsa",
+    hashingAlgo: "keccak256"
+  }).result();
+  runtime2.log(`reportResponse: ${safeStringify(reportResponse)}`);
+  const evmClient = new cre.capabilities.EVMClient(ETHEREUM_SEPOLIA_SELECTOR);
+  runtime2.log(`typeof evmClient.writeReport = ${typeof evmClient.writeReport}`);
+  const writeResp = evmClient.writeReport(runtime2, {
+    receiver: runtime2.config.rastroContractAddress,
+    report: reportResponse,
+    gasConfig: {
+      gasLimit: "1000000"
+    }
+  }).result();
+  const txHash = txHashToString(writeResp?.txHash);
+  runtime2.log(`writeResp completo: ${safeStringify(writeResp)}`);
+  runtime2.log(`writeResp txHash: ${txHash || "sem txHash"}`);
+  runtime2.log(`writeResp txStatus: ${safeStringify(writeResp?.txStatus)}`);
+  runtime2.log(`writeResp receiverContractExecutionStatus: ${safeStringify(writeResp?.receiverContractExecutionStatus)}`);
+  runtime2.log(`writeResp errorMessage: ${safeStringify(writeResp?.errorMessage)}`);
+  return "REGISTRO_FINALIZADO";
 };
 var initWorkflow = (config) => {
   const cron = new CronCapability;
@@ -21763,211 +20416,6 @@ var initWorkflow = (config) => {
       schedule: "0 * * * *"
     }), onFazendaCadastrada)
   ];
-=======
-      body: enc.encode(JSON.stringify({
-        query: `mutation { signIn(email: "${runtime2.config.mapbiomasEmail}", password: "${runtime2.config.mapbiomasPassword}") { token } }`
-      }))
-    }).result();
-    const token = JSON.parse(dec.decode(authResp.body))?.data?.signIn?.token;
-    if (!token)
-      throw new Error("Falha autenticacao MapBiomas");
-    const propertyResp = httpClient.sendRequest(nodeRuntime, {
-      url: MAPBIOMAS_GQL,
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: enc.encode(JSON.stringify({
-        query: `{
-          property(carCode: "${codigoCAR}") {
-            id name state area
-            centroid { lat lon }
-          }
-        }`
-      }))
-    }).result();
-    const propertyData = JSON.parse(dec.decode(propertyResp.body))?.data?.property;
-    if (!propertyData) {
-      nodeRuntime.log(`   CAR nao encontrado no SICAR`);
-      return {
-        score: 100,
-        risco: 2,
-        justificativa: "CAR invalido - nao encontrado no SICAR",
-        ipfsCID: ""
-      };
-    }
-    const nomeOficial = propertyData.name || "";
-    const lat = propertyData.centroid?.lat ?? 0;
-    const lon = propertyData.centroid?.lon ?? 0;
-    nodeRuntime.log(`   MapBiomas: ${nomeOficial} | ${propertyData.state} | ${propertyData.area}ha | ${lat},${lon}`);
-    const alertResp = httpClient.sendRequest(nodeRuntime, {
-      url: MAPBIOMAS_GQL,
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: enc.encode(JSON.stringify({
-        query: `{ validatedAlerts(carCode: "${codigoCAR}", page: 1, perPage: 20) { id afterImageDate geomAreaHa } }`
-      }))
-    }).result();
-    const alertas = JSON.parse(dec.decode(alertResp.body))?.data?.validatedAlerts ?? [];
-    const areaTotal = alertas.reduce((s, a) => s + (a.geomAreaHa || 0), 0);
-    const seisMesesAtras = new Date;
-    seisMesesAtras.setMonth(seisMesesAtras.getMonth() - 6);
-    const alertasRecentes = alertas.filter((a) => a.afterImageDate && new Date(a.afterImageDate) > seisMesesAtras).length;
-    nodeRuntime.log(`   Alertas: ${alertas.length} | ${areaTotal}ha | ${alertasRecentes} recentes`);
-    const poligono = buscarPoligonoSICAR(httpClient, nodeRuntime, codigoCAR);
-    const embargos = consultarIBAMA(httpClient, nodeRuntime, poligono, lat, lon);
-    const embargoAtivo = embargos.filter((e) => e.situacao?.includes("ATIVO")).length;
-    nodeRuntime.log(`   IBAMA: ${embargos.length} embargo(s) | ${embargoAtivo} ativo(s)`);
-    const prompt = `Retorne APENAS JSON valido: {"score":0-100,"risco":0,"justificativa":"max 80 chars"} onde risco: 0=BAIXO 1=MEDIO 2=ALTO
-CAR: ${codigoCAR}
-Propriedade: ${nomeOficial} | ${propertyData.state} | ${propertyData.area}ha
-MapBiomas: ${alertas.length} alertas, ${areaTotal}ha, ${alertasRecentes} recentes (ultimos 6 meses)
-IBAMA (interseccao ${poligono ? "poligono completo" : "centroide"}): ${embargos.length} embargos, ${embargoAtivo} ativos
-Avalie risco EUDR`;
-    const geminiResp = httpClient.sendRequest(nodeRuntime, {
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${runtime2.config.geminiKey}`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: enc.encode(JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
-      }))
-    }).result();
-    const texto = JSON.parse(dec.decode(geminiResp.body))?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    let score, risco, justificativa;
-    try {
-      const analise = JSON.parse(texto.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim());
-      score = Math.min(100, Math.max(0, analise.score || 50));
-      risco = Math.min(2, Math.max(0, analise.risco ?? 1));
-      justificativa = (analise.justificativa || "Analise automatica").substring(0, 80);
-    } catch {
-      score = 50;
-      risco = 1;
-      justificativa = "Erro na analise Gemini";
-    }
-    nodeRuntime.log(`   Gemini: score=${score} risco=${risco} -> ${justificativa}`);
-    const pinataResp = httpClient.sendRequest(nodeRuntime, {
-      url: "https://api.pinata.cloud/pinning/pinJSONToIPFS",
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${runtime2.config.pinataJwt}` },
-      body: enc.encode(JSON.stringify({
-        pinataContent: {
-          codigoCAR,
-          nomeOficial,
-          estado: propertyData.state,
-          areaHa: propertyData.area,
-          coordenadas: { lat, lon },
-          poligonoObtido: !!poligono,
-          status: "APROVADO",
-          mapbiomas: { alertas, areaTotal, alertasRecentes },
-          ibama: { embargos, embargoAtivo, metodo: poligono ? "poligono_completo" : "centroide" },
-          score,
-          risco,
-          justificativa,
-          data: new Date().toISOString()
-        },
-        pinataMetadata: { name: `RASTRO-${codigoCAR}-${Date.now()}` }
-      }))
-    }).result();
-    const ipfsCID = JSON.parse(dec.decode(pinataResp.body)).IpfsHash;
-    if (!ipfsCID)
-      throw new Error("Falha IPFS");
-    return { score, risco, justificativa, ipfsCID };
-  }, consensusIdenticalAggregation())().result();
-}
-var onCronTrigger = async (runtime2) => {
-  runtime2.log("RASTRO - Verificacao EUDR");
-  const address = runtime2.config.rastroContractAddress;
-  const httpClient = new ClientCapability;
-  const agora = BigInt(Math.floor(Date.now() / 1000));
-  const totalData = encodeFunctionData2({ abi: ABI, functionName: "totalFazendas" });
-  const totalResp = rpcCall(runtime2, httpClient, {
-    jsonrpc: "2.0",
-    method: "eth_call",
-    params: [{ to: address, data: totalData }, "latest"],
-    id: 1
-  });
-  const total = decodeFunctionResult2({
-    abi: ABI,
-    functionName: "totalFazendas",
-    data: totalResp.result
-  });
-  runtime2.log(`Total fazendas: ${total}`);
-  if (total === 0n) {
-    runtime2.log("Nenhuma fazenda cadastrada");
-    return "SEM_FAZENDAS";
-  }
-  const listarData = encodeFunctionData2({ abi: ABI, functionName: "listarTodos" });
-  const listarResp = rpcCall(runtime2, httpClient, {
-    jsonrpc: "2.0",
-    method: "eth_call",
-    params: [{ to: address, data: listarData }, "latest"],
-    id: 2
-  });
-  const lista = decodeFunctionResult2({
-    abi: ABI,
-    functionName: "listarTodos",
-    data: listarResp.result
-  });
-  for (let i2 = 0;i2 < lista.length; i2++) {
-    const car = lista[i2].trim().replace(/,/g, "");
-    runtime2.log(`[${i2 + 1}/${total}] ${car}`);
-    if (!/^[A-Z]{2}-\d{7}/i.test(car)) {
-      runtime2.log("   Formato invalido");
-      continue;
-    }
-    const fazendaData = encodeFunctionData2({ abi: ABI, functionName: "getFazenda", args: [car] });
-    const fazendaResp = rpcCall(runtime2, httpClient, {
-      jsonrpc: "2.0",
-      method: "eth_call",
-      params: [{ to: address, data: fazendaData }, "latest"],
-      id: 3 + i2
-    });
-    const fazenda = decodeFunctionResult2({
-      abi: ABI,
-      functionName: "getFazenda",
-      data: fazendaResp.result
-    });
-    const scoreAtual = Number(fazenda?.score ?? fazenda?.[2] ?? 0);
-    const riscoAtual = Number(fazenda?.risco ?? fazenda?.[3] ?? 3);
-    const atualizadoEm = BigInt(fazenda?.atualizadoEm ?? fazenda?.[4] ?? 0);
-    const cidAtual = fazenda?.cid ?? fazenda?.[5] ?? "";
-    const isPrimeira = cidAtual === "" || riscoAtual === 3;
-    const passouSeteDias = agora - atualizadoEm > BigInt(SETE_DIAS_S);
-    if (!isPrimeira && !passouSeteDias) {
-      const dias = Number(BigInt(SETE_DIAS_S) - (agora - atualizadoEm)) / 86400;
-      runtime2.log(`   Verificacao recente - proxima em ~${dias.toFixed(1)} dia(s)`);
-      continue;
-    }
-    runtime2.log(isPrimeira ? "   Primeira analise" : "   7 dias - reanalisando");
-    const resultado = analisarCAR(runtime2, httpClient, car);
-    if (resultado.ipfsCID === "") {
-      runtime2.log(`   CAR invalido - queimando NFT`);
-      const invalidarData = encodeFunctionData2({
-        abi: ABI,
-        functionName: "invalidarCAR",
-        args: [car]
-      });
-      runtime2.log(`   invalidarCAR("${car}")`);
-      continue;
-    }
-    runtime2.log(`   Score: ${resultado.score} | Risco: ${resultado.risco} | ${resultado.justificativa}`);
-    runtime2.log(`   IPFS: ${resultado.ipfsCID}`);
-    if (!isPrimeira && resultado.score === scoreAtual && resultado.risco === riscoAtual) {
-      runtime2.log(`   Sem mudanca - nao registra onchain`);
-      continue;
-    }
-    const registrarData = encodeFunctionData2({
-      abi: ABI,
-      functionName: "registrarVerificacao",
-      args: [car, resultado.score, resultado.risco, resultado.ipfsCID]
-    });
-    runtime2.log(`   registrarVerificacao("${car}", ${resultado.score}, ${resultado.risco}, "${resultado.ipfsCID}")`);
-  }
-  return "OK";
-};
-var initWorkflow = () => {
-  const cron = new CronCapability;
-  return [handler(cron.trigger({ schedule: "0 0 * * 1" }), onCronTrigger)];
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
 };
 async function main() {
   const runner = await Runner.newRunner();
@@ -21975,11 +20423,7 @@ async function main() {
 }
 main().catch(sendErrorResponse);
 export {
-<<<<<<< HEAD
   onFazendaCadastrada,
-=======
-  onCronTrigger,
->>>>>>> db92316a9bf4a2b9189c3fd40e3bd6d9a1568065
   main,
   initWorkflow
 };

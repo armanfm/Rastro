@@ -1,4 +1,12 @@
-*.env
+.env
+secrets.yaml
+node_modules/
+artifacts/
+cache/
+coverage/
+dist/
+*.key
+*.pem*.env
 .env
 node_modules/
 config.staging.json
