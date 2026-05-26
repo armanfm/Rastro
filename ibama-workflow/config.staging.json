@@ -1,9 +1,9 @@
 {
   "schedule": "0 0 * * *",
   "rastroContractAddress": "0xb739Bc41a48b71a23bbdc32b0aDc26962d2c5818",
-  "privateKey": "f2babe55010e59130570a8b2ffa56da40e7385835001ca0a1966c7e7ee383349",
-  "geminiKey": "AIzaSyA1aLn2rhcQiBIJqoLRd0vtk-z3_r1wTCY",
-  "pinataJwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJmYjU4NDYwMy1kZWExLTQwNjgtYTEwZS0xM2M0YjM3NzJkZDAiLCJlbWFpbCI6ImFybWFuZm1AZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6IjU2OWE0MzA0ZjNlYTMyYjM5ZDYzIiwic2NvcGVkS2V5U2VjcmV0IjoiNTUzNzNmYjBjZTBiZmUxYzliNjliNmY5ZmI2OTFmYjZlYTBlOTE4YWM5YmQxYTUwYjQ5NDBlMDU4MzgwZjM2YSIsImV4cCI6MTgxMTI4OTA0OX0.xczVowwctCS6e9HNLBOxhYPCnBhOPpsN0GZ8c486tWY",
-  "mapbiomasEmail": "armanfm@gmail.com",
-  "mapbiomasPassword": "$Olange2274"
+  "privateKey": "",
+  "geminiKey": "",
+  "pinataJwt": "e",
+  "mapbiomasEmail": "",
+  "mapbiomasPassword": ""
 }
