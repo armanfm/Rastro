@@ -1,0 +1,9 @@
+{
+  "schedule": "0 0 * * *",
+  "rastroContractAddress": "0x3a40CC45e86df777251ca4dB94E503bB83E29513",
+  "privateKey": "",
+  "geminiKey": "",
+  "pinataJwt": "ey...",
+  "mapbiomasEmail": "",
+  "mapbiomasPassword": ""
+}
