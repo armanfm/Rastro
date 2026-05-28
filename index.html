@@ -434,6 +434,21 @@ function resetMapa(){
   Object.values(mkrs).forEach(m=>m.setStyle({fillOpacity:.92,opacity:1}));
 }
 
+function normalizarBoundingBox(bb){
+  if(Array.isArray(bb) && bb.length >= 4){
+    const west=Number(bb[0]), south=Number(bb[1]), east=Number(bb[2]), north=Number(bb[3]);
+    if([west,south,east,north].every(Number.isFinite)) return {west,south,east,north};
+  }
+  if(bb && typeof bb === 'object'){
+    const west=Number(bb.west ?? bb.minLon ?? bb.xmin);
+    const south=Number(bb.south ?? bb.minLat ?? bb.ymin);
+    const east=Number(bb.east ?? bb.maxLon ?? bb.xmax);
+    const north=Number(bb.north ?? bb.maxLat ?? bb.ymax);
+    if([west,south,east,north].every(Number.isFinite)) return {west,south,east,north};
+  }
+  return null;
+}
+
 // ── DETALHE ───────────────────────────────────────────────────────────────────
 async function abrirDetalhe(car){
   document.getElementById('map').style.display='none';
@@ -456,8 +471,8 @@ async function abrirDetalhe(car){
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
   // Mapa estático Geoapify
-  if(f.bounding_box){
-    const bb=f.bounding_box;
+  const bb=normalizarBoundingBox(f.bounding_box);
+  if(bb){
     const mapUrl=`https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=600&height=220&area=rect:${bb.west},${bb.south},${bb.east},${bb.north}&apiKey=${GEOAPIFY_KEY}`;
     img.src=mapUrl;
     img.onload=()=>{img.style.display='block';load.style.display='none'};
@@ -782,3 +797,4 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
+
