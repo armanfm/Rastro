@@ -200,7 +200,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
           <option value="MEDIO">Risco Médio</option>
           <option value="ALTO">Risco Alto</option>
           <option value="PENDENTE">Pendente</option>
-          <option value="INVALIDO">Inválido</option>
+          <option value="INATIVO">Inválido</option>
         </select>
         <div class="row">
           <button class="btn btn-p" onclick="filtrar()">Buscar</button>
@@ -215,7 +215,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 
         <!-- Endereço do contrato -->
         <p style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:2px">Endereço do contrato</p>
-        <input class="inp" id="inp-contrato" type="text" value="0xb739Bc41a48b71a23bbdc32b0aDc26962d2c5818" style="font-family:'Courier New',monospace;font-size:11px"/>
+        <input class="inp" id="inp-contrato" type="text" value="0x86D903aADc96b4028e06Fc7643fD781980642144" style="font-family:'Courier New',monospace;font-size:11px"/>
 
         <!-- Conectar wallet -->
         <button class="btn-mm" id="btn-mm" onclick="conectarWallet()" style="margin-top:4px">
@@ -348,6 +348,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const GEOAPIFY_KEY   = 'dc783b9c4d184a4f95d4a7999f44ef13';
@@ -381,10 +382,10 @@ async function sbFetch(path, params=''){
 // ── GRUPOS ────────────────────────────────────────────────────────────────────
 const GRUPOS=[
   {k:'pendente',l:'Pendente',dc:'dp',lc:'lp',cc:'cp',cor:'#f59e0b',fn:f=>f.status==='PENDENTE'},
-  {k:'invalido',l:'Inválido',dc:'di',lc:'li',cc:'ci',cor:'#ef4444',fn:f=>f.status==='INVALIDO'},
-  {k:'baixo',l:'Risco Baixo',dc:'db',lc:'lb',cc:'cb',cor:'#22c55e',fn:f=>f.status==='VALIDO'&&f._risco==='BAIXO'},
-  {k:'medio',l:'Risco Médio',dc:'dm',lc:'lm',cc:'cm',cor:'#f97316',fn:f=>f.status==='VALIDO'&&f._risco==='MEDIO'},
-  {k:'alto',l:'Risco Alto',dc:'da',lc:'la',cc:'ca',cor:'#dc2626',fn:f=>f.status==='VALIDO'&&f._risco==='ALTO'},
+  {k:'invalido',l:'Inválido',dc:'di',lc:'li',cc:'ci',cor:'#ef4444',fn:f=>f.status==='INATIVO'},
+  {k:'baixo',l:'Risco Baixo',dc:'db',lc:'lb',cc:'cb',cor:'#22c55e',fn:f=>f.status==='ATIVO'&&f._risco==='BAIXO'},
+  {k:'medio',l:'Risco Médio',dc:'dm',lc:'lm',cc:'cm',cor:'#f97316',fn:f=>f.status==='ATIVO'&&f._risco==='MEDIO'},
+  {k:'alto',l:'Risco Alto',dc:'da',lc:'la',cc:'ca',cor:'#dc2626',fn:f=>f.status==='ATIVO'&&f._risco==='ALTO'},
 ];
 
 let map, mkrs={}, wallet=null;
@@ -404,7 +405,7 @@ function plotarFazenda(f){
   const m=L.circleMarker([f.centroid_lat,f.centroid_lon],
     {radius:9,fillColor:cor,color:'#fff',weight:2,fillOpacity:.92}).addTo(map);
   const risco=f._risco||f.status;
-  const sc=f.status==='VALIDO'?'bv':f.status==='PENDENTE'?'bp':'bi';
+  const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const rb=f._risco?`rb-${f._risco[0].toLowerCase()}`:'';
   const badge=f._risco
     ?`<span class="rbadge ${rb}" style="font-size:10px">${f._risco}</span>`
@@ -466,7 +467,7 @@ async function abrirDetalhe(car){
   }
 
   // Status
-  const sc=f.status==='VALIDO'?'bv':f.status==='PENDENTE'?'bp':'bi';
+  const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const se=document.getElementById('d-status');
   se.className='badge '+sc; se.textContent=f.status;
 
@@ -613,7 +614,7 @@ async function buscarCAR(){
 
   const resultado=f.rastro_resultados?.[0];
   const risco=resultado?.risco;
-  const sc=f.status==='VALIDO'?'bv':f.status==='PENDENTE'?'bp':'bi';
+  const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const rb=risco?'rb-'+risco[0].toLowerCase():'';
 
   document.getElementById('res-conteudo').innerHTML=`
@@ -668,7 +669,7 @@ async function filtrar(){
   }));
 
   if(riscoSel==='PENDENTE') fazendas=fazendas.filter(f=>f.status==='PENDENTE');
-  else if(riscoSel==='INVALIDO') fazendas=fazendas.filter(f=>f.status==='INVALIDO');
+  else if(riscoSel==='INATIVO') fazendas=fazendas.filter(f=>f.status==='INATIVO');
   else if(riscoSel) fazendas=fazendas.filter(f=>f._risco===riscoSel);
 
   // Plota no mapa
@@ -725,21 +726,6 @@ async function conectarWallet(){
   }
 }
 
-// Codifica chamada de função sem ethers.js
-function encodeCAR(codigoCAR){
-  // selector de cadastrarCAR(string)
-  const selector='0x'+keccak256Hex('cadastrarCAR(string)').slice(0,8);
-  const encoded=encodeStringParam(codigoCAR);
-  return selector+encoded;
-}
-
-// keccak256 simples para o selector (usando a API nativa do navegador)
-async function getFunctionSelector(sig){
-  const enc=new TextEncoder().encode(sig);
-  const hash=await crypto.subtle.digest('SHA-256',enc); // não é keccak, mas usamos eth_call mesmo
-  return null; // vamos usar approach diferente
-}
-
 async function cadastrar(){
   const car=document.getElementById('inp-cad').value.trim();
   if(!car){alert('Digite o código CAR.');return;}
@@ -752,36 +738,35 @@ async function cadastrar(){
   document.getElementById('tx-info').classList.remove('show');
 
   try {
-    // Codifica a chamada manualmente — selector de cadastrarCAR(string)
-    // cadastrarCAR(string) → keccak256 = 0x... (calculado offline)
-    // Selector correto para cadastrarCAR(string):
-    const selector = '9f111172'; // keccak256("cadastrarCAR(string)")[0:4]
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const addr = document.getElementById('inp-contrato').value.trim() || CONTRACT_ADDR;
+    const contrato = new ethers.Contract(addr, [
+      'function cadastrarCAR(string codigoCAR)',
+      'function totalFazendas() view returns (uint256)',
+      'function listarTodos() view returns (string[])'
+    ], signer);
 
-    // Encode string ABI
-    const strBytes = new TextEncoder().encode(car);
-    const strHex = Array.from(strBytes).map(b=>b.toString(16).padStart(2,'0')).join('');
-    const lenHex = car.length.toString(16).padStart(64,'0');
-    const padded = strHex.padEnd(Math.ceil(strHex.length/64)*64,'0');
-    const offset = '0000000000000000000000000000000000000000000000000000000000000020';
-    const data = '0x' + selector + offset + lenHex + padded;
+    const tx = await contrato.cadastrarCAR(car);
 
-    const txHash = await window.ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [{
-        from: wallet,
-        to: document.getElementById('inp-contrato').value.trim() || CONTRACT_ADDR,
-        data: data,
-        gas: '0x30D40', // 200000
-      }]
-    });
+    document.getElementById('tx-info').classList.add('show');
+    document.getElementById('tx-info').innerHTML=`Transação enviada, aguardando confirmação: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
+
+    const receipt = await tx.wait();
+
+    if(receipt.status !== 1){
+      throw new Error('A transação foi minerada, mas falhou no contrato.');
+    }
+
+    const total = await contrato.totalFazendas();
 
     document.getElementById('cad-ok').classList.add('show');
-    document.getElementById('tx-info').classList.add('show');
-    document.getElementById('tx-info').innerHTML=`Transação enviada: <a href="https://sepolia.etherscan.io/tx/${txHash}" target="_blank">${txHash.slice(0,18)}… ↗</a>`;
+    document.getElementById('cad-ok').textContent=`✓ CAR cadastrado on-chain. Total de fazendas: ${total.toString()}.`;
+    document.getElementById('tx-info').innerHTML=`Confirmada: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
     document.getElementById('inp-cad').value='';
   } catch(e) {
     document.getElementById('cad-err').classList.add('show');
-    document.getElementById('cad-err').textContent='Erro: '+(e.message||'transação cancelada');
+    document.getElementById('cad-err').textContent='Erro: '+(e.shortMessage||e.reason||e.message||'transação cancelada');
   }
 
   btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Cadastrar';
