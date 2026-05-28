@@ -109,7 +109,6 @@ nav{height:52px;background:var(--sup);border-bottom:1px solid var(--b);padding:0
 .det-voltar:hover{background:var(--v3);border-color:var(--v2);color:var(--v)}
 .det-car{font-family:'Courier New',monospace;font-size:11px;color:var(--v2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .det-mapa{width:100%;height:220px;object-fit:cover;background:var(--v4);display:block}
-#det-leaflet-map{height:260px;object-fit:initial}
 .det-mapa-load{width:100%;height:220px;background:var(--v4);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3)}
 .det-sec{padding:.9rem 1.2rem;border-bottom:1px solid var(--b)}
 .det-sec-tit{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin-bottom:.65rem}
@@ -216,7 +215,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 
         <!-- Endereço do contrato -->
         <p style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:2px">Endereço do contrato</p>
-        <input class="inp" id="inp-contrato" type="text" value="0x865724ffd417f5B696f31a8Af67541585fd2a262" style="font-family:'Courier New',monospace;font-size:11px"/>
+        <input class="inp" id="inp-contrato" type="text" value="0x86D903aADc96b4028e06Fc7643fD781980642144" style="font-family:'Courier New',monospace;font-size:11px"/>
 
         <!-- Conectar wallet -->
         <button class="btn-mm" id="btn-mm" onclick="conectarWallet()" style="margin-top:4px">
@@ -286,7 +285,6 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
       <div id="det-mapa-wrap">
         <div class="det-mapa-load" id="det-mapa-load">Carregando território…</div>
         <img id="det-mapa-img" class="det-mapa" style="display:none" alt="Território"/>
-        <div id="det-leaflet-map" class="det-mapa" style="display:none"></div>
       </div>
       <div class="det-sec">
         <p class="det-sec-tit">Propriedade</p>
@@ -356,7 +354,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 const GEOAPIFY_KEY   = 'dc783b9c4d184a4f95d4a7999f44ef13';
 const SUPABASE_URL   = 'https://tqsoopgmzdwttwvedngk.supabase.co';
 const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxc29vcGdtemR3dHR3dmVkbmdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjIxNTEsImV4cCI6MjA5NDUzODE1MX0.LaHuxJVFJI9SkGHFmapSpkUYBC5plB9oPuDXIXJXsN0';
-const CONTRACT_ADDR  = '0x865724ffd417f5B696f31a8Af67541585fd2a262';
+const CONTRACT_ADDR  = '0x86D903aADc96b4028e06Fc7643fD781980642144';
 const SEPOLIA_ID     = '0xaa36a7';
 
 // ABI mínimo do contrato
@@ -390,7 +388,7 @@ const GRUPOS=[
   {k:'alto',l:'Risco Alto',dc:'da',lc:'la',cc:'ca',cor:'#dc2626',fn:f=>f.status==='ATIVO'&&f._risco==='ALTO'},
 ];
 
-let map, mkrs={}, wallet=null, detalheMap=null, detalheAreaLayer=null;
+let map, mkrs={}, wallet=null;
 
 // ── MAPA ──────────────────────────────────────────────────────────────────────
 function initMap(){
@@ -436,149 +434,6 @@ function resetMapa(){
   Object.values(mkrs).forEach(m=>m.setStyle({fillOpacity:.92,opacity:1}));
 }
 
-function normalizarBoundingBox(bb){
-  if(Array.isArray(bb) && bb.length >= 4){
-    const west=Number(bb[0]), south=Number(bb[1]), east=Number(bb[2]), north=Number(bb[3]);
-    if([west,south,east,north].every(Number.isFinite)) return {west,south,east,north};
-  }
-  if(bb && typeof bb === 'object'){
-    const west=Number(bb.west ?? bb.minLon ?? bb.xmin);
-    const south=Number(bb.south ?? bb.minLat ?? bb.ymin);
-    const east=Number(bb.east ?? bb.maxLon ?? bb.xmax);
-    const north=Number(bb.north ?? bb.maxLat ?? bb.ymax);
-    if([west,south,east,north].every(Number.isFinite)) return {west,south,east,north};
-  }
-  return null;
-}
-
-function normalizarGeoJSON(geojson){
-  if(!geojson) return null;
-
-  let gj=geojson;
-  if(typeof gj === 'string'){
-    try{
-      gj=JSON.parse(gj);
-    }catch{
-      return null;
-    }
-  }
-
-  if(!gj || typeof gj !== 'object') return null;
-
-  if(gj.type === 'Feature' || gj.type === 'FeatureCollection'){
-    return gj;
-  }
-
-  if(['Polygon','MultiPolygon','LineString','MultiLineString','Point','MultiPoint'].includes(gj.type)){
-    return {
-      type:'Feature',
-      properties:{},
-      geometry:gj,
-    };
-  }
-
-  return null;
-}
-
-function limparMapaDetalhe(){
-  if(detalheMap){
-    detalheMap.remove();
-    detalheMap=null;
-    detalheAreaLayer=null;
-  }
-  const el=document.getElementById('det-leaflet-map');
-  if(el){
-    el.style.display='none';
-    el.innerHTML='';
-  }
-}
-
-function renderMapaDetalhe(geojson, bb){
-  const load=document.getElementById('det-mapa-load');
-  const img=document.getElementById('det-mapa-img');
-  const el=document.getElementById('det-leaflet-map');
-  const bbox=normalizarBoundingBox(bb);
-  const gj=normalizarGeoJSON(geojson);
-
-  limparMapaDetalhe();
-  img.style.display='none';
-
-  if(!gj && !bbox){
-    load.style.display='flex';
-    load.textContent='Sem desenho territorial';
-    return false;
-  }
-
-  load.style.display='none';
-  el.style.display='block';
-
-  detalheMap=L.map('det-leaflet-map',{
-    zoomControl:true,
-    attributionControl:false,
-    scrollWheelZoom:false,
-  });
-
-  L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_KEY}`,{
-    maxZoom:20,
-  }).addTo(detalheMap);
-
-  let bounds=null;
-
-  if(gj){
-    detalheAreaLayer=L.geoJSON(gj,{
-      style:{
-        color:'#1a3828',
-        weight:3,
-        fillColor:'#22c55e',
-        fillOpacity:.22,
-        opacity:1,
-      },
-      pointToLayer:(_feature,latlng)=>L.circleMarker(latlng,{
-        radius:8,
-        color:'#1a3828',
-        fillColor:'#22c55e',
-        fillOpacity:.9,
-        weight:2,
-      }),
-    }).addTo(detalheMap);
-
-    bounds=detalheAreaLayer.getBounds();
-  }
-
-  if((!bounds || !bounds.isValid()) && bbox){
-    bounds=L.latLngBounds([[bbox.south,bbox.west],[bbox.north,bbox.east]]);
-
-    detalheAreaLayer=L.rectangle(bounds,{
-      color:'#1a3828',
-      weight:3,
-      fillColor:'#22c55e',
-      fillOpacity:.16,
-      dashArray:'7 5',
-    }).addTo(detalheMap);
-  }
-
-  if(!bounds || !bounds.isValid()){
-    load.style.display='flex';
-    load.textContent='Desenho territorial invalido';
-    el.style.display='none';
-    limparMapaDetalhe();
-    return false;
-  }
-
-  const centro=bounds.getCenter();
-  L.circleMarker(centro,{
-    radius:6,
-    fillColor:'#1a3828',
-    color:'#fff',
-    weight:2,
-    fillOpacity:1,
-  }).addTo(detalheMap);
-
-  detalheMap.fitBounds(bounds,{padding:[28,28]});
-  setTimeout(()=>detalheMap.invalidateSize(),80);
-  return true;
-}
-
 // ── DETALHE ───────────────────────────────────────────────────────────────────
 async function abrirDetalhe(car){
   document.getElementById('map').style.display='none';
@@ -588,11 +443,8 @@ async function abrirDetalhe(car){
 
   // Mapa estático
   const img=document.getElementById('det-mapa-img');
-  const miniMap=document.getElementById('det-leaflet-map');
   const load=document.getElementById('det-mapa-load');
   img.style.display='none';
-  miniMap.style.display='none';
-  limparMapaDetalhe();
   load.style.display='flex';
   load.textContent='Carregando território…';
 
@@ -604,8 +456,13 @@ async function abrirDetalhe(car){
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
   // Mapa estático Geoapify
-  const bb=normalizarBoundingBox(f.bounding_box);
-  if(!renderMapaDetalhe(f.geojson, bb)){
+  if(f.bounding_box){
+    const bb=f.bounding_box;
+    const mapUrl=`https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=600&height=220&area=rect:${bb.west},${bb.south},${bb.east},${bb.north}&apiKey=${GEOAPIFY_KEY}`;
+    img.src=mapUrl;
+    img.onload=()=>{img.style.display='block';load.style.display='none'};
+    img.onerror=()=>{load.textContent='Mapa indisponível';};
+  } else {
     load.textContent='Sem dados territoriais';
   }
 
@@ -658,7 +515,6 @@ async function abrirDetalhe(car){
 }
 
 function fecharDetalhe(){
-  limparMapaDetalhe();
   document.getElementById('detalhe').classList.remove('show');
   document.getElementById('map').style.display='block';
   document.getElementById('legenda').style.display='block';
@@ -926,4 +782,3 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
-
