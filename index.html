@@ -596,18 +596,23 @@ async function abrirDetalhe(car){
   load.style.display='flex';
   load.textContent='Carregando território…';
 
-  // Busca dados completos no Supabase
+  // Busca em consultas separadas para uma relacao do Supabase nao derrubar a tela inteira.
   const rows = await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
-  const f = rows?.[0];
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+  const resultados = await sbFetch('rastro_resultados',
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+  const fontes = await sbFetch('rastro_analises_fontes',
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+
+  const f = Array.isArray(rows) ? rows[0] : null;
+  const listaResultados = Array.isArray(resultados) ? resultados : [];
+  const listaFontes = Array.isArray(fontes) ? fontes : [];
 
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
   // Mapa estático Geoapify
   const bb=normalizarBoundingBox(f.bounding_box);
-  if(bb){
-    renderMapaDetalhe(bb);
-  } else {
+  if(!renderMapaDetalhe(f.geojson, bb)){
     load.textContent='Sem dados territoriais';
   }
 
@@ -617,7 +622,7 @@ async function abrirDetalhe(car){
   se.className='badge '+sc; se.textContent=f.status;
 
   // Risco (vem de rastro_resultados)
-  const resultado=f.rastro_resultados?.[0];
+  const resultado=listaResultados[0];
   const re=document.getElementById('d-risco');
   if(resultado?.risco){
     const rc='rb-'+resultado.risco[0].toLowerCase();
@@ -648,8 +653,8 @@ async function abrirDetalhe(car){
   }
 
   // Fontes MapBiomas e IBAMA
-  const mb=f.rastro_analises_fontes?.find(x=>x.origem==='MAPBIOMAS');
-  const ib=f.rastro_analises_fontes?.find(x=>x.origem==='IBAMA');
+  const mb=listaFontes.find(x=>x.origem==='MAPBIOMAS');
+  const ib=listaFontes.find(x=>x.origem==='IBAMA');
   document.getElementById('d-mb-def').textContent=mb?.payload?.deforestationStatus===1?'Sim':'Não';
   document.getElementById('d-mb-alerts').textContent=mb?.payload?.numberOfAlerts??'—';
   document.getElementById('d-mb-ha').textContent=mb?.payload?.areaHaAlertas?(mb.payload.areaHaAlertas+' ha'):'—';
