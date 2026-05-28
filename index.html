@@ -528,11 +528,10 @@ function renderMapaDetalhe(geojson, bb){
     detalheAreaLayer=L.geoJSON(gj,{
       style:{
         color:'#1a3828',
-        weight:4,
+        weight:3,
         fillColor:'#22c55e',
-        fillOpacity:.14,
+        fillOpacity:.22,
         opacity:1,
-        dashArray:'10 7',
       },
       pointToLayer:(_feature,latlng)=>L.circleMarker(latlng,{
         radius:8,
@@ -597,28 +596,28 @@ async function abrirDetalhe(car){
   load.style.display='flex';
   load.textContent='Carregando território…';
 
-  // Busca em consultas separadas para uma relacao do Supabase nao derrubar a tela inteira.
+  // Busca dados completos no Supabase
   const rows = await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
-  const resultados = await sbFetch('rastro_resultados',
-    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
-  const fontes = await sbFetch('rastro_analises_fontes',
-    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
-
-  const f = Array.isArray(rows) ? rows[0] : null;
-  const listaResultados = Array.isArray(resultados) ? resultados : [];
-  const listaFontes = Array.isArray(fontes) ? fontes : [];
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
+  const f = rows?.[0];
 
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
   // Mapa estático Geoapify
+  const bb=normalizarBoundingBox(f.bounding_box);
+  if(bb){
+    renderMapaDetalhe(bb);
+  } else {
+    load.textContent='Sem dados territoriais';
+  }
+
   // Status
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const se=document.getElementById('d-status');
   se.className='badge '+sc; se.textContent=f.status;
 
   // Risco (vem de rastro_resultados)
-  const resultado=listaResultados[0];
+  const resultado=f.rastro_resultados?.[0];
   const re=document.getElementById('d-risco');
   if(resultado?.risco){
     const rc='rb-'+resultado.risco[0].toLowerCase();
@@ -649,26 +648,13 @@ async function abrirDetalhe(car){
   }
 
   // Fontes MapBiomas e IBAMA
-  const mb=listaFontes.find(x=>x.origem==='MAPBIOMAS');
-  const ib=listaFontes.find(x=>x.origem==='IBAMA');
+  const mb=f.rastro_analises_fontes?.find(x=>x.origem==='MAPBIOMAS');
+  const ib=f.rastro_analises_fontes?.find(x=>x.origem==='IBAMA');
   document.getElementById('d-mb-def').textContent=mb?.payload?.deforestationStatus===1?'Sim':'Não';
   document.getElementById('d-mb-alerts').textContent=mb?.payload?.numberOfAlerts??'—';
   document.getElementById('d-mb-ha').textContent=mb?.payload?.areaHaAlertas?(mb.payload.areaHaAlertas+' ha'):'—';
   document.getElementById('d-ib-emb').textContent=ib?.payload?.embargoStatus===1?'Sim':'Não';
   document.getElementById('d-ib-st').textContent=ib?.payload?.embargoStatus===1?'Embargado':'Regular';
-
-  // O mapa fica por ultimo para nunca travar as informacoes do laudo.
-  try {
-    const bb=normalizarBoundingBox(f.bounding_box);
-    if(!renderMapaDetalhe(f.geojson, bb)){
-      load.style.display='flex';
-      load.textContent='Sem desenho territorial';
-    }
-  } catch (e) {
-    load.style.display='flex';
-    load.textContent='Mapa indisponivel';
-    console.error('Erro ao renderizar territorio', e, f.geojson, f.bounding_box);
-  }
 
   document.getElementById('detalhe').scrollTop=0;
 }
@@ -760,9 +746,7 @@ async function buscarCAR(){
   document.getElementById('res-conteudo').innerHTML='';
 
   const rows=await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(v)}&select=*`);
-  const resultados=await sbFetch('rastro_resultados',
-    `?codigo_car=eq.${encodeURIComponent(v)}&select=*`);
+    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_resultados(*)`);
   const f=rows?.[0];
 
   btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Verificar';
@@ -774,7 +758,7 @@ async function buscarCAR(){
     return;
   }
 
-  const resultado=Array.isArray(resultados)?resultados[0]:null;
+  const resultado=f.rastro_resultados?.[0];
   const risco=resultado?.risco;
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const rb=risco?'rb-'+risco[0].toLowerCase():'';
@@ -819,21 +803,15 @@ async function filtrar(){
   if(!estadoSel){alert('Selecione um estado para filtrar.');return;}
   const sigla=estadoSel.match(/\(([A-Z]+)\)/)?.[1]||'';
 
+  let url=`rastro_territorios?state_acronym=eq.${sigla}&select=*,rastro_resultados(risco)`;
+
   const rows=await sbFetch('rastro_territorios',
-    `?state_acronym=eq.${sigla}&select=*`);
-  const codigos=(rows||[]).map(f=>f.codigo_car).filter(Boolean);
-  const resultados=codigos.length
-    ? await sbFetch('rastro_resultados',
-        `?codigo_car=in.(${codigos.map(encodeURIComponent).join(',')})&select=codigo_car,risco`)
-    : [];
-  const riscoPorCar=new Map(
-    (Array.isArray(resultados)?resultados:[]).map(r=>[r.codigo_car,r.risco])
-  );
+    `?state_acronym=eq.${sigla}&select=*,rastro_resultados(risco)`);
 
   // Normaliza risco para filtro local
   let fazendas=(rows||[]).map(f=>({
     ...f,
-    _risco:riscoPorCar.get(f.codigo_car)||null
+    _risco:f.rastro_resultados?.[0]?.risco||null
   }));
 
   if(riscoSel==='PENDENTE') fazendas=fazendas.filter(f=>f.status==='PENDENTE');
