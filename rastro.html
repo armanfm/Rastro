@@ -145,7 +145,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 .ft-c{font-size:10.5px;color:var(--t3)}
 .sep{color:var(--b)}
 
-/* ====== ESTRELAS (NOVO) ====== */
+/* ESTRELAS */
 .estrelas{display:inline-flex;align-items:center;gap:1px;flex-wrap:wrap}
 .estrela{position:relative;font-size:12px;line-height:1;cursor:default}
 .estrela.verde{color:#22c55e}
@@ -174,7 +174,6 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 
     <div class="abas">
       <button class="aba ativa" onclick="setAba('car',this)">Verificar</button>
-      <button class="aba" onclick="setAba('filtro',this)">Filtrar</button>
       <button class="aba" onclick="setAba('contrato',this)">Contrato</button>
     </div>
 
@@ -188,60 +187,6 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
           </button>
           <button class="btn btn-s" onclick="limparCAR()" title="Limpar" style="flex:0 0 36px">✕</button>
         </div>
-      </div>
-    </div>
-
-    <div class="painel" id="p-filtro">
-      <div class="p-inner">
-        <select class="sel" id="sel-estado">
-          <option value="">Selecione o estado (obrigatório)</option>
-          <option>Acre (AC)</option><option>Alagoas (AL)</option><option>Amapá (AP)</option>
-          <option>Amazonas (AM)</option><option>Bahia (BA)</option><option>Ceará (CE)</option>
-          <option>Distrito Federal (DF)</option><option>Espírito Santo (ES)</option><option>Goiás (GO)</option>
-          <option>Maranhão (MA)</option><option>Mato Grosso (MT)</option><option>Mato Grosso do Sul (MS)</option>
-          <option>Minas Gerais (MG)</option><option>Pará (PA)</option><option>Paraíba (PB)</option>
-          <option>Paraná (PR)</option><option>Pernambuco (PE)</option><option>Piauí (PI)</option>
-          <option>Rio de Janeiro (RJ)</option><option>Rio Grande do Norte (RN)</option>
-          <option>Rio Grande do Sul (RS)</option><option>Rondônia (RO)</option><option>Roraima (RR)</option>
-          <option>Santa Catarina (SC)</option><option>São Paulo (SP)</option><option>Sergipe (SE)</option>
-          <option>Tocantins (TO)</option>
-        </select>
-        <select class="sel" id="sel-risco">
-          <option value="">Todos os riscos (opcional)</option>
-          <option value="BAIXO">Risco Baixo</option>
-          <option value="MEDIO">Risco Médio</option>
-          <option value="ALTO">Risco Alto</option>
-          <option value="PENDENTE">Pendente</option>
-          <option value="INATIVO">Inválido</option>
-        </select>
-        <select class="sel" id="sel-segmento">
-          <option value="">Todos os segmentos (opcional)</option>
-          <option value="SOJA">Soja</option>
-          <option value="PECUARIA">Pecuária</option>
-          <option value="CAFE">Café</option>
-          <option value="CANA">Cana</option>
-          <option value="ALGODAO">Algodão</option>
-          <option value="ARROZ">Arroz</option>
-          <option value="SILVICULTURA">Silvicultura</option>
-          <option value="AGRICULTURA">Agricultura</option>
-          <option value="LAVOURA_TEMPORARIA">Lavoura Temporária</option>
-          <option value="MOSAICO_DE_USOS">Mosaico de Usos</option>
-        </select>
-        <select class="sel" id="sel-estrela">
-          <option value="">Todas as estrelas (opcional)</option>
-          <option value="VERDE">Só com estrela verde (recuperou)</option>
-          <option value="VERMELHA">Só com estrela vermelha (teve alerta)</option>
-          <option value="SEM_VERMELHA">Sem alerta (limpo)</option>
-        </select>
-        <div class="row">
-          <button class="btn btn-p" onclick="filtrar()">Buscar</button>
-          <button class="btn btn-s" onclick="limparFiltro()" style="padding:0 14px">Limpar</button>
-        </div>
-        <button class="btn btn-g" id="btn-atualizar-massa" onclick="atualizarHistoricoMassa()" style="margin-top:2px">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-          Atualizar histórico dos filtrados
-        </button>
-        <div id="massa-msg" style="display:none;font-size:11px;margin-top:4px;padding:6px 8px;border-radius:var(--r);background:var(--v4);color:var(--t2)"></div>
       </div>
     </div>
 
@@ -283,7 +228,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
     </div>
 
     <div class="sb-lista" id="sb-lista">
-      <div class="vazio">Selecione um estado para listar propriedades<br/>ou use "Verificar CAR" para busca individual.</div>
+      <div class="vazio">Digite um código CAR no campo acima para verificar.</div>
     </div>
   </div>
 
@@ -291,11 +236,11 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
     <div id="map"></div>
     <div class="legenda" id="legenda">
       <p>Legenda</p>
-      <div class="leg-i"><div class="leg-d" style="background:#f59e0b"></div>Pendente</div>
-      <div class="leg-i"><div class="leg-d" style="background:#ef4444"></div>Inválido</div>
       <div class="leg-i"><div class="leg-d" style="background:#22c55e"></div>Risco Baixo</div>
       <div class="leg-i"><div class="leg-d" style="background:#f97316"></div>Risco Médio</div>
       <div class="leg-i"><div class="leg-d" style="background:#dc2626"></div>Risco Alto</div>
+      <div class="leg-i"><div class="leg-d" style="background:#f59e0b"></div>Pendente</div>
+      <div class="leg-i"><div class="leg-d" style="background:#ef4444"></div>Inválido</div>
       <div class="leg-i" style="margin-top:4px"><span style="color:#22c55e">★</span>Recuperou vegetação</div>
       <div class="leg-i"><span style="color:#dc2626">★</span>Teve alerta</div>
     </div>
@@ -392,7 +337,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
 <script>
-// ── CONFIG ──
+// CONFIG
 const GEOAPIFY_KEY   = 'dc783b9c4d184a4f95d4a7999f44ef13';
 const SUPABASE_URL   = 'https://tqsoopgmzdwttwvedngk.supabase.co';
 const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxc29vcGdtemR3dHR3dmVkbmdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjIxNTEsImV4cCI6MjA5NDUzODE1MX0.LaHuxJVFJI9SkGHFmapSpkUYBC5plB9oPuDXIXJXsN0';
@@ -406,48 +351,28 @@ async function sbFetch(path, params=''){
   return r.json();
 }
 
-// ====== ESTRELAS (NOVO) ======
-// VERMELHAS = alertas de desmatamento -> vem de rastro_analises_fontes (MAPBIOMAS_HISTORICO, workflow CRE)
-// VERDES + SEGMENTO = Earth Engine -> vem de rastro_mapbiomas_historico_numeros (Edge Function mapibioma)
 function calcularEstrelas(territorio){
-  // --- VERMELHAS (alertas) ---
   const fontes = territorio?.rastro_analises_fontes || [];
   const hist = fontes.find(x => x.origem === 'MAPBIOMAS_HISTORICO');
   const col = hist?.payload?.colunas || hist || {};
-  const totalAlertas = Number(
-    hist?.total_alertas ?? col?.total_alertas ?? hist?.payload?.total_alertas ?? 0
-  ) || 0;
-  const areaDesmatada = Number(
-    hist?.area_desmatada_ha ?? col?.area_desmatada_ha ?? 0
-  ) || 0;
+  const totalAlertas = Number(hist?.total_alertas ?? col?.total_alertas ?? hist?.payload?.total_alertas ?? 0) || 0;
+  const areaDesmatada = Number(hist?.area_desmatada_ha ?? col?.area_desmatada_ha ?? 0) || 0;
 
-  // --- VERDES + SEGMENTO (Earth Engine) ---
-  // a tabela vem embarcada como rastro_mapbiomas_historico_numeros (objeto ou array)
   let gee = territorio?.rastro_mapbiomas_historico_numeros;
   if (Array.isArray(gee)) gee = gee[0];
   gee = gee || {};
 
   const segmento = gee.segmento_atual ?? null;
-
   let verdes = 0;
   let haRecuperado = 0;
-  // estrela_verde booleano + variacao em ha
   const variacao = Number(gee.variacao_nativa_2020_2024_ha ?? 0) || 0;
   if (gee.estrela_verde === true || variacao > 0){
     verdes = 1;
     haRecuperado = variacao > 0 ? variacao : (Number(gee.vegetacao_nativa_atual_ha ?? 0) || 0);
   }
-
-  return {
-    vermelhas: totalAlertas,
-    verdes: verdes,
-    areaDesmatada,
-    haRecuperado,
-    segmento,
-  };
+  return { vermelhas: totalAlertas, verdes, areaDesmatada, haRecuperado, segmento };
 }
 
-// gera o HTML das estrelas. cor: 'verde' | 'vermelha'
 function htmlEstrelas(qtd, cor, tooltipBase){
   if (!qtd || qtd <= 0) return '';
   let out = '';
@@ -458,17 +383,13 @@ function htmlEstrelas(qtd, cor, tooltipBase){
   return out;
 }
 
-// monta o conjunto verde+vermelha pequeno (pra lista lateral)
 function estrelasInline(est){
-  const v = htmlEstrelas(est.verdes,'verde',
-    `+${est.haRecuperado.toFixed(1)} ha recuperados`);
-  const r = htmlEstrelas(est.vermelhas,'vermelha',
-    `${est.areaDesmatada.toFixed(1)} ha em alertas`);
+  const v = htmlEstrelas(est.verdes,'verde', `+${est.haRecuperado.toFixed(1)} ha recuperados`);
+  const r = htmlEstrelas(est.vermelhas,'vermelha', `${est.areaDesmatada.toFixed(1)} ha em alertas`);
   if (!v && !r) return '';
   return `<span class="estrelas fitem-estrelas">${v}${r}</span>`;
 }
 
-// ── GRUPOS ──
 const GRUPOS=[
   {k:'pendente',l:'Pendente',dc:'dp',lc:'lp',cc:'cp',cor:'#f59e0b',fn:f=>f.status==='PENDENTE'},
   {k:'invalido',l:'Inválido',dc:'di',lc:'li',cc:'ci',cor:'#ef4444',fn:f=>f.status==='INATIVO'},
@@ -477,7 +398,7 @@ const GRUPOS=[
   {k:'alto',l:'Risco Alto',dc:'da',lc:'la',cc:'ca',cor:'#dc2626',fn:f=>f.status==='ATIVO'&&f._risco==='ALTO'},
 ];
 
-let map, mkrs={}, wallet=null, detalheMap=null, detalheAreaLayer=null;
+let map, mkrs={}, wallet=null, detalheMap=null;
 
 function initMap(){
   map=L.map('map').setView([-14,-52],5);
@@ -494,9 +415,7 @@ function plotarFazenda(f){
     {radius:9,fillColor:cor,color:'#fff',weight:2,fillOpacity:.92}).addTo(map);
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const rb=f._risco?`rb-${f._risco[0].toLowerCase()}`:'';
-  const badge=f._risco
-    ?`<span class="rbadge ${rb}" style="font-size:10px">${f._risco}</span>`
-    :`<span class="badge ${sc}" style="font-size:10px">${f.status}</span>`;
+  const badge=f._risco?`<span class="rbadge ${rb}" style="font-size:10px">${f._risco}</span>`:`<span class="badge ${sc}" style="font-size:10px">${f.status}</span>`;
   const est=f._estrelas?estrelasInline(f._estrelas):'';
   m.bindPopup(`<div class="pop" onclick="abrirDetalhe('${f.codigo_car}')">
     <p class="pop-car">${f.codigo_car.substring(0,34)}…</p>
@@ -507,18 +426,11 @@ function plotarFazenda(f){
   mkrs[f.codigo_car]=m;
 }
 
-function destacarMapa(fazendas){
-  Object.keys(mkrs).forEach(car=>{
-    const v=fazendas.find(f=>f.codigo_car===car);
-    mkrs[car].setStyle({fillOpacity:v?.92:.08,opacity:v?1:.2});
-  });
-  if(fazendas.length>0){
-    const b=L.latLngBounds(fazendas.filter(f=>f.centroid_lat).map(f=>[f.centroid_lat,f.centroid_lon]));
-    if(b.isValid()) map.fitBounds(b,{padding:[40,40]});
-  }
+function limparMapaDetalhe(){
+  if(detalheMap){ detalheMap.remove(); detalheMap=null; }
+  const el=document.getElementById('det-leaflet-map');
+  if(el){ el.style.display='none'; el.innerHTML=''; }
 }
-function resetMapa(){ Object.values(mkrs).forEach(m=>m.setStyle({fillOpacity:.92,opacity:1})); }
-
 function normalizarBoundingBox(bb){
   if(Array.isArray(bb) && bb.length >= 4){
     const west=Number(bb[0]), south=Number(bb[1]), east=Number(bb[2]), north=Number(bb[3]);
@@ -544,11 +456,6 @@ function normalizarGeoJSON(geojson){
   }
   return null;
 }
-function limparMapaDetalhe(){
-  if(detalheMap){ detalheMap.remove(); detalheMap=null; detalheAreaLayer=null; }
-  const el=document.getElementById('det-leaflet-map');
-  if(el){ el.style.display='none'; el.innerHTML=''; }
-}
 function renderMapaDetalhe(geojson, bb){
   const load=document.getElementById('det-mapa-load');
   const img=document.getElementById('det-mapa-img');
@@ -563,15 +470,12 @@ function renderMapaDetalhe(geojson, bb){
   L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_KEY}`,{maxZoom:20}).addTo(detalheMap);
   let bounds=null;
   if(gj){
-    detalheAreaLayer=L.geoJSON(gj,{
-      style:{color:'#1a3828',weight:3,fillColor:'#22c55e',fillOpacity:.22,opacity:1},
-      pointToLayer:(_f,latlng)=>L.circleMarker(latlng,{radius:8,color:'#1a3828',fillColor:'#22c55e',fillOpacity:.9,weight:2}),
-    }).addTo(detalheMap);
-    bounds=detalheAreaLayer.getBounds();
+    L.geoJSON(gj,{style:{color:'#1a3828',weight:3,fillColor:'#22c55e',fillOpacity:.22,opacity:1},pointToLayer:(_f,latlng)=>L.circleMarker(latlng,{radius:8,color:'#1a3828',fillColor:'#22c55e',fillOpacity:.9,weight:2})}).addTo(detalheMap);
+    bounds=detalheMap.getBounds();
   }
   if((!bounds || !bounds.isValid()) && bbox){
     bounds=L.latLngBounds([[bbox.south,bbox.west],[bbox.north,bbox.east]]);
-    detalheAreaLayer=L.rectangle(bounds,{color:'#1a3828',weight:3,fillColor:'#22c55e',fillOpacity:.16,dashArray:'7 5'}).addTo(detalheMap);
+    L.rectangle(bounds,{color:'#1a3828',weight:3,fillColor:'#22c55e',fillOpacity:.16,dashArray:'7 5'}).addTo(detalheMap);
   }
   if(!bounds || !bounds.isValid()){ load.style.display='flex'; load.textContent='Desenho territorial invalido'; el.style.display='none'; limparMapaDetalhe(); return false; }
   const centro=bounds.getCenter();
@@ -581,7 +485,6 @@ function renderMapaDetalhe(geojson, bb){
   return true;
 }
 
-// ── DETALHE ──
 async function abrirDetalhe(car){
   document.getElementById('map').style.display='none';
   document.getElementById('legenda').style.display='none';
@@ -598,25 +501,18 @@ async function abrirDetalhe(car){
   let f = rows?.[0];
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
-  // busca a tabela do Earth Engine separada (segmento + estrela verde)
   try{
-    const gee = await sbFetch('rastro_mapbiomas_historico_numeros',
-      `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+    const gee = await sbFetch('rastro_mapbiomas_historico_numeros', `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
     if(gee && gee.length) f.rastro_mapbiomas_historico_numeros = gee[0];
-  }catch(e){ /* ignora */ }
+  }catch(e){}
 
   const bb=normalizarBoundingBox(f.bounding_box);
   const gj = f.geojson || f.payload?.geometry;
   if(gj || bb){ renderMapaDetalhe(gj, bb); } else { load.textContent='Sem dados territoriais'; }
 
-  // ESTRELAS (NOVO)
   const est = calcularEstrelas(f);
-  document.getElementById('d-estrelas-verde').innerHTML =
-    est.verdes>0 ? htmlEstrelas(est.verdes,'verde',`+${est.haRecuperado.toFixed(1)} ha recuperados`)
-                 : '<span style="font-size:11px;color:var(--t3)">nenhuma</span>';
-  document.getElementById('d-estrelas-vermelha').innerHTML =
-    est.vermelhas>0 ? htmlEstrelas(est.vermelhas,'vermelha',`${est.areaDesmatada.toFixed(1)} ha em alertas`)
-                    : '<span style="font-size:11px;color:var(--t3)">nenhum alerta</span>';
+  document.getElementById('d-estrelas-verde').innerHTML = est.verdes>0 ? htmlEstrelas(est.verdes,'verde',`+${est.haRecuperado.toFixed(1)} ha recuperados`) : '<span style="font-size:11px;color:var(--t3)">nenhuma</span>';
+  document.getElementById('d-estrelas-vermelha').innerHTML = est.vermelhas>0 ? htmlEstrelas(est.vermelhas,'vermelha',`${est.areaDesmatada.toFixed(1)} ha em alertas`) : '<span style="font-size:11px;color:var(--t3)">nenhum alerta</span>';
   document.getElementById('d-segmento').textContent = est.segmento || '—';
 
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
@@ -637,9 +533,7 @@ async function abrirDetalhe(car){
     document.getElementById('d-g-int').textContent=resultado.interpretacao||'—';
     document.getElementById('d-g-res').textContent=resultado.resumo||'—';
   } else {
-    ['d-g-risco','d-g-just','d-g-comp','d-g-int','d-g-res'].forEach(id=>{
-      const el=document.getElementById(id); if(el){el.textContent='Análise pendente';el.className='gemini-campo-v';}
-    });
+    ['d-g-risco','d-g-just','d-g-comp','d-g-int','d-g-res'].forEach(id=>{ const el=document.getElementById(id); if(el){el.textContent='Análise pendente';el.className='gemini-campo-v';} });
   }
   const mb=f.rastro_analises_fontes?.find(x=>x.origem==='MAPBIOMAS');
   const ib=f.rastro_analises_fontes?.find(x=>x.origem==='IBAMA');
@@ -651,48 +545,32 @@ async function abrirDetalhe(car){
   document.getElementById('detalhe').scrollTop=0;
 }
 
-// ====== ATUALIZAR HISTORICO (NOVO) ======
-// Aciona a Edge Function que vai no Earth Engine, recalcula cobertura/segmento
-// para o CAR aberto, grava no Supabase e recarrega o detalhe.
 async function atualizarHistorico(){
   const car = document.getElementById('det-car-cod').textContent.trim();
   if(!car || car==='—') return;
-
   const btn = document.getElementById('btn-atualizar-hist');
   const msg = document.getElementById('hist-msg');
   btn.disabled = true;
   btn.innerHTML = '<div class="spin" style="border-top-color:var(--v2)"></div> Buscando no MapBiomas…';
   msg.style.display='none';
-
   try {
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/mapibioma`, {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':`Bearer ${SUPABASE_ANON}`,
-      },
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPABASE_ANON}`},
       body: JSON.stringify({ codigo_car: car }),
     });
     const data = await resp.json();
-
     if(data?.status === 'OK'){
-      msg.style.display='block';
-      msg.style.cssText += 'background:#dcfce7;color:#14532d;display:block';
-      msg.textContent = `✓ Atualizado. Segmento: ${data.segmento_atual||'—'} · `
-        + `Veg. nativa: ${data.vegetacao_nativa_atual_ha? Number(data.vegetacao_nativa_atual_ha).toFixed(1)+' ha':'—'}`;
-      // recarrega o detalhe pra mostrar as novas estrelas
+      msg.style.display='block'; msg.style.cssText += 'background:#dcfce7;color:#14532d;display:block';
+      msg.textContent = `✓ Atualizado. Segmento: ${data.segmento_atual||'—'} · Veg. nativa: ${data.vegetacao_nativa_atual_ha? Number(data.vegetacao_nativa_atual_ha).toFixed(1)+' ha':'—'}`;
       setTimeout(()=>abrirDetalhe(car), 800);
     } else {
-      msg.style.display='block';
-      msg.style.cssText += 'background:#fee2e2;color:#991b1b;display:block';
+      msg.style.display='block'; msg.style.cssText += 'background:#fee2e2;color:#991b1b;display:block';
       msg.textContent = `Não atualizou: ${data?.status||''} ${data?.detalhe? '· '+data.detalhe : ''}`;
     }
   } catch(e){
-    msg.style.display='block';
-    msg.style.cssText += 'background:#fee2e2;color:#991b1b;display:block';
+    msg.style.display='block'; msg.style.cssText += 'background:#fee2e2;color:#991b1b;display:block';
     msg.textContent = 'Erro ao chamar a função: ' + (e.message||e);
   }
-
   btn.disabled = false;
   btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg> Atualizar histórico';
 }
@@ -717,7 +595,7 @@ function buildLista(fazendas,label){
   const hdr=document.getElementById('lista-hdr');
   if(fazendas===null){
     hdr.classList.remove('show');
-    el.innerHTML='<div class="vazio">Selecione um estado para listar propriedades<br/>ou use "Verificar CAR" para busca individual.</div>';
+    el.innerHTML='<div class="vazio">Digite um código CAR no campo acima para verificar.</div>';
     return;
   }
   hdr.classList.add('show');
@@ -734,15 +612,7 @@ function buildLista(fazendas,label){
         <div style="display:flex;align-items:center;gap:4px"><span class="gcnt ${g.cc}">${items.length}</span><span class="garr ab">▶</span></div>
       </div>
       <div class="g-itens ab" id="grp-${g.k}">
-        ${items.map(f=>{
-          const est=f._estrelas?estrelasInline(f._estrelas):'';
-          const seg=f._estrelas?.segmento?` · ${f._estrelas.segmento}`:'';
-          return `<div class="fitem" id="fi-${f.codigo_car.replace(/[^a-zA-Z0-9]/g,'_')}" onclick="selFaz('${f.codigo_car}')">
-            <div class="fcar">${f.codigo_car}</div>
-            <div class="fmeta">${f.estado||''} · ${f.area_ha?(f.area_ha+' ha'):''}${seg}</div>
-            ${est}
-          </div>`;
-        }).join('')}
+        ${items.map(f=>{ const est=f._estrelas?estrelasInline(f._estrelas):''; return `<div class="fitem" id="fi-${f.codigo_car.replace(/[^a-zA-Z0-9]/g,'_')}" onclick="selFaz('${f.codigo_car}')"><div class="fcar">${f.codigo_car}</div><div class="fmeta">${f.estado||''} · ${f.area_ha?(f.area_ha+' ha'):''}</div>${est}</div>`; }).join('')}
       </div>`;
     el.appendChild(div);
   });
@@ -755,13 +625,8 @@ function selFaz(car){
   const m=mkrs[car];
   if(m){fecharDetalhe();m.openPopup();map.setView(m.getLatLng(),10,{animate:true});}
 }
-function destacarSidebar(car){
-  document.querySelectorAll('.fitem').forEach(e=>e.classList.remove('sel'));
-  const el=document.getElementById('fi-'+car.replace(/[^a-zA-Z0-9]/g,'_'));
-  if(el){el.classList.add('sel');el.scrollIntoView({behavior:'smooth',block:'nearest'})}
-}
+function destacarSidebar(car){ const el=document.getElementById('fi-'+car.replace(/[^a-zA-Z0-9]/g,'_')); if(el){document.querySelectorAll('.fitem').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.scrollIntoView({behavior:'smooth',block:'nearest'});} }
 
-// ── BUSCA CAR ──
 async function buscarCAR(){
   const v=document.getElementById('inp-car').value.trim();
   if(!v) return;
@@ -771,7 +636,7 @@ async function buscarCAR(){
   document.getElementById('res-erro').classList.remove('show');
   document.getElementById('res-conteudo').innerHTML='';
   const rows=await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
+    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_analises_fontes(*),rastro_resultados(*),rastro_mapbiomas_historico_numeros(*)`);
   const f=rows?.[0];
   btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Verificar';
   btn.disabled=false;
@@ -794,137 +659,36 @@ async function buscarCAR(){
       Ver análise completa →
     </button>`;
   document.getElementById('res-wrap').classList.add('show');
-  if(f.centroid_lat&&!mkrs[f.codigo_car]){ f._risco=risco; f._estrelas=est; plotarFazenda(f); }
-  resetMapa();
+  f._risco=risco; f._estrelas=est;
+  Object.values(mkrs).forEach(m=>m.remove()); mkrs={};
+  plotarFazenda(f);
   if(mkrs[f.codigo_car]){ mkrs[f.codigo_car].openPopup(); map.setView(mkrs[f.codigo_car].getLatLng(),10,{animate:true}); }
+  buildLista([f], 'Resultado');
 }
 function limparCAR(){
   document.getElementById('inp-car').value='';
   document.getElementById('res-wrap').classList.remove('show');
   document.getElementById('res-conteudo').innerHTML='';
   document.getElementById('res-erro').classList.remove('show');
-  fecharDetalhe(); resetMapa();
-}
-
-// ── FILTRO ──
-async function filtrar(){
-  const estadoSel=document.getElementById('sel-estado').value;
-  const riscoSel=document.getElementById('sel-risco').value;
-  const segSel=document.getElementById('sel-segmento').value;
-  const estrelaSel=document.getElementById('sel-estrela').value;
-  if(!estadoSel){alert('Selecione um estado para filtrar.');return;}
-  const sigla=estadoSel.match(/\(([A-Z]+)\)/)?.[1]||'';
-  const rows=await sbFetch('rastro_territorios',
-    `?state_acronym=eq.${sigla}&select=*,rastro_analises_fontes(*),rastro_resultados(risco)`);
-
-  // busca os dados do Earth Engine (segmento + estrela verde) e indexa por codigo_car
-  let geeMap = {};
-  try{
-    const geeRows = await sbFetch('rastro_mapbiomas_historico_numeros', `?select=*`);
-    (geeRows||[]).forEach(g=>{ geeMap[g.codigo_car] = g; });
-  }catch(e){ /* sem dados do GEE ainda, tudo bem */ }
-
-  let fazendas=(rows||[]).map(f=>{
-    if(geeMap[f.codigo_car]) f.rastro_mapbiomas_historico_numeros = geeMap[f.codigo_car];
-    return {
-      ...f,
-      _risco:f.rastro_resultados?.[0]?.risco||null,
-      _estrelas:calcularEstrelas(f),
-    };
-  });
-
-  if(riscoSel==='PENDENTE') fazendas=fazendas.filter(f=>f.status==='PENDENTE');
-  else if(riscoSel==='INATIVO') fazendas=fazendas.filter(f=>f.status==='INATIVO');
-  else if(riscoSel) fazendas=fazendas.filter(f=>f._risco===riscoSel);
-
-  // subfiltro segmento
-  if(segSel) fazendas=fazendas.filter(f=>f._estrelas?.segmento===segSel);
-
-  // subfiltro estrela
-  if(estrelaSel==='VERDE') fazendas=fazendas.filter(f=>f._estrelas?.verdes>0);
-  else if(estrelaSel==='VERMELHA') fazendas=fazendas.filter(f=>f._estrelas?.vermelhas>0);
-  else if(estrelaSel==='SEM_VERMELHA') fazendas=fazendas.filter(f=>!(f._estrelas?.vermelhas>0));
-
+  fecharDetalhe();
   Object.values(mkrs).forEach(m=>m.remove()); mkrs={};
-  fazendas.forEach(plotarFazenda);
-  let label=estadoSel;
-  if(riscoSel) label+=` · ${riscoSel}`;
-  if(segSel) label+=` · ${segSel}`;
-  if(estrelaSel) label+=` · ${estrelaSel}`;
-  buildLista(fazendas,label);
-  destacarMapa(fazendas);
-  // guarda os filtrados para a atualizacao em massa
-  window._filtrados = fazendas.map(f=>f.codigo_car);
-}
-
-// ====== ATUALIZAR HISTORICO EM MASSA (dos filtrados) ======
-async function atualizarHistoricoMassa(){
-  const cars = window._filtrados || [];
-  const btn = document.getElementById('btn-atualizar-massa');
-  const msg = document.getElementById('massa-msg');
-
-  if(!cars.length){
-    msg.style.display='block';
-    msg.textContent = 'Faça uma busca (estado) primeiro. Atualiza só os que aparecerem na lista.';
-    return;
-  }
-
-  if(cars.length > 30){
-    if(!confirm(`Vai atualizar ${cars.length} propriedades, uma por uma. Pode levar alguns minutos. Continuar?`)) return;
-  }
-
-  btn.disabled = true;
-  msg.style.display='block';
-  let ok=0, erro=0;
-
-  for(let i=0;i<cars.length;i++){
-    const car = cars[i];
-    btn.innerHTML = `<div class="spin" style="border-top-color:var(--v2)"></div> ${i+1}/${cars.length}…`;
-    msg.textContent = `Atualizando ${i+1} de ${cars.length} — ${ok} ok, ${erro} erro…`;
-    try{
-      const resp = await fetch(`${SUPABASE_URL}/functions/v1/mapibioma`, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_ANON}` },
-        body: JSON.stringify({ codigo_car: car }),
-      });
-      const data = await resp.json();
-      if(data?.status === 'OK') ok++; else erro++;
-    }catch(e){ erro++; }
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg> Atualizar histórico dos filtrados';
-  msg.style.cssText += 'background:#dcfce7;color:#14532d;display:block';
-  msg.textContent = `✓ Concluído: ${ok} atualizados, ${erro} com erro. Clique em Buscar de novo para ver as estrelas.`;
-}
-function limparFiltro(){
-  document.getElementById('sel-estado').value='';
-  document.getElementById('sel-risco').value='';
-  document.getElementById('sel-segmento').value='';
-  document.getElementById('sel-estrela').value='';
   buildLista(null);
-  Object.values(mkrs).forEach(m=>m.remove()); mkrs={};
-  resetMapa();
 }
 
-// ── METAMASK ──
 async function conectarWallet(){
-  if(!window.ethereum){ alert('MetaMask não encontrada. Instale a extensão MetaMask no seu navegador.'); return; }
+  if(!window.ethereum){ alert('MetaMask não encontrada.'); return; }
   try {
     const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
     wallet=accounts[0];
     const chainId=await window.ethereum.request({method:'eth_chainId'});
-    if(chainId!==SEPOLIA_ID){
-      try { await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:SEPOLIA_ID}]}); }
-      catch(e) { alert('Por favor, mude para a rede Ethereum Sepolia no MetaMask.'); return; }
-    }
+    if(chainId!==SEPOLIA_ID){ try { await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:SEPOLIA_ID}]}); } catch(e) { alert('Por favor, mude para a rede Sepolia.'); return; } }
     const btn=document.getElementById('btn-mm');
     btn.classList.add('conectado');
     btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Conectado`;
     document.getElementById('wallet-addr').style.display='block';
     document.getElementById('wallet-addr').textContent=wallet.slice(0,6)+'...'+wallet.slice(-4);
     document.getElementById('btn-cad').disabled=false;
-  } catch(e) { alert('Erro ao conectar MetaMask: '+e.message); }
+  } catch(e) { alert('Erro ao conectar: '+e.message); }
 }
 async function cadastrar(){
   const car=document.getElementById('inp-cad').value.trim();
@@ -939,24 +703,19 @@ async function cadastrar(){
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const addr = document.getElementById('inp-contrato').value.trim() || CONTRACT_ADDR;
-    const contrato = new ethers.Contract(addr, [
-      'function cadastrarCAR(string codigoCAR)',
-      'function totalFazendas() view returns (uint256)',
-      'function listarTodos() view returns (string[])'
-    ], signer);
+    const contrato = new ethers.Contract(addr, ['function cadastrarCAR(string codigoCAR)','function totalFazendas() view returns (uint256)'], signer);
     const tx = await contrato.cadastrarCAR(car);
     document.getElementById('tx-info').classList.add('show');
-    document.getElementById('tx-info').innerHTML=`Transação enviada, aguardando confirmação: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
+    document.getElementById('tx-info').innerHTML=`Transação enviada: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
     const receipt = await tx.wait();
-    if(receipt.status !== 1){ throw new Error('A transação foi minerada, mas falhou no contrato.'); }
+    if(receipt.status !== 1) throw new Error('Falha na transação.');
     const total = await contrato.totalFazendas();
     document.getElementById('cad-ok').classList.add('show');
-    document.getElementById('cad-ok').textContent=`✓ CAR cadastrado on-chain. Total de fazendas: ${total.toString()}.`;
-    document.getElementById('tx-info').innerHTML=`Confirmada: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
+    document.getElementById('cad-ok').textContent=`✓ CAR cadastrado. Total: ${total.toString()}.`;
     document.getElementById('inp-cad').value='';
   } catch(e) {
     document.getElementById('cad-err').classList.add('show');
-    document.getElementById('cad-err').textContent='Erro: '+(e.shortMessage||e.reason||e.message||'transação cancelada');
+    document.getElementById('cad-err').textContent='Erro: '+(e.shortMessage||e.reason||e.message||'Cancelada');
   }
   btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Cadastrar';
   btn.disabled=false;
