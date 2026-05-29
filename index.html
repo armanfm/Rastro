@@ -144,6 +144,34 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 .ft-s{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t3)}
 .ft-c{font-size:10.5px;color:var(--t3)}
 .sep{color:var(--b)}
+
+/* ====== ESTRELAS / HISTÓRICO MAPBIOMAS ====== */
+.estrelas{display:inline-flex;align-items:center;gap:2px;flex-wrap:wrap;min-height:14px}
+.estrela{position:relative;font-size:14px;line-height:1;cursor:default}
+.estrela.verde{color:#22c55e}
+.estrela.vermelha{color:#dc2626}
+.estrela .tip{visibility:hidden;opacity:0;position:absolute;bottom:140%;left:50%;transform:translateX(-50%);background:var(--t);color:#fff;font-size:10px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;z-index:9999;transition:opacity .12s;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.estrela .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--t)}
+.estrela:hover .tip{visibility:visible;opacity:1}
+.estrelas-bloco{display:flex;flex-direction:column;gap:5px}
+.estrelas-linha{display:flex;align-items:center;gap:8px}
+.estrelas-linha small{font-size:10.5px;color:var(--t3);min-width:74px}
+.hist-msg{display:none;font-size:11px;margin-top:6px;padding:6px 8px;border-radius:var(--r)}
+.hist-msg.ok{display:block;background:#dcfce7;color:#14532d}
+.hist-msg.err{display:block;background:#fee2e2;color:#991b1b}
+.saldo-card{background:var(--v4);border:1px solid var(--b);border-radius:var(--r2);padding:.75rem .85rem;margin:.35rem 0 .65rem}
+.saldo-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:.55rem}
+.saldo-status{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--t2)}
+.saldo-icone{font-size:18px;line-height:1}.saldo-icone.pos{color:#22c55e}.saldo-icone.neg{color:#dc2626}.saldo-icone.neu{color:var(--t3)}
+.saldo-num{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;background:#edf7f1;color:var(--v)}
+.saldo-num.neg{background:#fee2e2;color:#991b1b}.saldo-num.neu{background:#f1f5f1;color:#6b897a}
+.saldo-bar{position:relative;height:14px;border-radius:999px;background:#eef6f1;border:1px solid var(--b);display:flex;overflow:hidden}
+.saldo-bar::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(13,31,22,.25);transform:translateX(-1px)}
+.saldo-left,.saldo-right{width:50%;position:relative}.saldo-left{display:flex;justify-content:flex-end}.saldo-right{display:flex;justify-content:flex-start}
+.saldo-fill-red{height:100%;background:#dc2626;border-radius:999px 0 0 999px}.saldo-fill-green{height:100%;background:#22c55e;border-radius:0 999px 999px 0}
+.saldo-leg{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:var(--t3)}
+.saldo-leg strong{color:var(--t2);font-weight:600}
+
 </style>
 </head>
 <body>
@@ -203,6 +231,19 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
           <option value="PENDENTE">Pendente</option>
           <option value="INATIVO">Inválido</option>
         </select>
+        <select class="sel" id="sel-segmento">
+          <option value="">Todos os segmentos (opcional)</option>
+          <option value="SOJA">Soja</option>
+          <option value="PECUARIA">Pecuária</option>
+          <option value="CAFE">Café</option>
+          <option value="CANA">Cana</option>
+          <option value="ALGODAO">Algodão</option>
+          <option value="ARROZ">Arroz</option>
+          <option value="SILVICULTURA">Silvicultura</option>
+          <option value="AGRICULTURA">Agricultura</option>
+          <option value="LAVOURA_TEMPORARIA">Lavoura temporária</option>
+          <option value="MOSAICO_DE_USOS">Mosaico de usos</option>
+        </select>
         <div class="row">
           <button class="btn btn-p" onclick="filtrar()">Buscar</button>
           <button class="btn btn-s" onclick="limparFiltro()" style="padding:0 14px">Limpar</button>
@@ -217,6 +258,9 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
         <!-- Endereço do contrato -->
         <p style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:2px">Endereço do contrato</p>
         <input class="inp" id="inp-contrato" type="text" value="0x865724ffd417f5B696f31a8Af67541585fd2a262" style="font-family:'Courier New',monospace;font-size:11px"/>
+        <button class="btn btn-g" id="btn-salvar-contrato" onclick="salvarContratoAtual()" style="margin-top:4px">
+          Salvar contrato localmente
+        </button>
 
         <!-- Conectar wallet -->
         <button class="btn-mm" id="btn-mm" onclick="conectarWallet()" style="margin-top:4px">
@@ -289,6 +333,30 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
         <div id="det-leaflet-map" class="det-mapa" style="display:none"></div>
       </div>
       <div class="det-sec">
+        <p class="det-sec-tit">Histórico</p>
+        <div class="saldo-card">
+          <div class="saldo-top">
+            <div class="saldo-status"><span id="d-saldo-icone" class="saldo-icone neu">•</span><span id="d-saldo-texto">Saldo ambiental neutro</span></div>
+            <span id="d-saldo-num" class="saldo-num neu">0.0 ha</span>
+          </div>
+          <div class="saldo-bar">
+            <div class="saldo-left"><div id="d-barra-perda" class="saldo-fill-red" style="width:0%"></div></div>
+            <div class="saldo-right"><div id="d-barra-ganho" class="saldo-fill-green" style="width:0%"></div></div>
+          </div>
+          <div class="saldo-leg"><span>Desmatamento <strong id="d-perda-ha">0.0 ha</strong></span><span>Recuperação <strong id="d-ganho-ha">0.0 ha</strong></span></div>
+        </div>
+        <div class="estrelas-bloco">
+          <div class="estrelas-linha"><small>Classificação</small><span id="d-estrelas-verde" class="estrelas">—</span><span id="d-estrelas-vermelha" class="estrelas" style="display:none">—</span></div>
+          <div class="estrelas-linha"><small>Segmento</small><span id="d-segmento" class="det-cell-v" style="font-size:12px">—</span></div>
+        </div>
+        <button class="btn btn-g" id="btn-atualizar-hist" onclick="atualizarHistorico()" style="margin-top:.75rem">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          Atualizar histórico
+        </button>
+        <div id="hist-msg" class="hist-msg"></div>
+      </div>
+
+      <div class="det-sec">
         <p class="det-sec-tit">Propriedade</p>
         <div class="det-grid">
           <div class="det-cell"><p class="det-cell-l">Status</p><span id="d-status" class="badge bv">—</span></div>
@@ -313,7 +381,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
         </div>
       </div>
       <div class="det-sec">
-        <p class="det-sec-tit">Fontes de dados</p>
+        <p class="det-sec-tit">Fontes de dados estado atual</p>
         <div class="fontes-grid">
           <div class="fonte-card">
             <div class="fonte-tit">
@@ -351,13 +419,62 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const GEOAPIFY_KEY   = 'dc783b9c4d184a4f95d4a7999f44ef13';
 const SUPABASE_URL   = 'https://tqsoopgmzdwttwvedngk.supabase.co';
 const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxc29vcGdtemR3dHR3dmVkbmdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjIxNTEsImV4cCI6MjA5NDUzODE1MX0.LaHuxJVFJI9SkGHFmapSpkUYBC5plB9oPuDXIXJXsN0';
-const CONTRACT_ADDR  = '0x865724ffd417f5B696f31a8Af67541585fd2a262';
+const CONTRACT_ADDR_PADRAO = '0x865724ffd417f5B696f31a8Af67541585fd2a262';
 const SEPOLIA_ID     = '0xaa36a7';
+const dbLocal = new PouchDB('rastro_config_local');
+
+async function carregarContratoSalvo(){
+  const input = document.getElementById('inp-contrato');
+  try {
+    const doc = await dbLocal.get('contrato_ativo');
+    if(doc?.address && ethers.isAddress(doc.address)){
+      input.value = doc.address;
+      return doc.address;
+    }
+  } catch(e) {}
+  input.value = CONTRACT_ADDR_PADRAO;
+  return CONTRACT_ADDR_PADRAO;
+}
+
+async function salvarContratoAtual(){
+  const input = document.getElementById('inp-contrato');
+  const addr = input.value.trim();
+  const err = document.getElementById('cad-err');
+  const ok = document.getElementById('cad-ok');
+  err.classList.remove('show');
+  ok.classList.remove('show');
+  if(!ethers.isAddress(addr)){
+    err.textContent = 'Endereço de contrato inválido.';
+    err.classList.add('show');
+    return null;
+  }
+  let antigo = null;
+  try { antigo = await dbLocal.get('contrato_ativo'); } catch(e) {}
+  const doc = {
+    _id: 'contrato_ativo',
+    address: addr,
+    updated_at: new Date().toISOString(),
+  };
+  if(antigo?._rev) doc._rev = antigo._rev;
+  await dbLocal.put(doc);
+  ok.textContent = '✓ Contrato salvo localmente neste navegador.';
+  ok.classList.add('show');
+  return addr;
+}
+
+function getContratoAtual(){
+  const addr = document.getElementById('inp-contrato').value.trim();
+  if(!ethers.isAddress(addr)){
+    throw new Error('Endereço de contrato inválido.');
+  }
+  return addr;
+}
 
 // ABI mínimo do contrato
 const CONTRACT_ABI = [
@@ -380,6 +497,157 @@ async function sbFetch(path, params=''){
   });
   return r.json();
 }
+
+
+// ── HISTÓRICO MAPBIOMAS / ESTRELAS ───────────────────────────────────────────
+function nnum(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function primeiro(v){
+  return Array.isArray(v) ? (v[0] || null) : (v || null);
+}
+
+async function buscarHistoricoMapbiomas(car){
+  const rows = await sbFetch('rastro_mapbiomas_historico_numeros',
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+  return Array.isArray(rows) && rows.length ? rows[0] : null;
+}
+
+async function buscarHistoricosMapbiomasPorCars(cars){
+  const unicos = [...new Set((cars || []).filter(Boolean))];
+  const mapa = {};
+  if(!unicos.length) return mapa;
+
+  // Supabase REST aceita filtro in.(a,b,c). Em lotes evita URL gigante.
+  for(let i=0;i<unicos.length;i+=80){
+    const lote = unicos.slice(i, i+80);
+    const filtro = lote.map(c => encodeURIComponent(c)).join(',');
+    try{
+      const rows = await sbFetch('rastro_mapbiomas_historico_numeros',
+        `?codigo_car=in.(${filtro})&select=*`);
+      if(Array.isArray(rows)){
+        rows.forEach(h => { if(h?.codigo_car) mapa[h.codigo_car] = h; });
+      }
+    }catch(e){
+      console.warn('Histórico por lote indisponível:', e);
+    }
+  }
+  return mapa;
+}
+
+function calcularEstrelas(territorio){
+  const fontes = Array.isArray(territorio?.rastro_analises_fontes) ? territorio.rastro_analises_fontes : [];
+
+  const histFonte = fontes.find(x => x?.origem === 'MAPBIOMAS_HISTORICO') || null;
+  const mbFonte = fontes.find(x => x?.origem === 'MAPBIOMAS') || null;
+  const histPayload = histFonte?.payload || {};
+  const histCol = histPayload?.colunas || {};
+  const mbPayload = mbFonte?.payload || {};
+
+  const totalAlertas = nnum(
+    histFonte?.total_alertas ??
+    histCol?.total_alertas ??
+    histPayload?.total_alertas ??
+    histPayload?.numberOfAlerts ??
+    histPayload?.numero_alertas ??
+    mbPayload?.numberOfAlerts
+  );
+
+  const areaDesmatada = nnum(
+    histFonte?.area_desmatada_ha ??
+    histCol?.area_desmatada_ha ??
+    histPayload?.area_desmatada_ha ??
+    histPayload?.areaHaAlertas ??
+    mbPayload?.areaHaAlertas
+  );
+
+  const gee = primeiro(territorio?.rastro_mapbiomas_historico_numeros) || {};
+  const segmento = gee.segmento_atual || gee.segmento || gee.segmento_dominante || null;
+  const variacao = nnum(gee.variacao_nativa_2020_2024_ha ?? gee.variacao_nativa_ha);
+
+  const ganho = Math.max(0, variacao);
+  const perda = Math.max(0, areaDesmatada);
+  const saldo = ganho - perda;
+  const tolerancia = 0; // qualquer saldo positivo ja mostra estrela; qualquer saldo negativo mostra fogo
+
+  let classificacao = 'NEUTRO';
+  if(saldo > tolerancia) classificacao = 'POSITIVO';
+  else if(saldo < -tolerancia) classificacao = 'NEGATIVO';
+
+  return {
+    ganho,
+    perda,
+    saldo,
+    classificacao,
+    totalAlertas: Math.max(0, Math.round(totalAlertas)),
+    segmento,
+  };
+}
+
+function htmlIconeHistorico(est){
+  const saldoAbs = Math.abs(nnum(est.saldo)).toFixed(1);
+  if(est.classificacao === 'POSITIVO'){
+    return `<span class="estrela verde">★<span class="tip">Saldo positivo: +${saldoAbs} ha</span></span>`;
+  }
+  if(est.classificacao === 'NEGATIVO'){
+    return `<span class="estrela vermelha">🔥<span class="tip">Saldo negativo: -${saldoAbs} ha</span></span>`;
+  }
+  return '<span style="font-size:11px;color:var(--t3)">neutro</span>';
+}
+
+function preencherBlocoEstrelas(est){
+  const classificacaoEl = document.getElementById('d-estrelas-verde');
+  const legadoVermelho = document.getElementById('d-estrelas-vermelha');
+  const segmento = document.getElementById('d-segmento');
+  const icone = document.getElementById('d-saldo-icone');
+  const texto = document.getElementById('d-saldo-texto');
+  const saldoNum = document.getElementById('d-saldo-num');
+  const barraPerda = document.getElementById('d-barra-perda');
+  const barraGanho = document.getElementById('d-barra-ganho');
+  const perdaHa = document.getElementById('d-perda-ha');
+  const ganhoHa = document.getElementById('d-ganho-ha');
+
+  const ganho = nnum(est.ganho);
+  const perda = nnum(est.perda);
+  const saldo = nnum(est.saldo);
+  const total = Math.max(ganho + perda, 1);
+  const pctGanho = Math.min(100, (ganho / total) * 100);
+  const pctPerda = Math.min(100, (perda / total) * 100);
+
+  if(classificacaoEl) classificacaoEl.innerHTML = htmlIconeHistorico(est);
+  if(legadoVermelho) legadoVermelho.innerHTML = '';
+  if(segmento) segmento.textContent = est.segmento || '—';
+
+  if(barraGanho) barraGanho.style.width = `${pctGanho}%`;
+  if(barraPerda) barraPerda.style.width = `${pctPerda}%`;
+  if(ganhoHa) ganhoHa.textContent = `${ganho.toFixed(1)} ha`;
+  if(perdaHa) perdaHa.textContent = `${perda.toFixed(1)} ha`;
+
+  if(icone && texto && saldoNum){
+    icone.className = 'saldo-icone neu';
+    saldoNum.className = 'saldo-num neu';
+    icone.textContent = '•';
+    texto.textContent = 'Saldo ambiental neutro';
+    saldoNum.textContent = `${saldo.toFixed(1)} ha`;
+
+    if(est.classificacao === 'POSITIVO'){
+      icone.className = 'saldo-icone pos';
+      saldoNum.className = 'saldo-num';
+      icone.textContent = '★';
+      texto.textContent = 'Recuperação vencendo';
+      saldoNum.textContent = `+${saldo.toFixed(1)} ha`;
+    } else if(est.classificacao === 'NEGATIVO'){
+      icone.className = 'saldo-icone neg';
+      saldoNum.className = 'saldo-num neg';
+      icone.textContent = '🔥';
+      texto.textContent = 'Desmatamento vencendo';
+      saldoNum.textContent = `${saldo.toFixed(1)} ha`;
+    }
+  }
+}
+
 
 // ── GRUPOS ────────────────────────────────────────────────────────────────────
 const GRUPOS=[
@@ -493,7 +761,94 @@ function limparMapaDetalhe(){
   }
 }
 
-function renderMapaDetalhe(geojson, bb){
+function criarHachuraMapa(){
+  if(!detalheMap) return;
+  const svg = detalheMap.getPanes().overlayPane.querySelector('svg');
+  if(!svg) return;
+  let defs = svg.querySelector('defs');
+  if(!defs){
+    defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    svg.insertBefore(defs, svg.firstChild);
+  }
+  if(!defs.querySelector('#rastro-hachura-verde')){
+    const pattern = document.createElementNS('http://www.w3.org/2000/svg','pattern');
+    pattern.setAttribute('id','rastro-hachura-verde');
+    pattern.setAttribute('patternUnits','userSpaceOnUse');
+    pattern.setAttribute('width','10');
+    pattern.setAttribute('height','10');
+    pattern.setAttribute('patternTransform','rotate(45)');
+    const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bg.setAttribute('width','10');
+    bg.setAttribute('height','10');
+    bg.setAttribute('fill','rgba(34,197,94,0.12)');
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1','0');
+    line.setAttribute('y1','0');
+    line.setAttribute('x2','0');
+    line.setAttribute('y2','10');
+    line.setAttribute('stroke','#22c55e');
+    line.setAttribute('stroke-width','3');
+    line.setAttribute('stroke-opacity','0.55');
+    pattern.appendChild(bg);
+    pattern.appendChild(line);
+    defs.appendChild(pattern);
+  }
+}
+
+function aplicarHachuraLayer(layer){
+  setTimeout(()=>{
+    criarHachuraMapa();
+    const path = layer?._path;
+    if(path){
+      path.setAttribute('fill','url(#rastro-hachura-verde)');
+      path.setAttribute('fill-opacity','1');
+      path.setAttribute('stroke','#1a3828');
+      path.setAttribute('stroke-width','3');
+    }
+  }, 60);
+}
+
+function wktParaGeoJSON(wkt){
+  if(!wkt || typeof wkt !== 'string') return null;
+  let texto = wkt.trim();
+  const idx = texto.indexOf(';');
+  if(texto.toUpperCase().startsWith('SRID=') && idx >= 0) texto = texto.slice(idx + 1).trim();
+  const up = texto.toUpperCase();
+  const ehMulti = up.startsWith('MULTIPOLYGON');
+  const ehPoly = up.startsWith('POLYGON');
+  if(!ehMulti && !ehPoly) return null;
+  const inicio = texto.indexOf('(');
+  const fim = texto.lastIndexOf(')');
+  if(inicio < 0 || fim < 0) return null;
+  const corpo = texto.slice(inicio, fim + 1);
+  const parseAnel = anel => anel.split(',')
+    .map(par => par.trim().split(/\s+/).map(Number))
+    .filter(c => c.length >= 2 && c.every(Number.isFinite))
+    .map(c => [c[0], c[1]]);
+  try{
+    if(ehMulti){
+      let m = corpo.replace(/^\(/,'').replace(/\)$/,'');
+      const fimPrimeiro = m.indexOf(')),');
+      const primeiro = fimPrimeiro >= 0 ? m.slice(0, fimPrimeiro + 2) : m;
+      const p = primeiro.replace(/^\(/,'').replace(/\)$/,'');
+      const aneis = p.split(/\)\s*,\s*\(/).map(a => a.replace(/^\(/,'').replace(/\)$/,''));
+      return {type:'Polygon', coordinates: aneis.map(parseAnel)};
+    }
+    const p = corpo.replace(/^\(/,'').replace(/\)$/,'');
+    const aneis = p.split(/\)\s*,\s*\(/).map(a => a.replace(/^\(/,'').replace(/\)$/,''));
+    return {type:'Polygon', coordinates: aneis.map(parseAnel)};
+  }catch{
+    return null;
+  }
+}
+
+function extrairGeoJSONDoTerritorio(f){
+  const porWkt = wktParaGeoJSON(f?.geometry_wkt || f?.payload?.geometryWkt || f?.payload?.geometry_wkt);
+  if(porWkt) return porWkt;
+  return f?.geojson || f?.geometry || f?.payload?.geometry || f?.payload?.geojson || null;
+}
+
+function renderMapaDetalhe(geojson, bb, f=null){
   const load=document.getElementById('det-mapa-load');
   const img=document.getElementById('det-mapa-img');
   const el=document.getElementById('det-leaflet-map');
@@ -502,13 +857,6 @@ function renderMapaDetalhe(geojson, bb){
 
   limparMapaDetalhe();
   img.style.display='none';
-
-  if(!gj && !bbox){
-    load.style.display='flex';
-    load.textContent='Sem desenho territorial';
-    return false;
-  }
-
   load.style.display='none';
   el.style.display='block';
 
@@ -530,7 +878,7 @@ function renderMapaDetalhe(geojson, bb){
         color:'#1a3828',
         weight:3,
         fillColor:'#22c55e',
-        fillOpacity:.22,
+        fillOpacity:.20,
         opacity:1,
       },
       pointToLayer:(_feature,latlng)=>L.circleMarker(latlng,{
@@ -543,40 +891,126 @@ function renderMapaDetalhe(geojson, bb){
     }).addTo(detalheMap);
 
     bounds=detalheAreaLayer.getBounds();
+    detalheAreaLayer.eachLayer(aplicarHachuraLayer);
   }
 
   if((!bounds || !bounds.isValid()) && bbox){
     bounds=L.latLngBounds([[bbox.south,bbox.west],[bbox.north,bbox.east]]);
-
     detalheAreaLayer=L.rectangle(bounds,{
       color:'#1a3828',
       weight:3,
       fillColor:'#22c55e',
-      fillOpacity:.16,
+      fillOpacity:.18,
       dashArray:'7 5',
     }).addTo(detalheMap);
+    aplicarHachuraLayer(detalheAreaLayer);
+  }
+
+  // Fallback: se nao houver poligono nem bounding box, mostra so a localizacao aproximada.
+  // Sem mensagem "indisponivel" e sem segundo mapa duplicado.
+  if(!bounds || !bounds.isValid()){
+    const lat = Number(f?.centroid_lat);
+    const lon = Number(f?.centroid_lon);
+    if(Number.isFinite(lat) && Number.isFinite(lon)){
+      const areaHa = Number(f?.area_ha || 0);
+      const raioM = areaHa > 0 ? Math.max(500, Math.sqrt(areaHa * 10000 / Math.PI)) : 1500;
+      const centro = L.latLng(lat, lon);
+      detalheAreaLayer=L.circle(centro,{
+        radius:raioM,
+        color:'#1a3828',
+        weight:2,
+        fillColor:'#22c55e',
+        fillOpacity:.10,
+        dashArray:'7 5',
+      }).addTo(detalheMap);
+      aplicarHachuraLayer(detalheAreaLayer);
+      L.circleMarker(centro,{radius:6,fillColor:'#1a3828',color:'#fff',weight:2,fillOpacity:1}).addTo(detalheMap);
+      bounds=detalheAreaLayer.getBounds();
+    }
   }
 
   if(!bounds || !bounds.isValid()){
-    load.style.display='flex';
-    load.textContent='Desenho territorial invalido';
     el.style.display='none';
-    limparMapaDetalhe();
+    load.style.display='none';
     return false;
   }
-
-  const centro=bounds.getCenter();
-  L.circleMarker(centro,{
-    radius:6,
-    fillColor:'#1a3828',
-    color:'#fff',
-    weight:2,
-    fillOpacity:1,
-  }).addTo(detalheMap);
 
   detalheMap.fitBounds(bounds,{padding:[28,28]});
   setTimeout(()=>detalheMap.invalidateSize(),80);
   return true;
+}
+
+function preencherPropriedadeEGemini(f){
+  if(!f) return;
+
+  const resultado = Array.isArray(f.rastro_resultados) ? f.rastro_resultados[0] : null;
+
+  const sc = f.status === 'ATIVO' ? 'bv' : f.status === 'PENDENTE' ? 'bp' : 'bi';
+  const se = document.getElementById('d-status');
+  if(se){
+    se.className = 'badge ' + sc;
+    se.textContent = f.status || '—';
+  }
+
+  const re = document.getElementById('d-risco');
+  if(re){
+    re.style.cssText = '';
+    if(resultado?.risco){
+      re.className = 'rbadge rb-' + resultado.risco[0].toLowerCase();
+      re.textContent = resultado.risco;
+    } else {
+      re.className = 'rbadge';
+      re.style.cssText = 'background:#f1f5f1;color:#6b897a';
+      re.textContent = 'N/A';
+    }
+  }
+
+  const estado = document.getElementById('d-estado');
+  const area = document.getElementById('d-area');
+  const data = document.getElementById('d-data');
+  const sigla = document.getElementById('d-sigla');
+
+  if(estado) estado.textContent = f.estado || f.state_acronym || '—';
+  if(area) area.textContent = f.area_ha ? (f.area_ha + ' ha') : '—';
+  if(data) data.textContent = f.created_at ? new Date(f.created_at).toLocaleDateString('pt-BR') : '—';
+  if(sigla) sigla.textContent = f.state_acronym || '—';
+
+  if(resultado){
+    const gr = document.getElementById('d-g-risco');
+    if(gr){
+      gr.className = 'rbadge rb-' + (resultado.risco?.[0]?.toLowerCase() || 'b');
+      gr.textContent = resultado.risco || '—';
+    }
+    const just = document.getElementById('d-g-just');
+    const comp = document.getElementById('d-g-comp');
+    const inter = document.getElementById('d-g-int');
+    const resumo = document.getElementById('d-g-res');
+    if(just) just.textContent = resultado.justificativa || '—';
+    if(comp) comp.textContent = resultado.compliance || '—';
+    if(inter) inter.textContent = resultado.interpretacao || '—';
+    if(resumo) resumo.textContent = resultado.resumo || '—';
+  } else {
+    ['d-g-risco','d-g-just','d-g-comp','d-g-int','d-g-res'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){ el.textContent='Análise pendente'; el.className='gemini-campo-v'; }
+    });
+  }
+
+  const fontes = Array.isArray(f.rastro_analises_fontes) ? f.rastro_analises_fontes : [];
+  const mb = fontes.find(x=>x.origem==='MAPBIOMAS');
+  const ib = fontes.find(x=>x.origem==='IBAMA');
+
+  const mbDef = document.getElementById('d-mb-def');
+  const mbAlerts = document.getElementById('d-mb-alerts');
+  const mbHa = document.getElementById('d-mb-ha');
+  const ibEmb = document.getElementById('d-ib-emb');
+  const ibSt = document.getElementById('d-ib-st');
+
+  if(mbDef) mbDef.textContent = mb?.payload?.deforestationStatus === 1 ? 'Sim' : 'Não';
+  if(mbAlerts) mbAlerts.textContent = mb?.payload?.numberOfAlerts ?? '—';
+  if(mbHa) mbHa.textContent = mb?.payload?.areaHaAlertas ? (mb.payload.areaHaAlertas + ' ha') : '—';
+  if(ibEmb) ibEmb.textContent = ib?.payload?.embargoStatus === 1 ? 'Sim' : 'Não';
+  if(ibSt) ibSt.textContent = ib?.payload?.embargoStatus === 1 ? 'Embargado' : 'Regular';
 }
 
 // ── DETALHE ───────────────────────────────────────────────────────────────────
@@ -603,13 +1037,33 @@ async function abrirDetalhe(car){
 
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
-  // Mapa estático Geoapify
-  const bb=normalizarBoundingBox(f.bounding_box);
-  if(bb){
-    renderMapaDetalhe(bb);
-  } else {
-    load.textContent='Sem dados territoriais';
+  // Preenche a aba PROPRIEDADE imediatamente, antes de qualquer mapa/histórico.
+  // Assim, se Leaflet, GeoJSON ou Edge Function falhar, Estado/Área/Sigla/Risco não somem.
+  preencherPropriedadeEGemini(f);
+
+  // Estrelas/segmento: usa tabela histórica separada, sem alterar os dados da propriedade.
+  try{
+    const hist = await buscarHistoricoMapbiomas(car);
+    if(hist) f.rastro_mapbiomas_historico_numeros = hist;
+  }catch(e){
+    console.warn('Histórico MapBiomas indisponível:', e);
   }
+  window._detalheAtual = f;
+  preencherBlocoEstrelas(calcularEstrelas(f));
+
+  // Mapa territorial
+  const bb=normalizarBoundingBox(f.bounding_box);
+  const gj=extrairGeoJSONDoTerritorio(f);
+  try{
+    renderMapaDetalhe(gj, bb, f);
+  }catch(e){
+    console.error('Erro ao renderizar mapa do detalhe:', e);
+    limparMapaDetalhe();
+    load.style.display='none';
+  }
+
+  // Reforço: o mapa nunca pode apagar/travar a seção Propriedade.
+  preencherPropriedadeEGemini(f);
 
   // Status
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
@@ -657,6 +1111,63 @@ async function abrirDetalhe(car){
   document.getElementById('d-ib-st').textContent=ib?.payload?.embargoStatus===1?'Embargado':'Regular';
 
   document.getElementById('detalhe').scrollTop=0;
+}
+
+
+async function atualizarHistorico(){
+  const car = document.getElementById('det-car-cod').textContent.trim();
+  if(!car || car === '—') return;
+
+  const btn = document.getElementById('btn-atualizar-hist');
+  const msg = document.getElementById('hist-msg');
+  const original = btn.innerHTML;
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin" style="border-top-color:var(--v2)"></div> Buscando no MapBiomas…';
+  msg.className = 'hist-msg';
+  msg.textContent = '';
+
+  try{
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/mapibioma`, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${SUPABASE_ANON}`,
+      },
+      body: JSON.stringify({ codigo_car: car }),
+    });
+
+    let data = {};
+    try{ data = await resp.json(); }catch(_){ data = {}; }
+
+    if(!resp.ok || data?.status !== 'OK'){
+      throw new Error(data?.detalhe || data?.erro || data?.status || `HTTP ${resp.status}`);
+    }
+
+    const hist = {
+      codigo_car: car,
+      segmento_atual: data.segmento_atual,
+      vegetacao_nativa_atual_ha: data.vegetacao_nativa_atual_ha,
+      variacao_nativa_2020_2024_ha: data.variacao_nativa_2020_2024_ha,
+      estrela_verde: data.estrela_verde === true,
+    };
+
+    // Atualiza só o bloco Histórico, usando também as fontes já carregadas
+    // para comparar recuperação x desmatamento. Não mexe na aba Propriedade.
+    const base = window._detalheAtual || {};
+    base.rastro_mapbiomas_historico_numeros = hist;
+    window._detalheAtual = base;
+    preencherBlocoEstrelas(calcularEstrelas(base));
+
+    msg.className = 'hist-msg ok';
+    msg.textContent = `✓ Atualizado. Segmento: ${data.segmento_atual || '—'} · Veg. nativa: ${nnum(data.vegetacao_nativa_atual_ha).toFixed(1)} ha`;
+  }catch(e){
+    msg.className = 'hist-msg err';
+    msg.textContent = 'Erro ao atualizar histórico: ' + (e.message || e);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = original;
 }
 
 function fecharDetalhe(){
@@ -800,37 +1311,49 @@ function limparCAR(){
 async function filtrar(){
   const estadoSel=document.getElementById('sel-estado').value;
   const riscoSel=document.getElementById('sel-risco').value;
+  const segSel=document.getElementById('sel-segmento').value;
   if(!estadoSel){alert('Selecione um estado para filtrar.');return;}
   const sigla=estadoSel.match(/\(([A-Z]+)\)/)?.[1]||'';
-
-  let url=`rastro_territorios?state_acronym=eq.${sigla}&select=*,rastro_resultados(risco)`;
 
   const rows=await sbFetch('rastro_territorios',
     `?state_acronym=eq.${sigla}&select=*,rastro_resultados(risco)`);
 
-  // Normaliza risco para filtro local
-  let fazendas=(rows||[]).map(f=>({
-    ...f,
-    _risco:f.rastro_resultados?.[0]?.risco||null
-  }));
+  const base = Array.isArray(rows) ? rows : [];
+  const historicos = await buscarHistoricosMapbiomasPorCars(base.map(f => f.codigo_car));
+
+  // Normaliza risco e junta o histórico MapBiomas, que é de onde vem o segmento.
+  let fazendas=base.map(f=>{
+    const hist = historicos[f.codigo_car] || null;
+    if(hist) f.rastro_mapbiomas_historico_numeros = hist;
+    return {
+      ...f,
+      _risco:f.rastro_resultados?.[0]?.risco||null,
+      _estrelas:calcularEstrelas(f),
+    };
+  });
 
   if(riscoSel==='PENDENTE') fazendas=fazendas.filter(f=>f.status==='PENDENTE');
   else if(riscoSel==='INATIVO') fazendas=fazendas.filter(f=>f.status==='INATIVO');
   else if(riscoSel) fazendas=fazendas.filter(f=>f._risco===riscoSel);
+
+  // Segmento só existe quando o histórico já foi calculado/alimentado.
+  if(segSel) fazendas=fazendas.filter(f=>f._estrelas?.segmento===segSel);
 
   // Plota no mapa
   Object.values(mkrs).forEach(m=>m.remove());
   mkrs={};
   fazendas.forEach(plotarFazenda);
 
-  const label=riscoSel?`${estadoSel} · ${riscoSel}`:estadoSel;
+  let label=estadoSel;
+  if(riscoSel) label+=` · ${riscoSel}`;
+  if(segSel) label+=` · ${segSel}`;
   buildLista(fazendas,label);
   destacarMapa(fazendas);
 }
-
 function limparFiltro(){
   document.getElementById('sel-estado').value='';
   document.getElementById('sel-risco').value='';
+  document.getElementById('sel-segmento').value='';
   buildLista(null);
   Object.values(mkrs).forEach(m=>m.remove());
   mkrs={};
@@ -886,7 +1409,8 @@ async function cadastrar(){
   try {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
-    const addr = document.getElementById('inp-contrato').value.trim() || CONTRACT_ADDR;
+    const addr = getContratoAtual();
+    await salvarContratoAtual();
     const contrato = new ethers.Contract(addr, [
       'function cadastrarCAR(string codigoCAR)',
       'function totalFazendas() view returns (uint256)',
@@ -920,9 +1444,10 @@ async function cadastrar(){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-window.addEventListener('load',()=>{
+window.addEventListener('load', async ()=>{
   initMap();
   buildLista(null);
+  await carregarContratoSalvo();
   document.getElementById('inp-car').addEventListener('keydown',e=>{if(e.key==='Enter')buscarCAR();});
 });
 </script>
