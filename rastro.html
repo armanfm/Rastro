@@ -146,7 +146,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 .sep{color:var(--b)}
 
 /* ====== ESTRELAS / HISTÓRICO MAPBIOMAS ====== */
-.estrelas{display:inline-flex;align-items:center;gap:2px;flex-wrap:wrap;min-height:16px}
+.estrelas{display:inline-flex;align-items:center;gap:2px;flex-wrap:wrap;min-height:14px}
 .estrela{position:relative;font-size:14px;line-height:1;cursor:default}
 .estrela.verde{color:#22c55e}
 .estrela.vermelha{color:#dc2626}
@@ -155,8 +155,8 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 .estrela:hover .tip{visibility:visible;opacity:1}
 .estrelas-bloco{display:flex;flex-direction:column;gap:5px}
 .estrelas-linha{display:flex;align-items:center;gap:8px}
-.estrelas-linha small{font-size:10.5px;color:var(--t3);min-width:78px}
-.hist-msg{display:none;font-size:11px;margin-top:6px;padding:7px 10px;border-radius:var(--r)}
+.estrelas-linha small{font-size:10.5px;color:var(--t3);min-width:74px}
+.hist-msg{display:none;font-size:11px;margin-top:6px;padding:6px 8px;border-radius:var(--r)}
 .hist-msg.ok{display:block;background:#dcfce7;color:#14532d}
 .hist-msg.err{display:block;background:#fee2e2;color:#991b1b}
 
@@ -317,6 +317,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
         </button>
         <div id="hist-msg" class="hist-msg"></div>
       </div>
+
       <div class="det-sec">
         <p class="det-sec-tit">Propriedade</p>
         <div class="det-grid">
@@ -412,36 +413,52 @@ async function sbFetch(path, params=''){
 
 
 // ── HISTÓRICO MAPBIOMAS / ESTRELAS ───────────────────────────────────────────
-function primeiroItem(v){
-  return Array.isArray(v) ? (v[0] || null) : (v || null);
-}
-
-function numero(v){
+function nnum(v){
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 }
 
+function primeiro(v){
+  return Array.isArray(v) ? (v[0] || null) : (v || null);
+}
+
+async function buscarHistoricoMapbiomas(car){
+  const rows = await sbFetch('rastro_mapbiomas_historico_numeros',
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+  return Array.isArray(rows) && rows.length ? rows[0] : null;
+}
+
 function calcularEstrelas(territorio){
   const fontes = Array.isArray(territorio?.rastro_analises_fontes) ? territorio.rastro_analises_fontes : [];
+
   const histFonte = fontes.find(x => x?.origem === 'MAPBIOMAS_HISTORICO') || null;
   const histPayload = histFonte?.payload || {};
   const histCol = histPayload?.colunas || {};
 
-  const totalAlertas = numero(
-    histFonte?.total_alertas ?? histCol?.total_alertas ?? histPayload?.total_alertas ?? histPayload?.numberOfAlerts
-  );
-  const areaDesmatada = numero(
-    histFonte?.area_desmatada_ha ?? histCol?.area_desmatada_ha ?? histPayload?.area_desmatada_ha ?? histPayload?.areaHaAlertas
+  const totalAlertas = nnum(
+    histFonte?.total_alertas ??
+    histCol?.total_alertas ??
+    histPayload?.total_alertas ??
+    histPayload?.numberOfAlerts ??
+    histPayload?.numero_alertas
   );
 
-  const gee = primeiroItem(territorio?.rastro_mapbiomas_historico_numeros) || {};
+  const areaDesmatada = nnum(
+    histFonte?.area_desmatada_ha ??
+    histCol?.area_desmatada_ha ??
+    histPayload?.area_desmatada_ha ??
+    histPayload?.areaHaAlertas
+  );
+
+  const gee = primeiro(territorio?.rastro_mapbiomas_historico_numeros) || {};
   const segmento = gee.segmento_atual || gee.segmento || gee.segmento_dominante || null;
-  const variacao = numero(gee.variacao_nativa_2020_2024_ha ?? gee.variacao_nativa_ha);
-  const vegetacaoAtual = numero(gee.vegetacao_nativa_atual_ha ?? gee.vegetacao_nativa_2024_ha);
-  const estrelaVerde = gee.estrela_verde === true || gee.estrela_verde === 'true' || variacao > 0 || vegetacaoAtual > 0;
+  const variacao = nnum(gee.variacao_nativa_2020_2024_ha ?? gee.variacao_nativa_ha);
+  const vegetacaoAtual = nnum(gee.vegetacao_nativa_atual_ha ?? gee.vegetacao_nativa_2024_ha);
+
+  const temVerde = gee.estrela_verde === true || gee.estrela_verde === 'true' || variacao > 0 || vegetacaoAtual > 0;
 
   return {
-    verdes: estrelaVerde ? 1 : 0,
+    verdes: temVerde ? 1 : 0,
     vermelhas: Math.max(0, Math.round(totalAlertas)),
     haRecuperado: variacao > 0 ? variacao : vegetacaoAtual,
     areaDesmatada,
@@ -449,12 +466,12 @@ function calcularEstrelas(territorio){
   };
 }
 
-function htmlEstrelas(qtd, cor, tooltipBase){
+function htmlEstrelas(qtd, cor, tooltip){
   const n = Math.max(0, Math.round(Number(qtd) || 0));
   if(!n) return '';
   let out = '';
   for(let i=0; i<Math.min(n,30); i++){
-    out += `<span class="estrela ${cor}">★<span class="tip">${tooltipBase}</span></span>`;
+    out += `<span class="estrela ${cor}">★<span class="tip">${tooltip}</span></span>`;
   }
   if(n > 30) out += `<span class="estrela ${cor}" style="font-size:10px">+${n-30}</span>`;
   return out;
@@ -467,21 +484,16 @@ function preencherBlocoEstrelas(est){
   if(!verde || !vermelha || !segmento) return;
 
   verde.innerHTML = est.verdes > 0
-    ? htmlEstrelas(est.verdes, 'verde', `+${numero(est.haRecuperado).toFixed(1)} ha de vegetação nativa`)
+    ? htmlEstrelas(est.verdes, 'verde', `+${nnum(est.haRecuperado).toFixed(1)} ha de vegetação nativa`)
     : '<span style="font-size:11px;color:var(--t3)">nenhuma</span>';
 
   vermelha.innerHTML = est.vermelhas > 0
-    ? htmlEstrelas(est.vermelhas, 'vermelha', `${numero(est.areaDesmatada).toFixed(1)} ha em alertas`)
+    ? htmlEstrelas(est.vermelhas, 'vermelha', `${nnum(est.areaDesmatada).toFixed(1)} ha em alertas`)
     : '<span style="font-size:11px;color:var(--t3)">nenhum alerta</span>';
 
   segmento.textContent = est.segmento || '—';
 }
 
-async function buscarHistoricoMapbiomas(car){
-  const rows = await sbFetch('rastro_mapbiomas_historico_numeros',
-    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
-  return Array.isArray(rows) && rows.length ? rows[0] : null;
-}
 
 // ── GRUPOS ────────────────────────────────────────────────────────────────────
 const GRUPOS=[
@@ -681,6 +693,80 @@ function renderMapaDetalhe(geojson, bb){
   return true;
 }
 
+
+function preencherPropriedadeEGemini(f){
+  if(!f) return;
+
+  const resultado = Array.isArray(f.rastro_resultados) ? f.rastro_resultados[0] : null;
+
+  const sc = f.status === 'ATIVO' ? 'bv' : f.status === 'PENDENTE' ? 'bp' : 'bi';
+  const se = document.getElementById('d-status');
+  if(se){
+    se.className = 'badge ' + sc;
+    se.textContent = f.status || '—';
+  }
+
+  const re = document.getElementById('d-risco');
+  if(re){
+    re.style.cssText = '';
+    if(resultado?.risco){
+      re.className = 'rbadge rb-' + resultado.risco[0].toLowerCase();
+      re.textContent = resultado.risco;
+    } else {
+      re.className = 'rbadge';
+      re.style.cssText = 'background:#f1f5f1;color:#6b897a';
+      re.textContent = 'N/A';
+    }
+  }
+
+  const estado = document.getElementById('d-estado');
+  const area = document.getElementById('d-area');
+  const data = document.getElementById('d-data');
+  const sigla = document.getElementById('d-sigla');
+
+  if(estado) estado.textContent = f.estado || f.state_acronym || '—';
+  if(area) area.textContent = f.area_ha ? (f.area_ha + ' ha') : '—';
+  if(data) data.textContent = f.created_at ? new Date(f.created_at).toLocaleDateString('pt-BR') : '—';
+  if(sigla) sigla.textContent = f.state_acronym || '—';
+
+  if(resultado){
+    const gr = document.getElementById('d-g-risco');
+    if(gr){
+      gr.className = 'rbadge rb-' + (resultado.risco?.[0]?.toLowerCase() || 'b');
+      gr.textContent = resultado.risco || '—';
+    }
+    const just = document.getElementById('d-g-just');
+    const comp = document.getElementById('d-g-comp');
+    const inter = document.getElementById('d-g-int');
+    const resumo = document.getElementById('d-g-res');
+    if(just) just.textContent = resultado.justificativa || '—';
+    if(comp) comp.textContent = resultado.compliance || '—';
+    if(inter) inter.textContent = resultado.interpretacao || '—';
+    if(resumo) resumo.textContent = resultado.resumo || '—';
+  } else {
+    ['d-g-risco','d-g-just','d-g-comp','d-g-int','d-g-res'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){ el.textContent='Análise pendente'; el.className='gemini-campo-v'; }
+    });
+  }
+
+  const fontes = Array.isArray(f.rastro_analises_fontes) ? f.rastro_analises_fontes : [];
+  const mb = fontes.find(x=>x.origem==='MAPBIOMAS');
+  const ib = fontes.find(x=>x.origem==='IBAMA');
+
+  const mbDef = document.getElementById('d-mb-def');
+  const mbAlerts = document.getElementById('d-mb-alerts');
+  const mbHa = document.getElementById('d-mb-ha');
+  const ibEmb = document.getElementById('d-ib-emb');
+  const ibSt = document.getElementById('d-ib-st');
+
+  if(mbDef) mbDef.textContent = mb?.payload?.deforestationStatus === 1 ? 'Sim' : 'Não';
+  if(mbAlerts) mbAlerts.textContent = mb?.payload?.numberOfAlerts ?? '—';
+  if(mbHa) mbHa.textContent = mb?.payload?.areaHaAlertas ? (mb.payload.areaHaAlertas + ' ha') : '—';
+  if(ibEmb) ibEmb.textContent = ib?.payload?.embargoStatus === 1 ? 'Sim' : 'Não';
+  if(ibSt) ibSt.textContent = ib?.payload?.embargoStatus === 1 ? 'Embargado' : 'Regular';
+}
+
 // ── DETALHE ───────────────────────────────────────────────────────────────────
 async function abrirDetalhe(car){
   document.getElementById('map').style.display='none';
@@ -701,27 +787,40 @@ async function abrirDetalhe(car){
   // Busca dados completos no Supabase
   const rows = await sbFetch('rastro_territorios',
     `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
-  let f = rows?.[0];
+  const f = rows?.[0];
 
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
+  // Preenche a aba PROPRIEDADE imediatamente, antes de qualquer mapa/histórico.
+  // Assim, se Leaflet, GeoJSON ou Edge Function falhar, Estado/Área/Sigla/Risco não somem.
+  preencherPropriedadeEGemini(f);
+
+  // Estrelas/segmento: usa tabela histórica separada, sem alterar os dados da propriedade.
   try{
-    const gee = await buscarHistoricoMapbiomas(car);
-    if(gee) f.rastro_mapbiomas_historico_numeros = gee;
+    const hist = await buscarHistoricoMapbiomas(car);
+    if(hist) f.rastro_mapbiomas_historico_numeros = hist;
   }catch(e){
     console.warn('Histórico MapBiomas indisponível:', e);
   }
-
   preencherBlocoEstrelas(calcularEstrelas(f));
 
-  // Mapa estático Geoapify
+  // Mapa territorial
   const bb=normalizarBoundingBox(f.bounding_box);
   const gj=f.geojson || f.geometry || f.payload?.geometry || null;
-  if(gj || bb){
-    renderMapaDetalhe(gj, bb);
-  } else {
-    load.textContent='Sem dados territoriais';
+  try{
+    if(gj || bb){
+      renderMapaDetalhe(gj, bb);
+    } else {
+      load.textContent='Sem dados territoriais';
+    }
+  }catch(e){
+    console.error('Erro ao renderizar mapa do detalhe:', e);
+    load.style.display='flex';
+    load.textContent='Mapa territorial indisponível';
   }
+
+  // Reforço: o mapa nunca pode apagar/travar a seção Propriedade.
+  preencherPropriedadeEGemini(f);
 
   // Status
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
@@ -778,7 +877,7 @@ async function atualizarHistorico(){
 
   const btn = document.getElementById('btn-atualizar-hist');
   const msg = document.getElementById('hist-msg');
-  const oldHtml = btn.innerHTML;
+  const original = btn.innerHTML;
 
   btn.disabled = true;
   btn.innerHTML = '<div class="spin" style="border-top-color:var(--v2)"></div> Buscando no MapBiomas…';
@@ -794,13 +893,15 @@ async function atualizarHistorico(){
       },
       body: JSON.stringify({ codigo_car: car }),
     });
-    const data = await resp.json();
+
+    let data = {};
+    try{ data = await resp.json(); }catch(_){ data = {}; }
 
     if(!resp.ok || data?.status !== 'OK'){
       throw new Error(data?.detalhe || data?.erro || data?.status || `HTTP ${resp.status}`);
     }
 
-    const gee = {
+    const hist = {
       codigo_car: car,
       segmento_atual: data.segmento_atual,
       vegetacao_nativa_atual_ha: data.vegetacao_nativa_atual_ha,
@@ -808,17 +909,19 @@ async function atualizarHistorico(){
       estrela_verde: true,
     };
 
-    preencherBlocoEstrelas(calcularEstrelas({ rastro_mapbiomas_historico_numeros: gee }));
+    // Importante: isto atualiza só o bloco de estrelas/segmento.
+    // Não mexe em Status, Risco, Estado, Área, Data, Sigla, Gemini ou Fontes.
+    preencherBlocoEstrelas(calcularEstrelas({ rastro_mapbiomas_historico_numeros: hist }));
 
     msg.className = 'hist-msg ok';
-    msg.textContent = `✓ Atualizado. Segmento: ${data.segmento_atual || '—'} · Veg. nativa: ${numero(data.vegetacao_nativa_atual_ha).toFixed(1)} ha`;
+    msg.textContent = `✓ Atualizado. Segmento: ${data.segmento_atual || '—'} · Veg. nativa: ${nnum(data.vegetacao_nativa_atual_ha).toFixed(1)} ha`;
   }catch(e){
     msg.className = 'hist-msg err';
     msg.textContent = 'Erro ao atualizar histórico: ' + (e.message || e);
   }
 
   btn.disabled = false;
-  btn.innerHTML = oldHtml;
+  btn.innerHTML = original;
 }
 
 function fecharDetalhe(){
