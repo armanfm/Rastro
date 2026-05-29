@@ -94,6 +94,8 @@ nav{height:52px;background:var(--sup);border-bottom:1px solid var(--b);padding:0
 .bv{background:#dcfce7;color:#14532d}.bp{background:#fef3c7;color:#92400e}.bi{background:#fee2e2;color:#991b1b}
 .rbadge{display:inline-flex;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600}
 .rb-b{background:#dcfce7;color:#14532d}.rb-m{background:#ffedd5;color:#7c2d12}.rb-a{background:#fee2e2;color:#991b1b}
+.nature-star{display:inline-flex;align-items:center;justify-content:center;color:#16a34a;font-size:12px;line-height:1;margin-left:4px;vertical-align:middle}
+.nature-star.big{font-size:15px;margin-left:6px}
 .direita{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 #map{width:100%;flex:1}
 .legenda{position:absolute;bottom:18px;right:10px;z-index:500;background:var(--sup);border:1px solid var(--b);border-radius:var(--r2);padding:.6rem .85rem;font-size:11px;box-shadow:0 2px 12px rgba(10,26,16,.08)}
@@ -109,6 +111,7 @@ nav{height:52px;background:var(--sup);border-bottom:1px solid var(--b);padding:0
 .det-voltar:hover{background:var(--v3);border-color:var(--v2);color:var(--v)}
 .det-car{font-family:'Courier New',monospace;font-size:11px;color:var(--v2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .det-mapa{width:100%;height:220px;object-fit:cover;background:var(--v4);display:block}
+#det-leaflet-map{height:260px;object-fit:initial}
 .det-mapa-load{width:100%;height:220px;background:var(--v4);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3)}
 .det-sec{padding:.9rem 1.2rem;border-bottom:1px solid var(--b)}
 .det-sec-tit{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin-bottom:.65rem}
@@ -122,11 +125,20 @@ nav{height:52px;background:var(--sup);border-bottom:1px solid var(--b);padding:0
 .gemini-campo{margin-bottom:.6rem}
 .gemini-campo-l{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);margin-bottom:3px}
 .gemini-campo-v{font-size:12px;color:var(--t2);line-height:1.6}
+.det-tabs{display:flex;gap:6px;margin-bottom:.7rem}
+.det-tab{height:32px;padding:0 12px;border:1px solid var(--b);background:var(--sup);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer}
+.det-tab.ativa{background:var(--v3);border-color:var(--v2);color:var(--v)}
+.analise-bloco{display:none}
+.analise-bloco.show{display:block}
 .fontes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fonte-card{background:var(--v4);border:1px solid var(--b);border-radius:var(--r);padding:.7rem .85rem}
 .fonte-tit{font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:.45rem;display:flex;align-items:center;gap:5px}
 .fonte-item{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:2px}
 .fonte-item span:last-child{color:var(--t);font-weight:500}
+.hist-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hist-card{background:var(--v4);border:1px solid var(--b);border-radius:var(--r);padding:.7rem .85rem}
+.hist-l{font-size:10px;color:var(--t3);margin-bottom:3px}
+.hist-v{font-size:12.5px;font-weight:600;color:var(--t)}
 .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:.5rem}
 .mc{background:var(--sup);border:1px solid var(--b);border-radius:6px;padding:6px 8px}
 .mc-l{font-size:10px;color:var(--t3);margin-bottom:2px}
@@ -157,28 +169,22 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 
 <div class="main">
   <div class="sidebar" id="sidebar">
-
     <div class="abas">
       <button class="aba ativa" onclick="setAba('car',this)">Verificar</button>
       <button class="aba" onclick="setAba('filtro',this)">Filtrar</button>
       <button class="aba" onclick="setAba('contrato',this)">Contrato</button>
     </div>
 
-    <!-- ABA: VERIFICAR CAR -->
     <div class="painel ativo" id="p-car">
       <div class="p-inner">
         <div class="row">
           <input class="inp" id="inp-car" type="text" placeholder="Código CAR completo…" style="flex:1"/>
-          <button class="btn btn-p" id="btn-car" onclick="buscarCAR()" style="flex:0 0 auto;padding:0 12px">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            Verificar
-          </button>
+          <button class="btn btn-p" id="btn-car" onclick="buscarCAR()" style="flex:0 0 auto;padding:0 12px">Verificar</button>
           <button class="btn btn-s" onclick="limparCAR()" title="Limpar" style="flex:0 0 36px">✕</button>
         </div>
       </div>
     </div>
 
-    <!-- ABA: FILTRAR -->
     <div class="painel" id="p-filtro">
       <div class="p-inner">
         <select class="sel" id="sel-estado">
@@ -202,6 +208,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
           <option value="PENDENTE">Pendente</option>
           <option value="INATIVO">Inválido</option>
         </select>
+        <input class="inp" id="inp-segmento" type="text" placeholder="Segmento: soja, pecuária, café, algodão…"/>
         <div class="row">
           <button class="btn btn-p" onclick="filtrar()">Buscar</button>
           <button class="btn btn-s" onclick="limparFiltro()" style="padding:0 14px">Limpar</button>
@@ -209,29 +216,18 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
       </div>
     </div>
 
-    <!-- ABA: CONTRATO -->
     <div class="painel" id="p-contrato">
       <div class="p-inner">
-
-        <!-- Endereço do contrato -->
         <p style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:2px">Endereço do contrato</p>
-        <input class="inp" id="inp-contrato" type="text" value="0x86D903aADc96b4028e06Fc7643fD781980642144" style="font-family:'Courier New',monospace;font-size:11px"/>
+        <input class="inp" id="inp-contrato" type="text" value="0x865724ffd417f5B696f31a8Af67541585fd2a262" style="font-family:'Courier New',monospace;font-size:11px"/>
 
-        <!-- Conectar wallet -->
-        <button class="btn-mm" id="btn-mm" onclick="conectarWallet()" style="margin-top:4px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-          Conectar MetaMask
-        </button>
+        <button class="btn-mm" id="btn-mm" onclick="conectarWallet()" style="margin-top:4px">Conectar MetaMask</button>
         <p class="wallet-addr" id="wallet-addr" style="display:none"></p>
 
-        <!-- Cadastrar CAR -->
         <p style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin:6px 0 2px">Cadastrar novo CAR</p>
         <div class="row">
           <input class="inp" id="inp-cad" type="text" placeholder="Código CAR completo…" style="flex:1"/>
-          <button class="btn btn-p" id="btn-cad" onclick="cadastrar()" style="flex:0 0 auto;padding:0 12px" disabled>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-            Cadastrar
-          </button>
+          <button class="btn btn-p" id="btn-cad" onclick="cadastrar()" style="flex:0 0 auto;padding:0 12px" disabled>Cadastrar</button>
         </div>
         <div class="cad-ok" id="cad-ok">✓ CAR cadastrado! Workflow iniciará a análise em breve.</div>
         <div class="cad-err" id="cad-err"></div>
@@ -239,7 +235,6 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
       </div>
     </div>
 
-    <!-- RESULTADO BUSCA CAR -->
     <div class="res-wrap" id="res-wrap">
       <div class="res-topo">
         <span class="res-tit">Resultado</span>
@@ -249,19 +244,16 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
       <div class="res-erro" id="res-erro">CAR não encontrado no Supabase.</div>
     </div>
 
-    <!-- LISTA HEADER -->
     <div class="lista-hdr" id="lista-hdr">
       <span id="lista-lbl">—</span>
       <small id="lista-cnt">—</small>
     </div>
 
-    <!-- LISTA -->
     <div class="sb-lista" id="sb-lista">
       <div class="vazio">Selecione um estado para listar propriedades<br/>ou use "Verificar CAR" para busca individual.</div>
     </div>
   </div>
 
-  <!-- ÁREA DIREITA -->
   <div class="direita" id="direita">
     <div id="map"></div>
     <div class="legenda" id="legenda">
@@ -271,21 +263,21 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
       <div class="leg-i"><div class="leg-d" style="background:#22c55e"></div>Risco Baixo</div>
       <div class="leg-i"><div class="leg-d" style="background:#f97316"></div>Risco Médio</div>
       <div class="leg-i"><div class="leg-d" style="background:#dc2626"></div>Risco Alto</div>
+      <div class="leg-i"><span class="nature-star" style="margin-left:0">★</span>Aumentou vegetação nativa</div>
     </div>
 
-    <!-- DETALHE -->
     <div class="detalhe" id="detalhe">
       <div class="det-topo">
-        <button class="det-voltar" onclick="fecharDetalhe()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-          Voltar ao mapa
-        </button>
+        <button class="det-voltar" onclick="fecharDetalhe()">Voltar ao mapa</button>
         <span class="det-car" id="det-car-cod">—</span>
       </div>
+
       <div id="det-mapa-wrap">
         <div class="det-mapa-load" id="det-mapa-load">Carregando território…</div>
         <img id="det-mapa-img" class="det-mapa" style="display:none" alt="Território"/>
+        <div id="det-leaflet-map" class="det-mapa" style="display:none"></div>
       </div>
+
       <div class="det-sec">
         <p class="det-sec-tit">Propriedade</p>
         <div class="det-grid">
@@ -297,6 +289,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
           <div class="det-cell"><p class="det-cell-l">Sigla</p><p class="det-cell-v" id="d-sigla">—</p></div>
         </div>
       </div>
+
       <div class="det-sec">
         <p class="det-sec-tit">Análise Gemini</p>
         <div class="gemini-card">
@@ -310,25 +303,41 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
           <div class="gemini-campo"><p class="gemini-campo-l">Resumo para importador</p><p class="gemini-campo-v" id="d-g-res">—</p></div>
         </div>
       </div>
+
       <div class="det-sec">
-        <p class="det-sec-tit">Fontes de dados</p>
-        <div class="fontes-grid">
-          <div class="fonte-card">
-            <div class="fonte-tit">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-              MapBiomas
+        <p class="det-sec-tit">Análises</p>
+
+        <div class="det-tabs">
+          <button class="det-tab ativa" id="tab-alertas" onclick="setAnaliseTab('alertas')">Alertas</button>
+          <button class="det-tab" id="tab-historico" onclick="setAnaliseTab('historico')">Histórico</button>
+        </div>
+
+        <div class="analise-bloco show" id="bloco-alertas">
+          <div class="fontes-grid">
+            <div class="fonte-card">
+              <div class="fonte-tit">MapBiomas Alerta</div>
+              <div class="fonte-item"><span>Desmatamento</span><span id="d-mb-def">—</span></div>
+              <div class="fonte-item"><span>Alertas</span><span id="d-mb-alerts">—</span></div>
+              <div class="fonte-item"><span>Hectares</span><span id="d-mb-ha">—</span></div>
             </div>
-            <div class="fonte-item"><span>Desmatamento</span><span id="d-mb-def">—</span></div>
-            <div class="fonte-item"><span>Alertas</span><span id="d-mb-alerts">—</span></div>
-            <div class="fonte-item"><span>Hectares</span><span id="d-mb-ha">—</span></div>
+            <div class="fonte-card">
+              <div class="fonte-tit">IBAMA</div>
+              <div class="fonte-item"><span>Embargo</span><span id="d-ib-emb">—</span></div>
+              <div class="fonte-item"><span>Status</span><span id="d-ib-st">—</span></div>
+            </div>
           </div>
-          <div class="fonte-card">
-            <div class="fonte-tit">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-              IBAMA
-            </div>
-            <div class="fonte-item"><span>Embargo</span><span id="d-ib-emb">—</span></div>
-            <div class="fonte-item"><span>Status</span><span id="d-ib-st">—</span></div>
+        </div>
+
+        <div class="analise-bloco" id="bloco-historico">
+          <div class="hist-grid">
+            <div class="hist-card"><p class="hist-l">Segmento atual</p><p class="hist-v" id="d-h-seg-atual">—</p></div>
+            <div class="hist-card"><p class="hist-l">Segmento em 2008</p><p class="hist-v" id="d-h-seg-2008">—</p></div>
+            <div class="hist-card"><p class="hist-l">Consolidada em 2008</p><p class="hist-v" id="d-h-consolidada">—</p></div>
+            <div class="hist-card"><p class="hist-l">Mudou segmento</p><p class="hist-v" id="d-h-mudou">—</p></div>
+            <div class="hist-card"><p class="hist-l">Regeneração</p><p class="hist-v" id="d-h-ajuda">—</p></div>
+            <div class="hist-card"><p class="hist-l">Vegetação atual</p><p class="hist-v" id="d-h-veg-pct">—</p></div>
+            <div class="hist-card"><p class="hist-l">Variação 2020-2024</p><p class="hist-v" id="d-h-var">—</p></div>
+            <div class="hist-card"><p class="hist-l">Tendência</p><p class="hist-v" id="d-h-tendencia">—</p></div>
           </div>
         </div>
       </div>
@@ -340,7 +349,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
   <div class="ft-s">
     <span>MapBiomas</span><span class="sep">·</span>
     <span>IBAMA</span><span class="sep">·</span>
-    <span>SICAR</span><span class="sep">·</span>
+    <span>MapBiomas Histórico</span><span class="sep">·</span>
     <span>Chainlink CRE</span><span class="sep">·</span>
     <span>Ethereum Sepolia</span>
   </div>
@@ -350,25 +359,12 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────────────────
 const GEOAPIFY_KEY   = 'dc783b9c4d184a4f95d4a7999f44ef13';
 const SUPABASE_URL   = 'https://tqsoopgmzdwttwvedngk.supabase.co';
-const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxc29vcGdtemR3dHR3dmVkbmdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjIxNTEsImV4cCI6MjA5NDUzODE1MX0.LaHuxJVFJI9SkGHFmapSpkUYBC5plB9oPuDXIXJXsN0';
-const CONTRACT_ADDR  = '0x86D903aADc96b4028e06Fc7643fD781980642144';
+const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InRxc29vcGdtemR3dHR3dmVkbmdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjIxNTEsImV4cCI6MjA5NDUzODE1MX0.LaHuxJVFJI9SkGHFmapSpkUYBC5plB9oPuDXIXJXsN0';
+const CONTRACT_ADDR  = '0x865724ffd417f5B696f31a8Af67541585fd2a262';
 const SEPOLIA_ID     = '0xaa36a7';
 
-// ABI mínimo do contrato
-const CONTRACT_ABI = [
-  {
-    name: 'cadastrarCAR',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [{ name: 'codigoCAR', type: 'string' }],
-    outputs: [],
-  }
-];
-
-// ── SUPABASE HELPER ───────────────────────────────────────────────────────────
 async function sbFetch(path, params=''){
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}${params}`, {
     headers: {
@@ -379,7 +375,6 @@ async function sbFetch(path, params=''){
   return r.json();
 }
 
-// ── GRUPOS ────────────────────────────────────────────────────────────────────
 const GRUPOS=[
   {k:'pendente',l:'Pendente',dc:'dp',lc:'lp',cc:'cp',cor:'#f59e0b',fn:f=>f.status==='PENDENTE'},
   {k:'invalido',l:'Inválido',dc:'di',lc:'li',cc:'ci',cor:'#ef4444',fn:f=>f.status==='INATIVO'},
@@ -388,9 +383,60 @@ const GRUPOS=[
   {k:'alto',l:'Risco Alto',dc:'da',lc:'la',cc:'ca',cor:'#dc2626',fn:f=>f.status==='ATIVO'&&f._risco==='ALTO'},
 ];
 
-let map, mkrs={}, wallet=null;
+let map, mkrs={}, wallet=null, detalheMap=null, detalheAreaLayer=null;
 
-// ── MAPA ──────────────────────────────────────────────────────────────────────
+function norm(v){
+  return String(v ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function getFonte(f, origem){
+  return f?.rastro_analises_fontes?.find?.(x => x.origem === origem) || null;
+}
+
+function ajudouNatureza(f){
+  const historico = f?._historico || getFonte(f, 'MAPBIOMAS_HISTORICO');
+  return historico?.ajudando_natureza === true;
+}
+
+function estrelaNatureza(f, big=false){
+  return ajudouNatureza(f)
+    ? `<span class="nature-star ${big ? 'big' : ''}" title="Aumentou vegetação nativa">★</span>`
+    : '';
+}
+
+function simNao(v){
+  if(v === true) return 'Sim';
+  if(v === false) return 'Não';
+  return '—';
+}
+
+function fmtNum(v, sufixo=''){
+  if(v === null || v === undefined || v === '') return '—';
+  const n = Number(v);
+  if(!Number.isFinite(n)) return String(v);
+  return `${n.toFixed(2)}${sufixo}`;
+}
+
+function setAnaliseTab(tipo){
+  document.getElementById('tab-alertas').classList.toggle('ativa', tipo === 'alertas');
+  document.getElementById('tab-historico').classList.toggle('ativa', tipo === 'historico');
+  document.getElementById('bloco-alertas').classList.toggle('show', tipo === 'alertas');
+  document.getElementById('bloco-historico').classList.toggle('show', tipo === 'historico');
+}
+
+function preencherHistorico(f){
+  const hist = getFonte(f, 'MAPBIOMAS_HISTORICO');
+
+  document.getElementById('d-h-seg-atual').textContent = hist?.segmento_atual || '—';
+  document.getElementById('d-h-seg-2008').textContent = hist?.segmento_2008 || '—';
+  document.getElementById('d-h-consolidada').textContent = simNao(hist?.evidencia_area_consolidada_2008);
+  document.getElementById('d-h-mudou').textContent = simNao(hist?.mudou_segmento_desde_2008);
+  document.getElementById('d-h-ajuda').textContent = ajudouNatureza(f) ? '★ Aumentou vegetação nativa' : '—';
+  document.getElementById('d-h-veg-pct').textContent = fmtNum(hist?.vegetacao_nativa_atual_pct, '%');
+  document.getElementById('d-h-var').textContent = fmtNum(hist?.variacao_nativa_2020_2024_ha, ' ha');
+  document.getElementById('d-h-tendencia').textContent = hist?.tendencia_natureza || '—';
+}
+
 function initMap(){
   map=L.map('map').setView([-14,-52],5);
   L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_KEY}`,
@@ -402,19 +448,22 @@ function plotarFazenda(f){
   const g=GRUPOS.find(g=>g.fn(f));
   const cor=g?g.cor:'#888';
   if(mkrs[f.codigo_car]) mkrs[f.codigo_car].remove();
+
   const m=L.circleMarker([f.centroid_lat,f.centroid_lon],
     {radius:9,fillColor:cor,color:'#fff',weight:2,fillOpacity:.92}).addTo(map);
-  const risco=f._risco||f.status;
+
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const rb=f._risco?`rb-${f._risco[0].toLowerCase()}`:'';
   const badge=f._risco
     ?`<span class="rbadge ${rb}" style="font-size:10px">${f._risco}</span>`
     :`<span class="badge ${sc}" style="font-size:10px">${f.status}</span>`;
+
   m.bindPopup(`<div class="pop" onclick="abrirDetalhe('${f.codigo_car}')">
-    <p class="pop-car">${f.codigo_car.substring(0,34)}…</p>
+    <p class="pop-car">${f.codigo_car.substring(0,34)}… ${estrelaNatureza(f)}</p>
     <p class="pop-loc">${f.estado||''} · ${f.area_ha?f.area_ha+' ha':''}</p>
-    ${badge}<p class="pop-hint">Clique para ver detalhes</p>
+    ${badge}${estrelaNatureza(f,true)}<p class="pop-hint">Clique para ver detalhes</p>
   </div>`,{maxWidth:240});
+
   m.on('click',()=>destacarSidebar(f.codigo_car));
   mkrs[f.codigo_car]=m;
 }
@@ -449,51 +498,137 @@ function normalizarBoundingBox(bb){
   return null;
 }
 
-// ── DETALHE ───────────────────────────────────────────────────────────────────
+function normalizarGeoJSON(geojson){
+  if(!geojson) return null;
+  let gj=geojson;
+  if(typeof gj === 'string'){
+    try{ gj=JSON.parse(gj); }catch{ return null; }
+  }
+  if(!gj || typeof gj !== 'object') return null;
+  if(gj.type === 'Feature' || gj.type === 'FeatureCollection') return gj;
+  if(['Polygon','MultiPolygon','LineString','MultiLineString','Point','MultiPoint'].includes(gj.type)){
+    return {type:'Feature',properties:{},geometry:gj};
+  }
+  return null;
+}
+
+function limparMapaDetalhe(){
+  if(detalheMap){
+    detalheMap.remove();
+    detalheMap=null;
+    detalheAreaLayer=null;
+  }
+  const el=document.getElementById('det-leaflet-map');
+  if(el){
+    el.style.display='none';
+    el.innerHTML='';
+  }
+}
+
+function renderMapaDetalhe(geojson, bb){
+  const load=document.getElementById('det-mapa-load');
+  const img=document.getElementById('det-mapa-img');
+  const el=document.getElementById('det-leaflet-map');
+  const bbox=normalizarBoundingBox(bb);
+  const gj=normalizarGeoJSON(geojson);
+
+  limparMapaDetalhe();
+  img.style.display='none';
+
+  if(!gj && !bbox){
+    load.style.display='flex';
+    load.textContent='Sem desenho territorial';
+    return false;
+  }
+
+  load.style.display='none';
+  el.style.display='block';
+
+  detalheMap=L.map('det-leaflet-map',{zoomControl:true,attributionControl:false,scrollWheelZoom:false});
+  L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_KEY}`,{maxZoom:20}).addTo(detalheMap);
+
+  let bounds=null;
+
+  if(gj){
+    detalheAreaLayer=L.geoJSON(gj,{
+      style:{color:'#1a3828',weight:3,fillColor:'#22c55e',fillOpacity:.22,opacity:1},
+      pointToLayer:(_feature,latlng)=>L.circleMarker(latlng,{radius:8,color:'#1a3828',fillColor:'#22c55e',fillOpacity:.9,weight:2}),
+    }).addTo(detalheMap);
+    bounds=detalheAreaLayer.getBounds();
+  }
+
+  if((!bounds || !bounds.isValid()) && bbox){
+    bounds=L.latLngBounds([[bbox.south,bbox.west],[bbox.north,bbox.east]]);
+    detalheAreaLayer=L.rectangle(bounds,{color:'#1a3828',weight:3,fillColor:'#22c55e',fillOpacity:.16,dashArray:'7 5'}).addTo(detalheMap);
+  }
+
+  if(!bounds || !bounds.isValid()){
+    load.style.display='flex';
+    load.textContent='Desenho territorial invalido';
+    el.style.display='none';
+    limparMapaDetalhe();
+    return false;
+  }
+
+  L.circleMarker(bounds.getCenter(),{radius:6,fillColor:'#1a3828',color:'#fff',weight:2,fillOpacity:1}).addTo(detalheMap);
+  detalheMap.fitBounds(bounds,{padding:[28,28]});
+  setTimeout(()=>detalheMap.invalidateSize(),80);
+  return true;
+}
+
 async function abrirDetalhe(car){
   document.getElementById('map').style.display='none';
   document.getElementById('legenda').style.display='none';
   document.getElementById('detalhe').classList.add('show');
   document.getElementById('det-car-cod').textContent=car;
 
-  // Mapa estático
   const img=document.getElementById('det-mapa-img');
+  const miniMap=document.getElementById('det-leaflet-map');
   const load=document.getElementById('det-mapa-load');
   img.style.display='none';
+  miniMap.style.display='none';
+  limparMapaDetalhe();
   load.style.display='flex';
   load.textContent='Carregando território…';
 
-  // Busca dados completos no Supabase
   const rows = await sbFetch('rastro_territorios',
     `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
   const f = rows?.[0];
 
-  if(!f){ load.textContent='Propriedade não encontrada.'; return; }
-
-  // Mapa estático Geoapify
-  const bb=normalizarBoundingBox(f.bounding_box);
-  if(bb){
-    const mapUrl=`https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=600&height=220&area=rect:${bb.west},${bb.south},${bb.east},${bb.north}&apiKey=${GEOAPIFY_KEY}`;
-    img.src=mapUrl;
-    img.onload=()=>{img.style.display='block';load.style.display='none'};
-    img.onerror=()=>{load.textContent='Mapa indisponível';};
-  } else {
-    load.textContent='Sem dados territoriais';
+  if(!f){
+    load.textContent='Propriedade não encontrada.';
+    return;
   }
 
-  // Status
+  document.getElementById('det-car-cod').innerHTML =
+    `${car}${estrelaNatureza(f,true)}`;
+
+  const bb=normalizarBoundingBox(f.bounding_box);
+  const geojson =
+    f.geojson ||
+    f.geometry ||
+    f.payload?.geojson ||
+    f.payload?.geometry ||
+    f.payload?.territorioGeojson;
+
+  if(bb || geojson) renderMapaDetalhe(geojson, bb);
+  else load.textContent='Sem dados territoriais';
+
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const se=document.getElementById('d-status');
-  se.className='badge '+sc; se.textContent=f.status;
+  se.className='badge '+sc;
+  se.textContent=f.status;
 
-  // Risco (vem de rastro_resultados)
   const resultado=f.rastro_resultados?.[0];
   const re=document.getElementById('d-risco');
   if(resultado?.risco){
     const rc='rb-'+resultado.risco[0].toLowerCase();
-    re.className='rbadge '+rc; re.textContent=resultado.risco;
+    re.className='rbadge '+rc;
+    re.textContent=resultado.risco;
   } else {
-    re.className='rbadge'; re.style.cssText='background:#f1f5f1;color:#6b897a'; re.textContent='N/A';
+    re.className='rbadge';
+    re.style.cssText='background:#f1f5f1;color:#6b897a';
+    re.textContent='N/A';
   }
 
   document.getElementById('d-estado').textContent=f.estado||'—';
@@ -501,7 +636,6 @@ async function abrirDetalhe(car){
   document.getElementById('d-data').textContent=f.created_at?new Date(f.created_at).toLocaleDateString('pt-BR'):'—';
   document.getElementById('d-sigla').textContent=f.state_acronym||'—';
 
-  // Gemini
   if(resultado){
     const gr=document.getElementById('d-g-risco');
     gr.className='rbadge rb-'+resultado.risco?.[0]?.toLowerCase();
@@ -511,32 +645,35 @@ async function abrirDetalhe(car){
     document.getElementById('d-g-int').textContent=resultado.interpretacao||'—';
     document.getElementById('d-g-res').textContent=resultado.resumo||'—';
   } else {
-    ['d-g-risco','d-g-just','d-g-comp','d-g-int','d-g-res'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el){el.textContent='Análise pendente';el.className='gemini-campo-v';}
-    });
+    document.getElementById('d-g-risco').textContent='Pendente';
+    document.getElementById('d-g-just').textContent='Análise pendente';
+    document.getElementById('d-g-comp').textContent='Análise pendente';
+    document.getElementById('d-g-int').textContent='Análise pendente';
+    document.getElementById('d-g-res').textContent='Análise pendente';
   }
 
-  // Fontes MapBiomas e IBAMA
-  const mb=f.rastro_analises_fontes?.find(x=>x.origem==='MAPBIOMAS');
-  const ib=f.rastro_analises_fontes?.find(x=>x.origem==='IBAMA');
+  const mb=getFonte(f,'MAPBIOMAS');
+  const ib=getFonte(f,'IBAMA');
+
   document.getElementById('d-mb-def').textContent=mb?.payload?.deforestationStatus===1?'Sim':'Não';
   document.getElementById('d-mb-alerts').textContent=mb?.payload?.numberOfAlerts??'—';
   document.getElementById('d-mb-ha').textContent=mb?.payload?.areaHaAlertas?(mb.payload.areaHaAlertas+' ha'):'—';
   document.getElementById('d-ib-emb').textContent=ib?.payload?.embargoStatus===1?'Sim':'Não';
   document.getElementById('d-ib-st').textContent=ib?.payload?.embargoStatus===1?'Embargado':'Regular';
 
+  preencherHistorico(f);
+  setAnaliseTab('alertas');
   document.getElementById('detalhe').scrollTop=0;
 }
 
 function fecharDetalhe(){
+  limparMapaDetalhe();
   document.getElementById('detalhe').classList.remove('show');
   document.getElementById('map').style.display='block';
   document.getElementById('legenda').style.display='block';
   setTimeout(()=>map.invalidateSize(),50);
 }
 
-// ── ABAS ──────────────────────────────────────────────────────────────────────
 function setAba(id,btn){
   document.querySelectorAll('.aba').forEach(a=>a.classList.remove('ativa'));
   document.querySelectorAll('.painel').forEach(p=>p.classList.remove('ativo'));
@@ -544,26 +681,30 @@ function setAba(id,btn){
   document.getElementById('p-'+id).classList.add('ativo');
 }
 
-// ── SIDEBAR LISTA ─────────────────────────────────────────────────────────────
 function buildLista(fazendas,label){
   const el=document.getElementById('sb-lista');
   el.innerHTML='';
   const hdr=document.getElementById('lista-hdr');
+
   if(fazendas===null){
     hdr.classList.remove('show');
     el.innerHTML='<div class="vazio">Selecione um estado para listar propriedades<br/>ou use "Verificar CAR" para busca individual.</div>';
     return;
   }
+
   hdr.classList.add('show');
   document.getElementById('lista-lbl').textContent=label||'Resultados';
   document.getElementById('lista-cnt').textContent=`${fazendas.length} propriedade${fazendas.length!==1?'s':''}`;
+
   if(!fazendas.length){
     el.innerHTML='<div class="vazio">Nenhuma propriedade encontrada.</div>';
     return;
   }
+
   GRUPOS.forEach(g=>{
     const items=fazendas.filter(g.fn);
     if(!items.length) return;
+
     const div=document.createElement('div');
     div.innerHTML=`
       <div class="grupo-h" onclick="toggleG(this,'grp-${g.k}')">
@@ -571,11 +712,14 @@ function buildLista(fazendas,label){
         <div style="display:flex;align-items:center;gap:4px"><span class="gcnt ${g.cc}">${items.length}</span><span class="garr ab">▶</span></div>
       </div>
       <div class="g-itens ab" id="grp-${g.k}">
-        ${items.map(f=>`
+        ${items.map(f=>{
+          const seg=f._historico?.segmento_atual?` · ${f._historico.segmento_atual}`:'';
+          return `
           <div class="fitem" id="fi-${f.codigo_car.replace(/[^a-zA-Z0-9]/g,'_')}" onclick="selFaz('${f.codigo_car}')">
-            <div class="fcar">${f.codigo_car}</div>
-            <div class="fmeta">${f.estado||''} · ${f.area_ha?(f.area_ha+' ha'):''}</div>
-          </div>`).join('')}
+            <div class="fcar">${f.codigo_car}${estrelaNatureza(f)}</div>
+            <div class="fmeta">${f.estado||''} · ${f.area_ha?(f.area_ha+' ha'):''}${seg}</div>
+          </div>`;
+        }).join('')}
       </div>`;
     el.appendChild(div);
   });
@@ -604,21 +748,23 @@ function destacarSidebar(car){
   if(el){el.classList.add('sel');el.scrollIntoView({behavior:'smooth',block:'nearest'})}
 }
 
-// ── BUSCA CAR ─────────────────────────────────────────────────────────────────
 async function buscarCAR(){
   const v=document.getElementById('inp-car').value.trim();
   if(!v) return;
+
   const btn=document.getElementById('btn-car');
-  btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  btn.innerHTML='<div class="spin"></div>';
+  btn.disabled=true;
+
   document.getElementById('res-wrap').classList.remove('show');
   document.getElementById('res-erro').classList.remove('show');
   document.getElementById('res-conteudo').innerHTML='';
 
   const rows=await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_resultados(*)`);
+    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_resultados(*),rastro_analises_fontes(*)`);
   const f=rows?.[0];
 
-  btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Verificar';
+  btn.innerHTML='Verificar';
   btn.disabled=false;
 
   if(!f){
@@ -631,24 +777,26 @@ async function buscarCAR(){
   const risco=resultado?.risco;
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
   const rb=risco?'rb-'+risco[0].toLowerCase():'';
+  const historico=getFonte(f,'MAPBIOMAS_HISTORICO');
 
   document.getElementById('res-conteudo').innerHTML=`
     <div class="mini-grid">
       <div class="mc"><p class="mc-l">Status</p><span class="badge ${sc}">${f.status}</span></div>
       <div class="mc"><p class="mc-l">Risco</p><span class="rbadge ${rb}" style="${!risco?'background:#f1f5f1;color:#6b897a':''}">${risco||'N/A'}</span></div>
       <div class="mc"><p class="mc-l">Estado</p><p class="mc-v">${f.estado||'—'}</p></div>
-      <div class="mc"><p class="mc-l">Área</p><p class="mc-v">${f.area_ha?(f.area_ha+' ha'):'—'}</p></div>
+      <div class="mc"><p class="mc-l">Segmento</p><p class="mc-v">${historico?.segmento_atual||'—'}${estrelaNatureza(f)}</p></div>
     </div>
     <button class="btn btn-g" onclick="abrirDetalhe('${f.codigo_car}');document.getElementById('res-wrap').classList.remove('show')">
       Ver análise completa →
     </button>`;
   document.getElementById('res-wrap').classList.add('show');
 
-  // Plota no mapa se tiver coordenadas
   if(f.centroid_lat&&!mkrs[f.codigo_car]){
     f._risco=risco;
+    f._historico=historico;
     plotarFazenda(f);
   }
+
   resetMapa();
   if(mkrs[f.codigo_car]){
     mkrs[f.codigo_car].openPopup();
@@ -665,65 +813,90 @@ function limparCAR(){
   resetMapa();
 }
 
-// ── FILTRO ────────────────────────────────────────────────────────────────────
 async function filtrar(){
   const estadoSel=document.getElementById('sel-estado').value;
   const riscoSel=document.getElementById('sel-risco').value;
-  if(!estadoSel){alert('Selecione um estado para filtrar.');return;}
+  const segmentoBusca=document.getElementById('inp-segmento').value.trim();
+
+  if(!estadoSel){
+    alert('Selecione um estado para filtrar.');
+    return;
+  }
+
   const sigla=estadoSel.match(/\(([A-Z]+)\)/)?.[1]||'';
 
-  let url=`rastro_territorios?state_acronym=eq.${sigla}&select=*,rastro_resultados(risco)`;
-
   const rows=await sbFetch('rastro_territorios',
-    `?state_acronym=eq.${sigla}&select=*,rastro_resultados(risco)`);
+    `?state_acronym=eq.${sigla}&select=*,rastro_resultados(risco),rastro_analises_fontes(*)`);
 
-  // Normaliza risco para filtro local
-  let fazendas=(rows||[]).map(f=>({
-    ...f,
-    _risco:f.rastro_resultados?.[0]?.risco||null
-  }));
+  let fazendas=(rows||[]).map(f=>{
+    const historico =
+      f.rastro_analises_fontes?.find(x=>x.origem==='MAPBIOMAS_HISTORICO') || null;
+
+    return {
+      ...f,
+      _risco:f.rastro_resultados?.[0]?.risco||null,
+      _historico:historico,
+    };
+  });
 
   if(riscoSel==='PENDENTE') fazendas=fazendas.filter(f=>f.status==='PENDENTE');
   else if(riscoSel==='INATIVO') fazendas=fazendas.filter(f=>f.status==='INATIVO');
   else if(riscoSel) fazendas=fazendas.filter(f=>f._risco===riscoSel);
 
-  // Plota no mapa
+  if(segmentoBusca){
+    const busca=norm(segmentoBusca);
+
+    fazendas=fazendas.filter(f=>{
+      const h=f._historico;
+
+      const texto=[
+        h?.segmento_atual,
+        h?.segmento_2008,
+        h?.payload?.segmentoAtual,
+        h?.payload?.resultado?.indicadores?.perfilProdutivo?.segmentoAtual?.segmento,
+        h?.payload?.resultado?.indicadores?.perfilProdutivo?.segmento2008?.segmento,
+      ].filter(Boolean).join(' ');
+
+      return norm(texto).includes(busca);
+    });
+  }
+
   Object.values(mkrs).forEach(m=>m.remove());
   mkrs={};
   fazendas.forEach(plotarFazenda);
 
-  const label=riscoSel?`${estadoSel} · ${riscoSel}`:estadoSel;
-  buildLista(fazendas,label);
+  const labelParts=[estadoSel];
+  if(riscoSel) labelParts.push(riscoSel);
+  if(segmentoBusca) labelParts.push(segmentoBusca);
+
+  buildLista(fazendas,labelParts.join(' · '));
   destacarMapa(fazendas);
 }
 
 function limparFiltro(){
   document.getElementById('sel-estado').value='';
   document.getElementById('sel-risco').value='';
+  document.getElementById('inp-segmento').value='';
   buildLista(null);
   Object.values(mkrs).forEach(m=>m.remove());
   mkrs={};
   resetMapa();
 }
 
-// ── METAMASK ──────────────────────────────────────────────────────────────────
 async function conectarWallet(){
   if(!window.ethereum){
     alert('MetaMask não encontrada. Instale a extensão MetaMask no seu navegador.');
     return;
   }
+
   try {
     const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
     wallet=accounts[0];
 
-    // Verifica se está na Sepolia
     const chainId=await window.ethereum.request({method:'eth_chainId'});
     if(chainId!==SEPOLIA_ID){
       try {
-        await window.ethereum.request({
-          method:'wallet_switchEthereumChain',
-          params:[{chainId:SEPOLIA_ID}]
-        });
+        await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:SEPOLIA_ID}]});
       } catch(e) {
         alert('Por favor, mude para a rede Ethereum Sepolia no MetaMask.');
         return;
@@ -732,7 +905,7 @@ async function conectarWallet(){
 
     const btn=document.getElementById('btn-mm');
     btn.classList.add('conectado');
-    btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Conectado`;
+    btn.innerHTML='Conectado';
     document.getElementById('wallet-addr').style.display='block';
     document.getElementById('wallet-addr').textContent=wallet.slice(0,6)+'...'+wallet.slice(-4);
     document.getElementById('btn-cad').disabled=false;
@@ -747,7 +920,9 @@ async function cadastrar(){
   if(!wallet){alert('Conecte o MetaMask primeiro.');return;}
 
   const btn=document.getElementById('btn-cad');
-  btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  btn.innerHTML='<div class="spin"></div>';
+  btn.disabled=true;
+
   document.getElementById('cad-ok').classList.remove('show');
   document.getElementById('cad-err').classList.remove('show');
   document.getElementById('tx-info').classList.remove('show');
@@ -756,6 +931,7 @@ async function cadastrar(){
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const addr = document.getElementById('inp-contrato').value.trim() || CONTRACT_ADDR;
+
     const contrato = new ethers.Contract(addr, [
       'function cadastrarCAR(string codigoCAR)',
       'function totalFazendas() view returns (uint256)',
@@ -765,7 +941,7 @@ async function cadastrar(){
     const tx = await contrato.cadastrarCAR(car);
 
     document.getElementById('tx-info').classList.add('show');
-    document.getElementById('tx-info').innerHTML=`Transação enviada, aguardando confirmação: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
+    document.getElementById('tx-info').innerHTML=`Transação enviada: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
 
     const receipt = await tx.wait();
 
@@ -784,17 +960,16 @@ async function cadastrar(){
     document.getElementById('cad-err').textContent='Erro: '+(e.shortMessage||e.reason||e.message||'transação cancelada');
   }
 
-  btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Cadastrar';
+  btn.innerHTML='Cadastrar';
   btn.disabled=false;
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load',()=>{
   initMap();
   buildLista(null);
   document.getElementById('inp-car').addEventListener('keydown',e=>{if(e.key==='Enter')buscarCAR();});
+  document.getElementById('inp-segmento').addEventListener('keydown',e=>{if(e.key==='Enter')filtrar();});
 });
 </script>
 </body>
 </html>
-
