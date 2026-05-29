@@ -712,7 +712,8 @@ async function atualizarHistorico(){
         estrela_verde: haVerde > 0,
       };
       cacheFazenda(cached);
-      preencherDetalheBasico(cached);
+      // Não mexe nos campos de Propriedade aqui.
+      // A Edge Function retorna só histórico/segmento, não status/estado/área/sigla.
     } else {
       msg.style.display='block';
       msg.style.cssText += 'background:#fee2e2;color:#991b1b;display:block';
