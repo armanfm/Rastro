@@ -415,12 +415,16 @@ function calcularEstrelas(territorio){
 
   const segmento = gee.segmento_atual ?? null;
   const variacao = Number(gee.variacao_nativa_2020_2024_ha ?? 0) || 0;
+  const vegetacaoAtual = Number(gee.vegetacao_nativa_atual_ha ?? 0) || 0;
 
   let verdes = 0;
   let haRecuperado = 0;
-  if(gee.estrela_verde === true || variacao > 0){
+
+  // Mostra estrela verde quando o backend marcou estrela_verde,
+  // quando houve variação positiva, ou quando a Edge Function retornou vegetação nativa atual.
+  if(gee.estrela_verde === true || variacao > 0 || vegetacaoAtual > 0){
     verdes = 1;
-    haRecuperado = variacao > 0 ? variacao : (Number(gee.vegetacao_nativa_atual_ha ?? 0) || 0);
+    haRecuperado = variacao > 0 ? variacao : vegetacaoAtual;
   }
 
   return { vermelhas: totalAlertas, verdes, areaDesmatada, haRecuperado, segmento };
@@ -657,10 +661,21 @@ async function atualizarHistorico(){
     if(data?.status === 'OK'){
       msg.style.display='block';
       msg.style.cssText += 'background:#dcfce7;color:#14532d;display:block';
+      const vegAtual = Number(data.vegetacao_nativa_atual_ha ?? 0) || 0;
+      const variacao = Number(data.variacao_nativa_2020_2024_ha ?? 0) || 0;
+      const haVerde = variacao > 0 ? variacao : vegAtual;
+
       msg.textContent = `✓ Atualizado. Segmento: ${data.segmento_atual||'—'} · `
-        + `Veg. nativa: ${data.vegetacao_nativa_atual_ha? Number(data.vegetacao_nativa_atual_ha).toFixed(1)+' ha':'—'}`;
-      // recarrega o detalhe pra mostrar as novas estrelas
-      setTimeout(()=>abrirDetalhe(car), 800);
+        + `Veg. nativa: ${vegAtual ? vegAtual.toFixed(1)+' ha':'—'}`;
+
+      // Atualiza a área selecionada na hora, sem depender do reload do Supabase.
+      document.getElementById('d-segmento').textContent = data.segmento_atual || '—';
+      document.getElementById('d-estrelas-verde').innerHTML = haVerde > 0
+        ? htmlEstrelas(1, 'verde', `+${haVerde.toFixed(1)} ha de vegetação nativa`)
+        : '<span style="font-size:11px;color:var(--t3)">nenhuma</span>';
+
+      // Recarrega depois para puxar status, risco, fontes e histórico gravados no Supabase.
+      setTimeout(()=>abrirDetalhe(car), 1500);
     } else {
       msg.style.display='block';
       msg.style.cssText += 'background:#fee2e2;color:#991b1b;display:block';
