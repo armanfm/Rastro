@@ -476,6 +476,76 @@ function getContratoAtual(){
   return addr;
 }
 
+
+// Escopo do contrato ativo ----------------------------------------------------
+// O contrato salvo no PouchDB agora também controla o que a tela considera
+// como análise válida. Sem isso, o front buscava o resultado antigo do Supabase
+// apenas pelo codigo_car e podia mostrar uma análise gerada em outro contrato.
+let _cacheCarsPorContrato = {};
+
+async function listarCarsDoContratoAtual(force=false){
+  const addr = getContratoAtual();
+  const key = addr.toLowerCase();
+  if(!force && Array.isArray(_cacheCarsPorContrato[key])) return _cacheCarsPorContrato[key];
+
+  if(!window.ethereum){
+    console.warn('MetaMask não encontrada; não foi possível validar o CAR no contrato ativo.');
+    return null;
+  }
+
+  try{
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const contrato = new ethers.Contract(addr, CONTRACT_ABI, provider);
+    const lista = await contrato.listarTodos();
+    const normalizada = Array.from(lista || []).map(x => String(x).trim().toUpperCase());
+    _cacheCarsPorContrato[key] = normalizada;
+    return normalizada;
+  }catch(e){
+    console.warn('Não foi possível ler listarTodos() do contrato ativo:', e);
+    return null;
+  }
+}
+
+async function carEstaNoContratoAtual(codigoCar){
+  const lista = await listarCarsDoContratoAtual(false);
+  if(lista === null) return null;
+  return lista.includes(String(codigoCar || '').trim().toUpperCase());
+}
+
+async function aplicarEscopoContratoAtual(f){
+  if(!f) return f;
+  const pertence = await carEstaNoContratoAtual(f.codigo_car);
+  f._noContratoAtual = pertence;
+
+  // Se o CAR não está no contrato ativo, não mostramos risco/Gemini antigo.
+  // Mantemos dados cadastrais e fontes públicas do estado atual, porque esses
+  // pertencem ao território/CAR, não ao contrato escolhido para teste.
+  if(pertence === false){
+    f.rastro_resultados = [];
+  }
+  return f;
+}
+
+function mostrarAvisoContratoAtual(f){
+  let aviso = document.getElementById('aviso-contrato-atual');
+  const alvo = document.querySelector('#detalhe .det-sec:nth-of-type(3)') || document.getElementById('detalhe');
+  if(!aviso){
+    aviso = document.createElement('div');
+    aviso.id = 'aviso-contrato-atual';
+    aviso.style.cssText = 'display:none;margin:.75rem 1.2rem 0;padding:8px 10px;border-radius:8px;font-size:12px;background:#fff7ed;color:#7c2d12;border:1px solid #fed7aa';
+    if(alvo && alvo.parentNode) alvo.parentNode.insertBefore(aviso, alvo);
+  }
+
+  if(f?._noContratoAtual === false){
+    const addr = (()=>{ try{return getContratoAtual()}catch{return ''} })();
+    aviso.style.display='block';
+    aviso.textContent = `Este CAR não consta no contrato ativo ${addr ? addr.slice(0,6)+'...'+addr.slice(-4) : ''}. Risco/Gemini antigos foram ocultados.`;
+  } else {
+    aviso.style.display='none';
+    aviso.textContent='';
+  }
+}
+
 // ABI mínimo do contrato
 const CONTRACT_ABI = [
   {
@@ -1037,6 +1107,9 @@ async function abrirDetalhe(car){
 
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
+  await aplicarEscopoContratoAtual(f);
+  mostrarAvisoContratoAtual(f);
+
   // Preenche a aba PROPRIEDADE imediatamente, antes de qualquer mapa/histórico.
   // Assim, se Leaflet, GeoJSON ou Edge Function falhar, Estado/Área/Sigla/Risco não somem.
   preencherPropriedadeEGemini(f);
@@ -1269,6 +1342,8 @@ async function buscarCAR(){
     return;
   }
 
+  await aplicarEscopoContratoAtual(f);
+
   const resultado=f.rastro_resultados?.[0];
   const risco=resultado?.risco;
   const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
@@ -1281,6 +1356,7 @@ async function buscarCAR(){
       <div class="mc"><p class="mc-l">Estado</p><p class="mc-v">${f.estado||'—'}</p></div>
       <div class="mc"><p class="mc-l">Área</p><p class="mc-v">${f.area_ha?(f.area_ha+' ha'):'—'}</p></div>
     </div>
+    ${f._noContratoAtual === false ? '<div style="font-size:11px;margin:6px 0 8px;padding:7px 9px;border-radius:8px;background:#fff7ed;color:#7c2d12;border:1px solid #fed7aa">CAR não encontrado no contrato ativo. Risco/Gemini ocultados.</div>' : ''}
     <button class="btn btn-g" onclick="abrirDetalhe('${f.codigo_car}');document.getElementById('res-wrap').classList.remove('show')">
       Ver análise completa →
     </button>`;
@@ -1429,6 +1505,8 @@ async function cadastrar(){
     }
 
     const total = await contrato.totalFazendas();
+    _cacheCarsPorContrato = {};
+    await listarCarsDoContratoAtual(true);
 
     document.getElementById('cad-ok').classList.add('show');
     document.getElementById('cad-ok').textContent=`✓ CAR cadastrado on-chain. Total de fazendas: ${total.toString()}.`;
