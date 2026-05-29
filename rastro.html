@@ -159,6 +159,18 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 .hist-msg{display:none;font-size:11px;margin-top:6px;padding:6px 8px;border-radius:var(--r)}
 .hist-msg.ok{display:block;background:#dcfce7;color:#14532d}
 .hist-msg.err{display:block;background:#fee2e2;color:#991b1b}
+.saldo-card{background:var(--v4);border:1px solid var(--b);border-radius:var(--r2);padding:.75rem .85rem;margin:.35rem 0 .65rem}
+.saldo-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:.55rem}
+.saldo-status{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--t2)}
+.saldo-icone{font-size:18px;line-height:1}.saldo-icone.pos{color:#22c55e}.saldo-icone.neg{color:#dc2626}.saldo-icone.neu{color:var(--t3)}
+.saldo-num{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;background:#edf7f1;color:var(--v)}
+.saldo-num.neg{background:#fee2e2;color:#991b1b}.saldo-num.neu{background:#f1f5f1;color:#6b897a}
+.saldo-bar{position:relative;height:14px;border-radius:999px;background:#eef6f1;border:1px solid var(--b);display:flex;overflow:hidden}
+.saldo-bar::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(13,31,22,.25);transform:translateX(-1px)}
+.saldo-left,.saldo-right{width:50%;position:relative}.saldo-left{display:flex;justify-content:flex-end}.saldo-right{display:flex;justify-content:flex-start}
+.saldo-fill-red{height:100%;background:#dc2626;border-radius:999px 0 0 999px}.saldo-fill-green{height:100%;background:#22c55e;border-radius:0 999px 999px 0}
+.saldo-leg{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:var(--t3)}
+.saldo-leg strong{color:var(--t2);font-weight:600}
 
 </style>
 </head>
@@ -305,10 +317,20 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
         <div id="det-leaflet-map" class="det-mapa" style="display:none"></div>
       </div>
       <div class="det-sec">
-        <p class="det-sec-tit">Classificação por estrelas</p>
+        <p class="det-sec-tit">Histórico</p>
+        <div class="saldo-card">
+          <div class="saldo-top">
+            <div class="saldo-status"><span id="d-saldo-icone" class="saldo-icone neu">•</span><span id="d-saldo-texto">Saldo ambiental neutro</span></div>
+            <span id="d-saldo-num" class="saldo-num neu">0.0 ha</span>
+          </div>
+          <div class="saldo-bar">
+            <div class="saldo-left"><div id="d-barra-perda" class="saldo-fill-red" style="width:0%"></div></div>
+            <div class="saldo-right"><div id="d-barra-ganho" class="saldo-fill-green" style="width:0%"></div></div>
+          </div>
+          <div class="saldo-leg"><span>Desmatamento <strong id="d-perda-ha">0.0 ha</strong></span><span>Recuperação <strong id="d-ganho-ha">0.0 ha</strong></span></div>
+        </div>
         <div class="estrelas-bloco">
-          <div class="estrelas-linha"><small>Recuperação</small><span id="d-estrelas-verde" class="estrelas">—</span></div>
-          <div class="estrelas-linha"><small>Alertas</small><span id="d-estrelas-vermelha" class="estrelas">—</span></div>
+          <div class="estrelas-linha"><small>Classificação</small><span id="d-estrelas-verde" class="estrelas">—</span><span id="d-estrelas-vermelha" class="estrelas" style="display:none">—</span></div>
           <div class="estrelas-linha"><small>Segmento</small><span id="d-segmento" class="det-cell-v" style="font-size:12px">—</span></div>
         </div>
         <button class="btn btn-g" id="btn-atualizar-hist" onclick="atualizarHistorico()" style="margin-top:.75rem">
@@ -343,7 +365,7 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
         </div>
       </div>
       <div class="det-sec">
-        <p class="det-sec-tit">Fontes de dados</p>
+        <p class="det-sec-tit">Fontes de dados estado atual</p>
         <div class="fontes-grid">
           <div class="fonte-card">
             <div class="fonte-tit">
@@ -432,66 +454,111 @@ function calcularEstrelas(territorio){
   const fontes = Array.isArray(territorio?.rastro_analises_fontes) ? territorio.rastro_analises_fontes : [];
 
   const histFonte = fontes.find(x => x?.origem === 'MAPBIOMAS_HISTORICO') || null;
+  const mbFonte = fontes.find(x => x?.origem === 'MAPBIOMAS') || null;
   const histPayload = histFonte?.payload || {};
   const histCol = histPayload?.colunas || {};
+  const mbPayload = mbFonte?.payload || {};
 
   const totalAlertas = nnum(
     histFonte?.total_alertas ??
     histCol?.total_alertas ??
     histPayload?.total_alertas ??
     histPayload?.numberOfAlerts ??
-    histPayload?.numero_alertas
+    histPayload?.numero_alertas ??
+    mbPayload?.numberOfAlerts
   );
 
   const areaDesmatada = nnum(
     histFonte?.area_desmatada_ha ??
     histCol?.area_desmatada_ha ??
     histPayload?.area_desmatada_ha ??
-    histPayload?.areaHaAlertas
+    histPayload?.areaHaAlertas ??
+    mbPayload?.areaHaAlertas
   );
 
   const gee = primeiro(territorio?.rastro_mapbiomas_historico_numeros) || {};
   const segmento = gee.segmento_atual || gee.segmento || gee.segmento_dominante || null;
   const variacao = nnum(gee.variacao_nativa_2020_2024_ha ?? gee.variacao_nativa_ha);
-  const vegetacaoAtual = nnum(gee.vegetacao_nativa_atual_ha ?? gee.vegetacao_nativa_2024_ha);
 
-  const temVerde = gee.estrela_verde === true || gee.estrela_verde === 'true' || variacao > 0 || vegetacaoAtual > 0;
+  const ganho = Math.max(0, variacao);
+  const perda = Math.max(0, areaDesmatada);
+  const saldo = ganho - perda;
+  const tolerancia = 1; // evita classificar ruído pequeno como vitória/perda
+
+  let classificacao = 'NEUTRO';
+  if(saldo > tolerancia) classificacao = 'POSITIVO';
+  else if(saldo < -tolerancia) classificacao = 'NEGATIVO';
 
   return {
-    verdes: temVerde ? 1 : 0,
-    vermelhas: Math.max(0, Math.round(totalAlertas)),
-    haRecuperado: variacao > 0 ? variacao : vegetacaoAtual,
-    areaDesmatada,
+    ganho,
+    perda,
+    saldo,
+    classificacao,
+    totalAlertas: Math.max(0, Math.round(totalAlertas)),
     segmento,
   };
 }
 
-function htmlEstrelas(qtd, cor, tooltip){
-  const n = Math.max(0, Math.round(Number(qtd) || 0));
-  if(!n) return '';
-  let out = '';
-  for(let i=0; i<Math.min(n,30); i++){
-    out += `<span class="estrela ${cor}">★<span class="tip">${tooltip}</span></span>`;
+function htmlIconeHistorico(est){
+  const saldoAbs = Math.abs(nnum(est.saldo)).toFixed(1);
+  if(est.classificacao === 'POSITIVO'){
+    return `<span class="estrela verde">★<span class="tip">Saldo positivo: +${saldoAbs} ha</span></span>`;
   }
-  if(n > 30) out += `<span class="estrela ${cor}" style="font-size:10px">+${n-30}</span>`;
-  return out;
+  if(est.classificacao === 'NEGATIVO'){
+    return `<span class="estrela vermelha">🔥<span class="tip">Saldo negativo: -${saldoAbs} ha</span></span>`;
+  }
+  return '<span style="font-size:11px;color:var(--t3)">neutro</span>';
 }
 
 function preencherBlocoEstrelas(est){
-  const verde = document.getElementById('d-estrelas-verde');
-  const vermelha = document.getElementById('d-estrelas-vermelha');
+  const classificacaoEl = document.getElementById('d-estrelas-verde');
+  const legadoVermelho = document.getElementById('d-estrelas-vermelha');
   const segmento = document.getElementById('d-segmento');
-  if(!verde || !vermelha || !segmento) return;
+  const icone = document.getElementById('d-saldo-icone');
+  const texto = document.getElementById('d-saldo-texto');
+  const saldoNum = document.getElementById('d-saldo-num');
+  const barraPerda = document.getElementById('d-barra-perda');
+  const barraGanho = document.getElementById('d-barra-ganho');
+  const perdaHa = document.getElementById('d-perda-ha');
+  const ganhoHa = document.getElementById('d-ganho-ha');
 
-  verde.innerHTML = est.verdes > 0
-    ? htmlEstrelas(est.verdes, 'verde', `+${nnum(est.haRecuperado).toFixed(1)} ha de vegetação nativa`)
-    : '<span style="font-size:11px;color:var(--t3)">nenhuma</span>';
+  const ganho = nnum(est.ganho);
+  const perda = nnum(est.perda);
+  const saldo = nnum(est.saldo);
+  const total = Math.max(ganho + perda, 1);
+  const pctGanho = Math.min(100, (ganho / total) * 100);
+  const pctPerda = Math.min(100, (perda / total) * 100);
 
-  vermelha.innerHTML = est.vermelhas > 0
-    ? htmlEstrelas(est.vermelhas, 'vermelha', `${nnum(est.areaDesmatada).toFixed(1)} ha em alertas`)
-    : '<span style="font-size:11px;color:var(--t3)">nenhum alerta</span>';
+  if(classificacaoEl) classificacaoEl.innerHTML = htmlIconeHistorico(est);
+  if(legadoVermelho) legadoVermelho.innerHTML = '';
+  if(segmento) segmento.textContent = est.segmento || '—';
 
-  segmento.textContent = est.segmento || '—';
+  if(barraGanho) barraGanho.style.width = `${pctGanho}%`;
+  if(barraPerda) barraPerda.style.width = `${pctPerda}%`;
+  if(ganhoHa) ganhoHa.textContent = `${ganho.toFixed(1)} ha`;
+  if(perdaHa) perdaHa.textContent = `${perda.toFixed(1)} ha`;
+
+  if(icone && texto && saldoNum){
+    icone.className = 'saldo-icone neu';
+    saldoNum.className = 'saldo-num neu';
+    icone.textContent = '•';
+    texto.textContent = 'Saldo ambiental neutro';
+    saldoNum.textContent = `${saldo.toFixed(1)} ha`;
+
+    if(est.classificacao === 'POSITIVO'){
+      icone.className = 'saldo-icone pos';
+      saldoNum.className = 'saldo-num';
+      icone.textContent = '★';
+      texto.textContent = 'Recuperação vencendo';
+      saldoNum.textContent = `+${saldo.toFixed(1)} ha`;
+    } else if(est.classificacao === 'NEGATIVO'){
+      icone.className = 'saldo-icone neg';
+      saldoNum.className = 'saldo-num neg';
+      icone.textContent = '🔥';
+      texto.textContent = 'Desmatamento vencendo';
+      saldoNum.textContent = `${saldo.toFixed(1)} ha`;
+    }
+  }
 }
 
 
@@ -802,6 +869,7 @@ async function abrirDetalhe(car){
   }catch(e){
     console.warn('Histórico MapBiomas indisponível:', e);
   }
+  window._detalheAtual = f;
   preencherBlocoEstrelas(calcularEstrelas(f));
 
   // Mapa territorial
@@ -906,12 +974,15 @@ async function atualizarHistorico(){
       segmento_atual: data.segmento_atual,
       vegetacao_nativa_atual_ha: data.vegetacao_nativa_atual_ha,
       variacao_nativa_2020_2024_ha: data.variacao_nativa_2020_2024_ha,
-      estrela_verde: true,
+      estrela_verde: data.estrela_verde === true,
     };
 
-    // Importante: isto atualiza só o bloco de estrelas/segmento.
-    // Não mexe em Status, Risco, Estado, Área, Data, Sigla, Gemini ou Fontes.
-    preencherBlocoEstrelas(calcularEstrelas({ rastro_mapbiomas_historico_numeros: hist }));
+    // Atualiza só o bloco Histórico, usando também as fontes já carregadas
+    // para comparar recuperação x desmatamento. Não mexe na aba Propriedade.
+    const base = window._detalheAtual || {};
+    base.rastro_mapbiomas_historico_numeros = hist;
+    window._detalheAtual = base;
+    preencherBlocoEstrelas(calcularEstrelas(base));
 
     msg.className = 'hist-msg ok';
     msg.textContent = `✓ Atualizado. Segmento: ${data.segmento_atual || '—'} · Veg. nativa: ${nnum(data.vegetacao_nativa_atual_ha).toFixed(1)} ha`;
