@@ -237,6 +237,11 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
           <button class="btn btn-p" onclick="filtrar()">Buscar</button>
           <button class="btn btn-s" onclick="limparFiltro()" style="padding:0 14px">Limpar</button>
         </div>
+        <button class="btn btn-g" id="btn-atualizar-massa" onclick="atualizarHistoricoMassa()" style="margin-top:2px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          Atualizar histórico dos filtrados
+        </button>
+        <div id="massa-msg" style="display:none;font-size:11px;margin-top:4px;padding:6px 8px;border-radius:var(--r);background:var(--v4);color:var(--t2)"></div>
       </div>
     </div>
 
@@ -402,44 +407,36 @@ async function sbFetch(path, params=''){
 }
 
 // ====== ESTRELAS (NOVO) ======
-// Le os dados de analise MAPBIOMAS_HISTORICO de um territorio e calcula estrelas.
-// total_alertas -> N estrelas vermelhas (1 por alerta)
-// anos com variacao_nativa > 0 -> N estrelas verdes (1 por ano que recuperou)
+// VERMELHAS = alertas de desmatamento -> vem de rastro_analises_fontes (MAPBIOMAS_HISTORICO, workflow CRE)
+// VERDES + SEGMENTO = Earth Engine -> vem de rastro_mapbiomas_historico_numeros (Edge Function mapibioma)
 function calcularEstrelas(territorio){
-  // acha a analise historica do MapBiomas
+  // --- VERMELHAS (alertas) ---
   const fontes = territorio?.rastro_analises_fontes || [];
   const hist = fontes.find(x => x.origem === 'MAPBIOMAS_HISTORICO');
-
-  // numeros podem estar em colunas diretas ou dentro do payload.colunas
   const col = hist?.payload?.colunas || hist || {};
-
   const totalAlertas = Number(
     hist?.total_alertas ?? col?.total_alertas ?? hist?.payload?.total_alertas ?? 0
   ) || 0;
-
   const areaDesmatada = Number(
     hist?.area_desmatada_ha ?? col?.area_desmatada_ha ?? 0
   ) || 0;
 
-  // verdes: quantos anos recuperaram. Se tiver detalhe por ano usa, senao usa flag.
+  // --- VERDES + SEGMENTO (Earth Engine) ---
+  // a tabela vem embarcada como rastro_mapbiomas_historico_numeros (objeto ou array)
+  let gee = territorio?.rastro_mapbiomas_historico_numeros;
+  if (Array.isArray(gee)) gee = gee[0];
+  gee = gee || {};
+
+  const segmento = gee.segmento_atual ?? null;
+
   let verdes = 0;
   let haRecuperado = 0;
-  const variacao = Number(
-    hist?.variacao_nativa_2020_2024_ha ?? col?.variacao_nativa_2020_2024_ha ?? 0
-  ) || 0;
-
-  // se tiver um historico anual de recuperacao no payload, conta os anos positivos
-  const recPorAno = hist?.payload?.recuperacao_por_ano || col?.recuperacao_por_ano;
-  if (recPorAno && typeof recPorAno === 'object'){
-    for (const [ano, val] of Object.entries(recPorAno)){
-      if (Number(val) > 0){ verdes++; haRecuperado += Number(val); }
-    }
-  } else if (variacao > 0){
+  // estrela_verde booleano + variacao em ha
+  const variacao = Number(gee.variacao_nativa_2020_2024_ha ?? 0) || 0;
+  if (gee.estrela_verde === true || variacao > 0){
     verdes = 1;
-    haRecuperado = variacao;
+    haRecuperado = variacao > 0 ? variacao : (Number(gee.vegetacao_nativa_atual_ha ?? 0) || 0);
   }
-
-  const segmento = hist?.segmento_atual ?? col?.segmento_atual ?? null;
 
   return {
     vermelhas: totalAlertas,
@@ -597,9 +594,24 @@ async function abrirDetalhe(car){
   limparMapaDetalhe(); load.style.display='flex'; load.textContent='Carregando território…';
 
   const rows = await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
-  const f = rows?.[0];
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*),rastro_mapbiomas_historico_numeros(*)`);
+  let f = rows?.[0];
+  if(!f){
+    // fallback: query sem o join (caso a FK nao exista)
+    const r2 = await sbFetch('rastro_territorios',
+      `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
+    f = r2?.[0];
+  }
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
+
+  // fallback: se a tabela do Earth Engine nao veio embutida, busca separada
+  if(!f.rastro_mapbiomas_historico_numeros){
+    try{
+      const gee = await sbFetch('rastro_mapbiomas_historico_numeros',
+        `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+      if(gee && gee.length) f.rastro_mapbiomas_historico_numeros = gee[0];
+    }catch(e){ /* ignora */ }
+  }
 
   const bb=normalizarBoundingBox(f.bounding_box);
   const gj = f.geojson || f.payload?.geometry;
@@ -661,7 +673,7 @@ async function atualizarHistorico(){
   msg.style.display='none';
 
   try {
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/mapbiomas-cobertura`, {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/mapibioma`, {
       method:'POST',
       headers:{
         'Content-Type':'application/json',
@@ -767,7 +779,7 @@ async function buscarCAR(){
   document.getElementById('res-erro').classList.remove('show');
   document.getElementById('res-conteudo').innerHTML='';
   const rows=await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
+    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_analises_fontes(*),rastro_resultados(*),rastro_mapbiomas_historico_numeros(*)`);
   const f=rows?.[0];
   btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Verificar';
   btn.disabled=false;
@@ -811,7 +823,7 @@ async function filtrar(){
   if(!estadoSel){alert('Selecione um estado para filtrar.');return;}
   const sigla=estadoSel.match(/\(([A-Z]+)\)/)?.[1]||'';
   const rows=await sbFetch('rastro_territorios',
-    `?state_acronym=eq.${sigla}&select=*,rastro_analises_fontes(*),rastro_resultados(risco)`);
+    `?state_acronym=eq.${sigla}&select=*,rastro_analises_fontes(*),rastro_resultados(risco),rastro_mapbiomas_historico_numeros(*)`);
   let fazendas=(rows||[]).map(f=>({
     ...f,
     _risco:f.rastro_resultados?.[0]?.risco||null,
@@ -838,6 +850,49 @@ async function filtrar(){
   if(estrelaSel) label+=` · ${estrelaSel}`;
   buildLista(fazendas,label);
   destacarMapa(fazendas);
+  // guarda os filtrados para a atualizacao em massa
+  window._filtrados = fazendas.map(f=>f.codigo_car);
+}
+
+// ====== ATUALIZAR HISTORICO EM MASSA (dos filtrados) ======
+async function atualizarHistoricoMassa(){
+  const cars = window._filtrados || [];
+  const btn = document.getElementById('btn-atualizar-massa');
+  const msg = document.getElementById('massa-msg');
+
+  if(!cars.length){
+    msg.style.display='block';
+    msg.textContent = 'Faça uma busca (estado) primeiro. Atualiza só os que aparecerem na lista.';
+    return;
+  }
+
+  if(cars.length > 30){
+    if(!confirm(`Vai atualizar ${cars.length} propriedades, uma por uma. Pode levar alguns minutos. Continuar?`)) return;
+  }
+
+  btn.disabled = true;
+  msg.style.display='block';
+  let ok=0, erro=0;
+
+  for(let i=0;i<cars.length;i++){
+    const car = cars[i];
+    btn.innerHTML = `<div class="spin" style="border-top-color:var(--v2)"></div> ${i+1}/${cars.length}…`;
+    msg.textContent = `Atualizando ${i+1} de ${cars.length} — ${ok} ok, ${erro} erro…`;
+    try{
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/mapibioma`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${SUPABASE_ANON}` },
+        body: JSON.stringify({ codigo_car: car }),
+      });
+      const data = await resp.json();
+      if(data?.status === 'OK') ok++; else erro++;
+    }catch(e){ erro++; }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg> Atualizar histórico dos filtrados';
+  msg.style.cssText += 'background:#dcfce7;color:#14532d;display:block';
+  msg.textContent = `✓ Concluído: ${ok} atualizados, ${erro} com erro. Clique em Buscar de novo para ver as estrelas.`;
 }
 function limparFiltro(){
   document.getElementById('sel-estado').value='';
