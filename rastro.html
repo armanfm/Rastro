@@ -594,24 +594,16 @@ async function abrirDetalhe(car){
   limparMapaDetalhe(); load.style.display='flex'; load.textContent='Carregando território…';
 
   const rows = await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*),rastro_mapbiomas_historico_numeros(*)`);
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
   let f = rows?.[0];
-  if(!f){
-    // fallback: query sem o join (caso a FK nao exista)
-    const r2 = await sbFetch('rastro_territorios',
-      `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
-    f = r2?.[0];
-  }
   if(!f){ load.textContent='Propriedade não encontrada.'; return; }
 
-  // fallback: se a tabela do Earth Engine nao veio embutida, busca separada
-  if(!f.rastro_mapbiomas_historico_numeros){
-    try{
-      const gee = await sbFetch('rastro_mapbiomas_historico_numeros',
-        `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
-      if(gee && gee.length) f.rastro_mapbiomas_historico_numeros = gee[0];
-    }catch(e){ /* ignora */ }
-  }
+  // busca a tabela do Earth Engine separada (segmento + estrela verde)
+  try{
+    const gee = await sbFetch('rastro_mapbiomas_historico_numeros',
+      `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+    if(gee && gee.length) f.rastro_mapbiomas_historico_numeros = gee[0];
+  }catch(e){ /* ignora */ }
 
   const bb=normalizarBoundingBox(f.bounding_box);
   const gj = f.geojson || f.payload?.geometry;
@@ -779,7 +771,7 @@ async function buscarCAR(){
   document.getElementById('res-erro').classList.remove('show');
   document.getElementById('res-conteudo').innerHTML='';
   const rows=await sbFetch('rastro_territorios',
-    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_analises_fontes(*),rastro_resultados(*),rastro_mapbiomas_historico_numeros(*)`);
+    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
   const f=rows?.[0];
   btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Verificar';
   btn.disabled=false;
@@ -823,12 +815,23 @@ async function filtrar(){
   if(!estadoSel){alert('Selecione um estado para filtrar.');return;}
   const sigla=estadoSel.match(/\(([A-Z]+)\)/)?.[1]||'';
   const rows=await sbFetch('rastro_territorios',
-    `?state_acronym=eq.${sigla}&select=*,rastro_analises_fontes(*),rastro_resultados(risco),rastro_mapbiomas_historico_numeros(*)`);
-  let fazendas=(rows||[]).map(f=>({
-    ...f,
-    _risco:f.rastro_resultados?.[0]?.risco||null,
-    _estrelas:calcularEstrelas(f),
-  }));
+    `?state_acronym=eq.${sigla}&select=*,rastro_analises_fontes(*),rastro_resultados(risco)`);
+
+  // busca os dados do Earth Engine (segmento + estrela verde) e indexa por codigo_car
+  let geeMap = {};
+  try{
+    const geeRows = await sbFetch('rastro_mapbiomas_historico_numeros', `?select=*`);
+    (geeRows||[]).forEach(g=>{ geeMap[g.codigo_car] = g; });
+  }catch(e){ /* sem dados do GEE ainda, tudo bem */ }
+
+  let fazendas=(rows||[]).map(f=>{
+    if(geeMap[f.codigo_car]) f.rastro_mapbiomas_historico_numeros = geeMap[f.codigo_car];
+    return {
+      ...f,
+      _risco:f.rastro_resultados?.[0]?.risco||null,
+      _estrelas:calcularEstrelas(f),
+    };
+  });
 
   if(riscoSel==='PENDENTE') fazendas=fazendas.filter(f=>f.status==='PENDENTE');
   else if(riscoSel==='INATIVO') fazendas=fazendas.filter(f=>f.status==='INATIVO');
