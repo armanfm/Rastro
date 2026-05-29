@@ -489,43 +489,32 @@ async function listarCarsDoContratoAtual(force=false){
   if(!force && Array.isArray(_cacheCarsPorContrato[key])) return _cacheCarsPorContrato[key];
 
   if(!window.ethereum){
-    console.warn('MetaMask não encontrada; não foi possível validar o CAR no contrato ativo.');
-    return null;
+    throw new Error('MetaMask não encontrada. Conecte a carteira para validar o contrato ativo.');
   }
 
-  try{
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const contrato = new ethers.Contract(addr, CONTRACT_ABI, provider);
-    const lista = await contrato.listarTodos();
-    const normalizada = Array.from(lista || []).map(x => String(x).trim().toUpperCase());
-    _cacheCarsPorContrato[key] = normalizada;
-    return normalizada;
-  }catch(e){
-    console.warn('Não foi possível ler listarTodos() do contrato ativo:', e);
-    return null;
-  }
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const contrato = new ethers.Contract(addr, CONTRACT_ABI, provider);
+  const lista = await contrato.listarTodos();
+  const normalizada = Array.from(lista || []).map(x => String(x).trim().toUpperCase());
+  _cacheCarsPorContrato[key] = normalizada;
+  return normalizada;
 }
-
 async function carEstaNoContratoAtual(codigoCar){
   const lista = await listarCarsDoContratoAtual(false);
-  if(lista === null) return null;
   return lista.includes(String(codigoCar || '').trim().toUpperCase());
 }
-
 async function aplicarEscopoContratoAtual(f){
   if(!f) return f;
   const pertence = await carEstaNoContratoAtual(f.codigo_car);
   f._noContratoAtual = pertence;
 
   // Se o CAR não está no contrato ativo, não mostramos risco/Gemini antigo.
-  // Mantemos dados cadastrais e fontes públicas do estado atual, porque esses
-  // pertencem ao território/CAR, não ao contrato escolhido para teste.
+  // Mantemos os dados básicos apenas quando a tela decidir exibir detalhe público.
   if(pertence === false){
     f.rastro_resultados = [];
   }
   return f;
 }
-
 function mostrarAvisoContratoAtual(f){
   let aviso = document.getElementById('aviso-contrato-atual');
   const alvo = document.querySelector('#detalhe .det-sec:nth-of-type(3)') || document.getElementById('detalhe');
@@ -546,7 +535,10 @@ function mostrarAvisoContratoAtual(f){
   }
 }
 
-// ABI mínimo do contrato
+// ABI mínimo do contrato ativo.
+// Importante: listarTodos() precisa estar aqui, senão o front não consegue
+// saber quais CARs pertencem ao contrato selecionado e acaba mostrando dados
+// antigos do Supabase de outro contrato.
 const CONTRACT_ABI = [
   {
     name: 'cadastrarCAR',
@@ -554,6 +546,33 @@ const CONTRACT_ABI = [
     stateMutability: 'nonpayable',
     inputs: [{ name: 'codigoCAR', type: 'string' }],
     outputs: [],
+  },
+  {
+    name: 'listarTodos',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'string[]' }],
+  },
+  {
+    name: 'totalFazendas',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    name: 'fazendas',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: '', type: 'string' }],
+    outputs: [
+      { name: 'dono', type: 'address' },
+      { name: 'status', type: 'uint8' },
+      { name: 'cadastradoEm', type: 'uint256' },
+      { name: 'atualizadoEm', type: 'uint256' },
+      { name: 'existe', type: 'bool' },
+    ],
   }
 ];
 
@@ -1342,7 +1361,25 @@ async function buscarCAR(){
     return;
   }
 
-  await aplicarEscopoContratoAtual(f);
+  try{
+    await aplicarEscopoContratoAtual(f);
+  }catch(e){
+    document.getElementById('res-erro').textContent = e.message || String(e);
+    document.getElementById('res-erro').classList.add('show');
+    document.getElementById('res-wrap').classList.add('show');
+    return;
+  }
+
+  if(f._noContratoAtual === false){
+    const addr = getContratoAtual();
+    document.getElementById('res-conteudo').innerHTML = `
+      <div style="font-size:12px;line-height:1.55;padding:9px 10px;border-radius:8px;background:#fff7ed;color:#7c2d12;border:1px solid #fed7aa">
+        Este CAR existe na base pública do Rastro, mas <b>não está cadastrado no contrato ativo</b><br>
+        <span style="font-family:'Courier New',monospace;font-size:10.5px">${addr}</span>
+      </div>`;
+    document.getElementById('res-wrap').classList.add('show');
+    return;
+  }
 
   const resultado=f.rastro_resultados?.[0];
   const risco=resultado?.risco;
