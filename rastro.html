@@ -461,6 +461,39 @@ const GRUPOS=[
 ];
 
 let map, mkrs={}, wallet=null, detalheMap=null, detalheAreaLayer=null;
+window._fazendasCache = window._fazendasCache || {};
+function cacheFazenda(f){
+  if(f && f.codigo_car) window._fazendasCache[f.codigo_car] = {...(window._fazendasCache[f.codigo_car]||{}), ...f};
+  return f;
+}
+function getFazendaCache(car){
+  return (window._fazendasCache && window._fazendasCache[car]) ? window._fazendasCache[car] : null;
+}
+function preencherDetalheBasico(f){
+  const status = f?.status || '—';
+  const sc=status==='ATIVO'?'bv':status==='PENDENTE'?'bp':'bi';
+  const se=document.getElementById('d-status');
+  se.className='badge '+sc;
+  se.textContent=status;
+
+  const resultado=Array.isArray(f?.rastro_resultados) ? f.rastro_resultados[0] : null;
+  const re=document.getElementById('d-risco');
+  if(resultado?.risco){
+    re.className='rbadge rb-'+resultado.risco[0].toLowerCase();
+    re.textContent=resultado.risco;
+    re.style.cssText='';
+  } else {
+    re.className='rbadge';
+    re.style.cssText='background:#f1f5f1;color:#6b897a';
+    re.textContent='N/A';
+  }
+
+  document.getElementById('d-estado').textContent=f?.estado||f?.state_acronym||'—';
+  document.getElementById('d-area').textContent=f?.area_ha?(f.area_ha+' ha'):'—';
+  document.getElementById('d-data').textContent=f?.created_at?new Date(f.created_at).toLocaleDateString('pt-BR'):'—';
+  document.getElementById('d-sigla').textContent=f?.state_acronym||'—';
+  return resultado;
+}
 
 function initMap(){
   map=L.map('map').setView([-14,-52],5);
@@ -576,10 +609,13 @@ async function abrirDetalhe(car){
   img.style.display='none'; miniMap.style.display='none';
   limparMapaDetalhe(); load.style.display='flex'; load.textContent='Carregando território…';
 
+  const cached = getFazendaCache(car) || {};
   const rows = await sbFetch('rastro_territorios',
     `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
-  let f = rows?.[0];
-  if(!f){ load.textContent='Propriedade não encontrada.'; return; }
+  const fetched = Array.isArray(rows) ? rows[0] : null;
+  let f = fetched ? {...cached, ...fetched} : cached;
+  if(!f || !f.codigo_car){ load.textContent='Propriedade não encontrada.'; return; }
+  cacheFazenda(f);
 
   // busca a tabela do Earth Engine separada (segmento + estrela verde)
   try{
@@ -587,6 +623,7 @@ async function abrirDetalhe(car){
       `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
     if(gee && gee.length) f.rastro_mapbiomas_historico_numeros = gee[0];
   }catch(e){ /* ignora */ }
+  cacheFazenda(f);
 
   const bb=normalizarBoundingBox(f.bounding_box);
   const gj = f.geojson || f.payload?.geometry;
@@ -602,16 +639,7 @@ async function abrirDetalhe(car){
                     : '<span style="font-size:11px;color:var(--t3)">nenhum alerta</span>';
   document.getElementById('d-segmento').textContent = est.segmento || '—';
 
-  const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
-  const se=document.getElementById('d-status'); se.className='badge '+sc; se.textContent=f.status;
-  const resultado=f.rastro_resultados?.[0];
-  const re=document.getElementById('d-risco');
-  if(resultado?.risco){ re.className='rbadge rb-'+resultado.risco[0].toLowerCase(); re.textContent=resultado.risco; }
-  else { re.className='rbadge'; re.style.cssText='background:#f1f5f1;color:#6b897a'; re.textContent='N/A'; }
-  document.getElementById('d-estado').textContent=f.estado||'—';
-  document.getElementById('d-area').textContent=f.area_ha?(f.area_ha+' ha'):'—';
-  document.getElementById('d-data').textContent=f.created_at?new Date(f.created_at).toLocaleDateString('pt-BR'):'—';
-  document.getElementById('d-sigla').textContent=f.state_acronym||'—';
+  const resultado = preencherDetalheBasico(f);
   if(resultado){
     const gr=document.getElementById('d-g-risco');
     gr.className='rbadge rb-'+resultado.risco?.[0]?.toLowerCase(); gr.textContent=resultado.risco||'—';
@@ -674,8 +702,17 @@ async function atualizarHistorico(){
         ? htmlEstrelas(1, 'verde', `+${haVerde.toFixed(1)} ha de vegetação nativa`)
         : '<span style="font-size:11px;color:var(--t3)">nenhuma</span>';
 
-      // Recarrega depois para puxar status, risco, fontes e histórico gravados no Supabase.
-      setTimeout(()=>abrirDetalhe(car), 1500);
+      // Não recarrega o detalhe aqui, porque isso podia apagar Estado, Área e Sigla se o select voltasse incompleto.
+      const cached = getFazendaCache(car) || {codigo_car: car};
+      cached.rastro_mapbiomas_historico_numeros = {
+        ...(cached.rastro_mapbiomas_historico_numeros || {}),
+        segmento_atual: data.segmento_atual,
+        vegetacao_nativa_atual_ha: vegAtual,
+        variacao_nativa_2020_2024_ha: variacao,
+        estrela_verde: haVerde > 0,
+      };
+      cacheFazenda(cached);
+      preencherDetalheBasico(cached);
     } else {
       msg.style.display='block';
       msg.style.cssText += 'background:#fee2e2;color:#991b1b;display:block';
@@ -784,6 +821,7 @@ async function buscarCAR(){
       return;
     }
 
+    cacheFazenda(f);
     const resultado=f.rastro_resultados?.[0];
     const risco=resultado?.risco;
     const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
@@ -856,11 +894,13 @@ async function filtrar(){
 
   let fazendas=rows.map(f=>{
     if(geeMap[f.codigo_car]) f.rastro_mapbiomas_historico_numeros = geeMap[f.codigo_car];
-    return {
+    const item = {
       ...f,
       _risco:f.rastro_resultados?.[0]?.risco||null,
       _estrelas:calcularEstrelas(f),
     };
+    cacheFazenda(item);
+    return item;
   });
 
   if(riscoSel==='PENDENTE') fazendas=fazendas.filter(f=>f.status==='PENDENTE');
