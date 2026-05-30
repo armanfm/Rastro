@@ -172,6 +172,16 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
 .saldo-leg{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:var(--t3)}
 .saldo-leg strong{color:var(--t2);font-weight:600}
 
+
+/* ====== EVIDÊNCIA ON-CHAIN ====== */
+.onchain-box{margin-top:.7rem;border-top:1px dashed var(--b);padding-top:.65rem;display:none}
+.onchain-box.show{display:block}
+.onchain-title{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.onchain-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--t3);margin-top:4px}
+.onchain-row code{font-family:'Courier New',monospace;font-size:10.5px;color:var(--t);background:var(--sup);border:1px solid var(--b);border-radius:5px;padding:2px 5px}
+.onchain-row a{font-size:10.5px;font-weight:600;color:var(--v2);text-decoration:none;white-space:nowrap;margin-left:5px}
+.onchain-row a:hover{text-decoration:underline}
+
 </style>
 </head>
 <body>
@@ -378,6 +388,17 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
           <div class="gemini-campo"><p class="gemini-campo-l">Compliance EUDR</p><p class="gemini-campo-v" id="d-g-comp">—</p></div>
           <div class="gemini-campo"><p class="gemini-campo-l">Interpretação</p><p class="gemini-campo-v" id="d-g-int">—</p></div>
           <div class="gemini-campo"><p class="gemini-campo-l">Resumo para importador</p><p class="gemini-campo-v" id="d-g-res">—</p></div>
+          <div class="onchain-box" id="d-g-onchain">
+            <p class="onchain-title">Evidência on-chain</p>
+            <div class="onchain-row" id="d-g-tx-row">
+              <span>Tx</span>
+              <span><code id="d-g-tx">—</code><a id="d-g-tx-link" href="#" target="_blank" rel="noopener">ver</a></span>
+            </div>
+            <div class="onchain-row" id="d-g-case-row">
+              <span>Case hash</span>
+              <span><code id="d-g-case">—</code></span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="det-sec">
@@ -391,6 +412,13 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
             <div class="fonte-item"><span>Desmatamento</span><span id="d-mb-def">—</span></div>
             <div class="fonte-item"><span>Alertas</span><span id="d-mb-alerts">—</span></div>
             <div class="fonte-item"><span>Hectares</span><span id="d-mb-ha">—</span></div>
+            <div class="onchain-box" id="d-mb-onchain">
+              <p class="onchain-title">Evidência on-chain</p>
+              <div class="onchain-row">
+                <span>Tx</span>
+                <span><code id="d-mb-tx">—</code><a id="d-mb-tx-link" href="#" target="_blank" rel="noopener">ver</a></span>
+              </div>
+            </div>
           </div>
           <div class="fonte-card">
             <div class="fonte-tit">
@@ -399,6 +427,13 @@ footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0
             </div>
             <div class="fonte-item"><span>Embargo</span><span id="d-ib-emb">—</span></div>
             <div class="fonte-item"><span>Status</span><span id="d-ib-st">—</span></div>
+            <div class="onchain-box" id="d-ib-onchain">
+              <p class="onchain-title">Evidência on-chain</p>
+              <div class="onchain-row">
+                <span>Tx</span>
+                <span><code id="d-ib-tx">—</code><a id="d-ib-tx-link" href="#" target="_blank" rel="noopener">ver</a></span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1029,6 +1064,56 @@ function renderMapaDetalhe(geojson, bb, f=null){
   return true;
 }
 
+
+function encurtarHash(hash){
+  if(!hash || typeof hash !== 'string') return '';
+  if(hash.length <= 14) return hash;
+  return `${hash.slice(0, 8)}...${hash.slice(-6)}`;
+}
+
+function etherscanTx(hash){
+  return `https://sepolia.etherscan.io/tx/${hash}`;
+}
+
+function mostrarTxOnchain(boxId, codeId, linkId, hash){
+  const box = document.getElementById(boxId);
+  const code = document.getElementById(codeId);
+  const link = document.getElementById(linkId);
+  if(!box || !code || !link) return;
+
+  if(hash && typeof hash === 'string' && hash.startsWith('0x')){
+    box.classList.add('show');
+    code.textContent = encurtarHash(hash);
+    code.title = hash;
+    link.href = etherscanTx(hash);
+    link.style.display = 'inline';
+  } else {
+    box.classList.remove('show');
+    code.textContent = '—';
+    code.title = '';
+    link.href = '#';
+    link.style.display = 'none';
+  }
+}
+
+function mostrarCaseHashGemini(caseHash){
+  const box = document.getElementById('d-g-onchain');
+  const row = document.getElementById('d-g-case-row');
+  const code = document.getElementById('d-g-case');
+  if(!box || !row || !code) return;
+
+  if(caseHash && typeof caseHash === 'string'){
+    box.classList.add('show');
+    row.style.display = 'flex';
+    code.textContent = encurtarHash(caseHash);
+    code.title = caseHash;
+  } else {
+    row.style.display = 'none';
+    code.textContent = '—';
+    code.title = '';
+  }
+}
+
 function preencherPropriedadeEGemini(f){
   if(!f) return;
 
@@ -1078,11 +1163,16 @@ function preencherPropriedadeEGemini(f){
     if(comp) comp.textContent = resultado.compliance || '—';
     if(inter) inter.textContent = resultado.interpretacao || '—';
     if(resumo) resumo.textContent = resultado.resumo || '—';
+
+    mostrarTxOnchain('d-g-onchain','d-g-tx','d-g-tx-link',resultado.tx_hash);
+    mostrarCaseHashGemini(resultado.case_hash);
   } else {
     ['d-g-risco','d-g-just','d-g-comp','d-g-int','d-g-res'].forEach(id=>{
       const el=document.getElementById(id);
       if(el){ el.textContent='Análise pendente'; el.className='gemini-campo-v'; }
     });
+    mostrarTxOnchain('d-g-onchain','d-g-tx','d-g-tx-link',null);
+    mostrarCaseHashGemini(null);
   }
 
   const fontes = Array.isArray(f.rastro_analises_fontes) ? f.rastro_analises_fontes : [];
@@ -1100,6 +1190,9 @@ function preencherPropriedadeEGemini(f){
   if(mbHa) mbHa.textContent = mb?.payload?.areaHaAlertas ? (mb.payload.areaHaAlertas + ' ha') : '—';
   if(ibEmb) ibEmb.textContent = ib?.payload?.embargoStatus === 1 ? 'Sim' : 'Não';
   if(ibSt) ibSt.textContent = ib?.payload?.embargoStatus === 1 ? 'Embargado' : 'Regular';
+
+  mostrarTxOnchain('d-mb-onchain','d-mb-tx','d-mb-tx-link',mb?.tx_hash);
+  mostrarTxOnchain('d-ib-onchain','d-ib-tx','d-ib-tx-link',ib?.tx_hash);
 }
 
 // ── DETALHE ───────────────────────────────────────────────────────────────────
