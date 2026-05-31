@@ -1,0 +1,2662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Rastro — Demo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #101A14; -webkit-font-smoothing: antialiased; font-family: 'DM Sans', sans-serif; color: #1A2E24; }
+  #root { height: 100%; }
+  button { font-family: inherit; }
+  input { font-family: inherit; }
+  input::placeholder { color: #B0BCB4; }
+  ::selection { background: rgba(27,94,58,0.22); }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 920px) {
+    .grid-4, .grid-3, .grid-2, .hero-bottom { grid-template-columns: 1fr !important; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+
+// Shim de ícones lucide como SVG inline (paths verbatim do lucide v0.383)
+const ICONS = {
+  ArrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  ArrowLeft: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  Check: '<path d="M20 6 9 17l-5-5"/>',
+  X: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  Search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  Wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  ExternalLink: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  ShieldCheck: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  MapPin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  Leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
+  FileCheck: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/>',
+  Share2: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>',
+  Briefcase: '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+  CircleCheck: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  CircleAlert: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+  Clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  ChevronRight: '<path d="m9 18 6-6-6-6"/>',
+  Sparkles: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+  Eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  Download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+  Layers: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>',
+  Lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+};
+
+function makeIcon(inner) {
+  return function Icon({ size = 24, color = "currentColor", strokeWidth = 2, style }) {
+    return React.createElement("svg", {
+      width: size, height: size, viewBox: "0 0 24 24",
+      fill: "none", stroke: color, strokeWidth: strokeWidth,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: style, dangerouslySetInnerHTML: { __html: inner },
+    });
+  };
+}
+const _I = {};
+Object.keys(ICONS).forEach(function(k){ _I[k] = makeIcon(ICONS[k]); });
+const ArrowRight=_I.ArrowRight, ArrowLeft=_I.ArrowLeft, Check=_I.Check, X=_I.X, Search=_I.Search, Wallet=_I.Wallet, ExternalLink=_I.ExternalLink, ShieldCheck=_I.ShieldCheck, MapPin=_I.MapPin, Leaf=_I.Leaf, FileCheck=_I.FileCheck, Share2=_I.Share2, Briefcase=_I.Briefcase, CircleCheck=_I.CircleCheck, CircleAlert=_I.CircleAlert, Clock=_I.Clock, ChevronRight=_I.ChevronRight, Sparkles=_I.Sparkles, Eye=_I.Eye, Lock=_I.Lock, Layers=_I.Layers, Download=_I.Download;
+const { useState, useEffect } = React;
+
+
+/* ============================================================
+   A RASTRO — Demo (tema escuro premium da marca)
+   Home · Exportador/Trader · Importador · Auditor · Auditoria on-chain
+   ============================================================ */
+
+const C = {
+  bg: "#101A14", bg1: "#13201A", surface: "#18261E", surfaceUp: "#1F2F26", surfaceMax: "#26392E",
+  line: "#27362D", lineSoft: "#1F2D25", lineHi: "#35473B",
+  forest: "#3D9968", forestHi: "#54B07E", forestDeep: "#1B5E3A",
+  forestSoft: "rgba(61,153,104,0.10)", forestBd: "rgba(61,153,104,0.26)", forestBg: "rgba(27,94,58,0.20)",
+  sand: "#C9A86A", sandHi: "#DBBE86", terraDeep: "#C47A2A",
+  sandSoft: "rgba(201,168,106,0.10)", sandBd: "rgba(201,168,106,0.28)", sandBg: "rgba(201,168,106,0.12)",
+  ink: "#EDE8DB", ink1: "#D6D0C0", ink2: "#A6AD9C", ink3: "#7B8377", ink4: "#565E54",
+  ok: "#5FB584", okSoft: "rgba(95,181,132,0.12)", okBd: "rgba(95,181,132,0.30)",
+  warn: "#D9BC82", warnSoft: "rgba(217,188,130,0.12)", warnBd: "rgba(217,188,130,0.30)",
+  bad: "#CE7E66", badSoft: "rgba(206,126,102,0.12)", badBd: "rgba(206,126,102,0.30)",
+  info: "#8FA8B8", infoSoft: "rgba(143,168,184,0.12)", infoBd: "rgba(143,168,184,0.28)",
+};
+
+const DISPLAY = "'Fraunces', Georgia, serif";
+const WORDMARK = "Georgia, 'Times New Roman', serif";
+const UI = "'DM Sans', 'Inter', system-ui, sans-serif";
+const MONO = "'IBM Plex Mono', ui-monospace, monospace";
+
+/* ---------- LOGO (versão dark da marca) ---------- */
+function Mark({ size = 40 }) {
+  const id = "rg-" + Math.round(size * 100);
+  return (
+    <svg width={size} height={size} viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", flexShrink: 0 }}>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0.5" x2="1" y2="0.5">
+          <stop offset="0%" stopColor="#38996A" /><stop offset="35%" stopColor="#38996A" />
+          <stop offset="55%" stopColor="#4AAF7A" /><stop offset="75%" stopColor="#B89040" /><stop offset="100%" stopColor="#D4943A" />
+        </linearGradient>
+      </defs>
+      <path d="M30 150 L30 30 Q30 22, 38 22 L90 22 Q130 22, 130 62 Q130 102, 90 102 L58 102 Q46 102, 54 112 L130 150"
+        stroke={`url(#${id})`} strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="30" cy="150" r="10" fill="#38996A" /><circle cx="130" cy="150" r="10" fill="#D4943A" />
+    </svg>
+  );
+}
+function Logo({ height = 30, onClick }) {
+  return (
+    <div onClick={onClick} style={{ display: "inline-flex", alignItems: "center", gap: 1, cursor: onClick ? "pointer" : "default", height }}>
+      <Mark size={height * 1.08} />
+      <span style={{ fontFamily: WORDMARK, fontSize: height * 1.02, fontWeight: 400, color: C.ink, letterSpacing: "-0.05em", marginLeft: -height * 0.16, lineHeight: 1 }}>astro</span>
+    </div>
+  );
+}
+
+/* ---------- PRIMITIVOS ---------- */
+function Btn({ children, onClick, kind = "primary", size = "md", icon: Icon, iconRight: IconRight, full }) {
+  const sizes = { sm: { p: "8px 14px", f: 13 }, md: { p: "11px 22px", f: 14 }, lg: { p: "14px 28px", f: 15 } };
+  const z = sizes[size];
+  const kinds = {
+    primary: { background: C.forest, color: "#0C1611", border: `1px solid ${C.forest}` },
+    sand: { background: C.sand, color: "#1A1306", border: `1px solid ${C.sand}` },
+    ghost: { background: "transparent", color: C.ink, border: `1.5px solid ${C.lineHi}` },
+    quiet: { background: "transparent", color: C.ink2, border: "1px solid transparent" },
+    soft: { background: C.surfaceUp, color: C.ink, border: `1px solid ${C.line}` },
+  };
+  return (
+    <button onClick={onClick} style={{ ...kinds[kind], padding: z.p, fontSize: z.f, fontWeight: 600, fontFamily: UI, borderRadius: 10, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, width: full ? "100%" : "auto", transition: "transform .12s, filter .15s, background .15s, border-color .15s", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}
+      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; if (kind === "ghost") { e.currentTarget.style.borderColor = C.forest; e.currentTarget.style.background = C.forestSoft; } if (kind === "quiet") e.currentTarget.style.color = C.ink; if (kind === "primary" || kind === "sand") e.currentTarget.style.filter = "brightness(1.06)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; if (kind === "ghost") { e.currentTarget.style.borderColor = C.lineHi; e.currentTarget.style.background = "transparent"; } if (kind === "quiet") e.currentTarget.style.color = C.ink2; if (kind === "primary" || kind === "sand") e.currentTarget.style.filter = "none"; }}>
+      {Icon && <Icon size={z.f + 2} strokeWidth={2} />}{children}{IconRight && <IconRight size={z.f + 1} strokeWidth={2} />}
+    </button>
+  );
+}
+function Card({ children, pad = 24, style, onClick, hover }) {
+  return (
+    <div onClick={onClick} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: pad, cursor: onClick ? "pointer" : "default", transition: "border-color .18s, background .18s, transform .12s", ...style }}
+      onMouseEnter={(e) => { if (hover || onClick) { e.currentTarget.style.borderColor = C.lineHi; e.currentTarget.style.background = C.surfaceUp; } }}
+      onMouseLeave={(e) => { if (hover || onClick) { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = C.surface; } }}>
+      {children}
+    </div>
+  );
+}
+function Modal({ title, subtitle, eyebrow, onClose, children, footer, wide }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    try { window.addEventListener("keydown", onKey); } catch (e) {}
+    return () => { try { window.removeEventListener("keydown", onKey); } catch (e) {} };
+  }, [onClose]);
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(8,14,11,0.72)", backdropFilter: "blur(4px)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 1000, padding: "40px 20px", overflowY: "auto" }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C.bg, border: `1px solid ${C.lineHi}`, borderRadius: 16, width: "100%", maxWidth: wide ? 880 : 620, boxShadow: "0 30px 80px rgba(0,0,0,.5)", animation: "rise .22s ease", marginBottom: 40 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "22px 26px", borderBottom: `1px solid ${C.line}`, position: "sticky", top: 0, background: C.bg, borderRadius: "16px 16px 0 0", zIndex: 2 }}>
+          <div>
+            {eyebrow && <Mini color={C.sand} style={{ letterSpacing: "0.1em", marginBottom: 4 }}>{eyebrow}</Mini>}
+            <span style={{ fontFamily: DISPLAY, fontSize: 23, fontWeight: 400, color: C.ink, letterSpacing: "-0.02em" }}>{title}</span>
+            {subtitle && <p style={{ fontFamily: UI, fontSize: 13, color: C.ink2, margin: "6px 0 0" }}>{subtitle}</p>}
+          </div>
+          <button onClick={onClose} aria-label="Fechar" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: 9, background: C.surfaceUp, border: `1px solid ${C.line}`, color: C.ink2, cursor: "pointer", flexShrink: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = C.ink; e.currentTarget.style.borderColor = C.lineHi; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = C.ink2; e.currentTarget.style.borderColor = C.line; }}>
+            <X size={18} />
+          </button>
+        </div>
+        <div style={{ padding: 26 }}>{children}</div>
+        <div style={{ padding: "18px 26px", borderTop: `1px solid ${C.line}`, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", position: "sticky", bottom: 0, background: C.bg, borderRadius: "0 0 16px 16px" }}>
+          {footer}
+          <button onClick={onClose} style={{ fontFamily: UI, fontSize: 13, fontWeight: 500, color: C.ink3, background: "transparent", border: "none", cursor: "pointer", marginLeft: "auto" }}>Fechar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const SELO = {
+  pronto: { label: "Pronto", c: C.ok, bg: C.okSoft, bd: C.okBd, dot: C.ok },
+  pendente: { label: "Revisão necessária", c: C.warn, bg: C.warnSoft, bd: C.warnBd, dot: C.warn },
+  bloq: { label: "Sinalizado", c: C.bad, bg: C.badSoft, bd: C.badBd, dot: C.bad },
+  proc: { label: "Em processamento", c: C.info, bg: C.infoSoft, bd: C.infoBd, dot: C.info },
+};
+function Selo({ kind = "pronto", size = "md", text }) {
+  const s = SELO[kind];
+  const z = size === "lg" ? { f: 13, p: "7px 14px", dot: 7 } : size === "sm" ? { f: 11, p: "4px 10px", dot: 5 } : { f: 12, p: "6px 12px", dot: 6 };
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: UI, fontSize: z.f, fontWeight: 600, color: s.c, background: s.bg, border: `1px solid ${s.bd}`, padding: z.p, borderRadius: 999, whiteSpace: "nowrap", letterSpacing: "-0.005em" }}>
+      <span style={{ width: z.dot, height: z.dot, borderRadius: "50%", background: s.dot }} />{text || s.label}
+    </span>
+  );
+}
+function Eyebrow({ children, accent = C.sand }) {
+  return <p style={{ fontFamily: UI, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0 0 16px" }}>{children}</p>;
+}
+function H1({ children, size = 56 }) { return <h1 style={{ fontFamily: DISPLAY, fontSize: size, fontWeight: 400, lineHeight: 1.08, color: C.ink, margin: 0, letterSpacing: "-0.025em" }}>{children}</h1>; }
+function H2({ children, size = 36 }) { return <h2 style={{ fontFamily: DISPLAY, fontSize: size, fontWeight: 400, lineHeight: 1.15, color: C.ink, margin: 0, letterSpacing: "-0.02em" }}>{children}</h2>; }
+function H3({ children }) { return <h3 style={{ fontFamily: UI, fontSize: 17, fontWeight: 600, lineHeight: 1.3, color: C.ink, margin: 0, letterSpacing: "-0.015em" }}>{children}</h3>; }
+function Lead({ children, max = 660, color = C.ink2 }) { return <p style={{ fontFamily: UI, fontSize: 17, color, lineHeight: 1.55, margin: "18px 0 0", maxWidth: max }}>{children}</p>; }
+function Body({ children, color = C.ink2, size = 14 }) { return <p style={{ fontFamily: UI, fontSize: size, color, lineHeight: 1.6, margin: 0 }}>{children}</p>; }
+function Mini({ children, color = C.ink3, style }) { return <p style={{ fontFamily: UI, fontSize: 12, color, lineHeight: 1.5, margin: 0, letterSpacing: "-0.005em", ...(style || {}) }}>{children}</p>; }
+function Row({ k, v, mono, last }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "11px 0", borderBottom: last ? "none" : `1px solid ${C.lineSoft}`, fontFamily: UI, fontSize: 13.5 }}>
+      <span style={{ color: C.ink3, flexShrink: 0 }}>{k}</span>
+      <span style={{ color: C.ink1, textAlign: "right", fontFamily: mono ? MONO : UI, fontSize: mono ? 12 : 13.5, wordBreak: mono ? "break-all" : "normal", marginLeft: 24 }}>{v}</span>
+    </div>
+  );
+}
+
+/* fluxo Exportador → Trader → Importador → Auditor, com etapa ativa destacada */
+function FluxoCirculacao({ ativo, onNav }) {
+  const etapas = [
+    ["exportador", "Exportador", "organiza"],
+    ["exportador", "Trader", "consolida"],
+    ["importador", "Importador", "revisa"],
+    ["auditor", "Auditor", "verifica"],
+  ];
+  return (
+    <div style={{ display: "flex", alignItems: "stretch", gap: 0, flexWrap: "wrap" }}>
+      {etapas.map(([rota, nome, verbo], i) => {
+        const on = ativo === rota;
+        return (
+          <React.Fragment key={nome}>
+            <div onClick={onNav ? () => onNav(rota) : undefined} style={{ flex: "1 1 0", minWidth: 116, background: on ? C.forestSoft : C.surface, border: `1px solid ${on ? C.forestBd : C.line}`, borderRadius: 12, padding: "14px 16px", cursor: onNav ? "pointer" : "default", transition: "border-color .15s, background .15s" }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: i === 3 ? C.sand : on ? C.forestHi : C.forest, marginBottom: 9 }} />
+              <p style={{ fontFamily: UI, fontSize: 14, fontWeight: 600, color: on ? C.forestHi : C.ink, margin: 0, letterSpacing: "-0.01em" }}>{nome}</p>
+              <Mini color={C.ink3} style={{ marginTop: 2 }}>{verbo}</Mini>
+            </div>
+            {i < etapas.length - 1 && <div style={{ display: "flex", alignItems: "center", padding: "0 6px", flexShrink: 0 }} className="fluxo-arrow"><ArrowRight size={15} color={C.ink4} /></div>}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+/* faixa de identificação do ator no topo de cada dashboard */
+function ActorBar({ rota, nav }) {
+  const meta = {
+    exportador: { label: "Exportador / Trader", papel: "Organiza e consolida o caso", c: C.forest, ic: Layers },
+    importador: { label: "Importador", papel: "Revisa o caso recebido", c: C.info, ic: Eye },
+    auditor: { label: "Auditor", papel: "Verifica consistência e integridade", c: C.sand, ic: ShieldCheck },
+  }[rota];
+  const Ic = meta.ic;
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 22 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 40, height: 40, borderRadius: 10, background: `${meta.c}1f`, border: `1px solid ${meta.c}55`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Ic size={19} color={meta.c} strokeWidth={1.8} />
+        </div>
+        <div>
+          <p style={{ fontFamily: UI, fontSize: 16, fontWeight: 700, color: C.ink, margin: 0, letterSpacing: "-0.01em" }}>Dashboard · {meta.label}</p>
+          <Mini color={C.ink3} style={{ marginTop: 2 }}>{meta.papel}</Mini>
+        </div>
+      </div>
+      <div style={{ minWidth: 300, flex: "0 1 480px" }}>
+        <FluxoCirculacao ativo={rota} onNav={nav} />
+      </div>
+    </div>
+  );
+}
+
+const wrap = { maxWidth: 1180, margin: "0 auto", padding: "0 32px" };
+
+/* ============================================================
+   NAV (5 destinos) + FOOTER + SECTION
+   ============================================================ */
+function TopNav({ nav, route, walletConnected, onConnectWallet }) {
+  const dests = [
+    ["exportador", "Exportador / Trader"],
+    ["importador", "Importador"],
+    ["auditor", "Auditor"],
+    ["territorio", "Território"],
+  ];
+  const isDash = (r) => r === route;
+  return (
+    <div style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(16,26,20,0.88)", backdropFilter: "blur(14px)", borderBottom: `1px solid ${C.line}` }}>
+      <div style={{ ...wrap, padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+        <Logo height={26} onClick={() => nav("home")} />
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }} className="nav-links">
+          {dests.map(([r, label]) => (
+            <button key={r} onClick={() => nav(r)} style={{
+              fontFamily: UI, fontSize: 13, fontWeight: isDash(r) ? 600 : 500, padding: "7px 12px", borderRadius: 8, cursor: "pointer", border: "none",
+              background: isDash(r) ? C.forestSoft : "transparent", color: isDash(r) ? C.forestHi : C.ink2, transition: "color .15s, background .15s",
+            }}
+              onMouseEnter={(e) => { if (!isDash(r)) e.currentTarget.style.color = C.ink; }}
+              onMouseLeave={(e) => { if (!isDash(r)) e.currentTarget.style.color = C.ink2; }}>{label}</button>
+          ))}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Btn size="sm" kind={route === "auditoria" ? "primary" : "ghost"} icon={ShieldCheck} onClick={() => nav("auditoria")}>Auditoria on-chain</Btn>
+          <button onClick={onConnectWallet} title={walletConnected ? "Carteira conectada" : "Conectar carteira (opcional)"}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "transparent", border: `1px solid ${C.line}`, color: walletConnected ? C.forestHi : C.ink3, fontFamily: UI, fontSize: 12, fontWeight: 500, padding: "7px 10px", borderRadius: 8, cursor: "pointer", transition: "border-color .15s, color .15s" }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lineHi; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.line; }}>
+            <Wallet size={13} strokeWidth={1.8} />{walletConnected ? "Conectada" : "Carteira"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Footer({ nav }) {
+  return (
+    <div style={{ borderTop: `1px solid ${C.line}`, marginTop: 80, background: C.bg1 }}>
+      <div style={{ ...wrap, padding: "32px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+        <Logo height={22} />
+        <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
+          <span onClick={() => nav("home")} style={{ fontFamily: UI, fontSize: 12.5, color: C.ink3, cursor: "pointer" }}>Home</span>
+          <span onClick={() => nav("exportador")} style={{ fontFamily: UI, fontSize: 12.5, color: C.ink3, cursor: "pointer" }}>Exportador / Trader</span>
+          <span onClick={() => nav("importador")} style={{ fontFamily: UI, fontSize: 12.5, color: C.ink3, cursor: "pointer" }}>Importador</span>
+          <span onClick={() => nav("auditor")} style={{ fontFamily: UI, fontSize: 12.5, color: C.ink3, cursor: "pointer" }}>Auditor</span>
+          <span onClick={() => nav("auditoria")} style={{ fontFamily: UI, fontSize: 12.5, color: C.ink3, cursor: "pointer" }}>Auditoria on-chain</span>
+        </div>
+        <Mini color={C.ink4}>© 2026 A Rastro · Demo MVP</Mini>
+      </div>
+    </div>
+  );
+}
+
+function Section({ children, soft }) {
+  return (
+    <div style={{ background: soft ? C.bg1 : "transparent", borderTop: soft ? `1px solid ${C.line}` : "none", borderBottom: soft ? `1px solid ${C.line}` : "none" }}>
+      <div style={{ ...wrap, padding: "84px 32px" }}>{children}</div>
+    </div>
+  );
+}
+
+/* ============================================================
+   HOME
+   ============================================================ */
+function Home({ nav }) {
+  return (
+    <div style={{ animation: "fade .4s ease" }}>
+      {/* HERO */}
+      <div style={{ position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: -220, left: "50%", transform: "translateX(-50%)", width: 1000, height: 640, pointerEvents: "none", background: `radial-gradient(ellipse at center, ${C.forestSoft} 0%, transparent 62%)`, filter: "blur(50px)" }} />
+        <div style={{ position: "absolute", top: -120, right: -80, width: 520, height: 460, pointerEvents: "none", background: `radial-gradient(ellipse, ${C.sandSoft} 0%, transparent 60%)`, filter: "blur(50px)" }} />
+        <div style={{ ...wrap, padding: "104px 32px 80px", position: "relative" }}>
+          <div style={{ maxWidth: 880 }}>
+            <Eyebrow accent={C.forestHi}>Due diligence ambiental verificável · Corredor Brasil–UE</Eyebrow>
+            <H1 size={62}>Organize a due diligence como um <em style={{ fontStyle: "italic", color: C.sandHi }}>caso verificável</em>.</H1>
+            <Lead max={720}>A Rastro conecta origem, análise ambiental e documentação em uma base comum para exportador, trader, importador e auditor.</Lead>
+            <p style={{ fontFamily: UI, fontSize: 14.5, color: C.ink3, margin: "16px 0 0" }}>Menos retrabalho, mais clareza, mais auditabilidade.</p>
+            <div style={{ display: "flex", gap: 12, marginTop: 36, flexWrap: "wrap", alignItems: "center" }}>
+              <Btn size="lg" iconRight={ArrowRight} onClick={() => nav("exportador")}>Entrar como Exportador / Trader</Btn>
+              <Btn size="lg" kind="ghost" icon={ShieldCheck} onClick={() => nav("auditoria")}>Ver auditoria on-chain</Btn>
+            </div>
+          </div>
+          <div style={{ marginTop: 64, display: "grid", gridTemplateColumns: "1fr auto", alignItems: "end", gap: 32 }} className="hero-bottom">
+            <div>
+              <Mini color={C.ink4}>Caso em operação</Mini>
+              <p style={{ fontFamily: MONO, fontSize: 13, color: C.ink2, margin: "6px 0 0" }}>RST-2026-0042 · Fazenda São Mateus</p>
+            </div>
+            <HeroCaseChip />
+          </div>
+        </div>
+      </div>
+
+      {/* FAIXA DE CONTEXTO */}
+      <div style={{ borderTop: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}`, background: C.bg1 }}>
+        <div style={{ ...wrap, padding: "36px 32px" }}>
+          <p style={{ fontFamily: DISPLAY, fontSize: 22, fontWeight: 400, color: C.ink1, lineHeight: 1.45, margin: 0, letterSpacing: "-0.01em", maxWidth: 940, fontStyle: "italic" }}>
+            Hoje, a dificuldade não está apenas em acessar dados. Está em transformar origem, análise e documentação em um caso que possa circular com consistência entre as partes.
+          </p>
+        </div>
+      </div>
+
+      {/* O QUE É */}
+      <Section>
+        <div style={{ maxWidth: 820 }}>
+          <Eyebrow>O que é a Rastro</Eyebrow>
+          <H2>Uma plataforma para organizar a due diligence como caso.</H2>
+          <Lead max={760}>A Rastro foi desenhada para ajudar exportadores e traders a transformar informações fragmentadas em um caso estruturado, compartilhável e verificável.</Lead>
+        </div>
+      </Section>
+
+      {/* 4 CARDS */}
+      <Section soft>
+        <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+          {[
+            [MapPin, "Origem", "CAR validado, base territorial identificada e propriedade vinculada ao caso."],
+            [Leaf, "Condição ambiental", "Leitura consolidada de desmatamento, embargo e risco da área analisada."],
+            [FileCheck, "Completude", "Prontidão e pendências do caso para revisão, compartilhamento e auditoria."],
+            [ShieldCheck, "Prova verificável", "Prova mínima on-chain para integridade, auditabilidade e verificação pública."],
+          ].map(([Ic, t, d]) => (
+            <Card key={t} pad={26}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: C.forestSoft, border: `1px solid ${C.forestBd}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18 }}>
+                <Ic size={18} color={C.forestHi} strokeWidth={1.8} />
+              </div>
+              <H3>{t}</H3><div style={{ marginTop: 8 }}><Body size={13.5}>{d}</Body></div>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* INTEROPERABILIDADE */}
+      <Section>
+        <div style={{ maxWidth: 760 }}>
+          <Eyebrow>Interoperabilidade entre as partes</Eyebrow>
+          <H2>Uma base comum para exportador, trader, importador e auditor.</H2>
+          <Lead max={780}>A Rastro foi desenhada para evitar que cada parte reconstrua o caso do zero. A plataforma organiza a informação em uma base comum, reduz atrito operacional e melhora a circulação do caso ao longo da cadeia.</Lead>
+        </div>
+        <div style={{ marginTop: 40 }}><FluxoCirculacao onNav={nav} /></div>
+      </Section>
+
+      {/* POR QUE IMPORTA */}
+      <Section soft>
+        <div style={{ maxWidth: 820 }}>
+          <Eyebrow accent={C.sand}>Por que isso importa</Eyebrow>
+          <H2>Due diligence mais clara em um contexto de exigência crescente.</H2>
+          <Lead max={780}>No contexto da EUDR e de outras pressões por origem, risco e documentação verificável, a Rastro ajuda a transformar exigência regulatória e comercial em operação mais organizada, rastreável e auditável.</Lead>
+        </div>
+      </Section>
+
+      {/* BLOCKCHAIN */}
+      <Section>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }} className="grid-2">
+          <div>
+            <Eyebrow accent={C.sand}>Blockchain e prova</Eyebrow>
+            <H2>Não é só organização. <em style={{ fontStyle: "italic", color: C.sandHi }}>É prova verificável.</em></H2>
+            <Lead>A blockchain, na Rastro, não serve só para registrar prova. Ela ajuda a transformar due diligence em integridade verificável e, com o tempo, em reputação auditável.</Lead>
+            <p style={{ fontFamily: UI, fontSize: 14.5, color: C.ink3, lineHeight: 1.65, margin: "18px 0 0" }}>A plataforma mantém o conteúdo rico na camada operacional e ancora on-chain apenas a prova mínima necessária para auditoria e verificação.</p>
+          </div>
+          <Card pad={28}>
+            <Mini color={C.ink3}>OFF-CHAIN · CAMADA OPERACIONAL</Mini>
+            <div style={{ marginTop: 12, padding: "16px 18px", background: C.bg1, border: `1px solid ${C.line}`, borderRadius: 10 }}>
+              <p style={{ fontFamily: UI, fontSize: 13, fontWeight: 600, color: C.ink, margin: 0 }}>Conteúdo do caso</p>
+              <Mini style={{ marginTop: 3 }}>Documento, narrativa, dados comerciais e análise completa.</Mini>
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", margin: "12px 0" }}><div style={{ width: 2, height: 30, background: `linear-gradient(180deg, ${C.sandBd}, ${C.forestBd})` }} /></div>
+            <Mini color={C.forestHi}>ON-CHAIN · PROVA MÍNIMA</Mini>
+            <div style={{ marginTop: 12, padding: "16px 18px", background: C.forestSoft, border: `1px solid ${C.forestBd}`, borderRadius: 10 }}>
+              <p style={{ fontFamily: UI, fontSize: 13, fontWeight: 600, color: C.forestHi, margin: 0 }}>Hash, selo e referência</p>
+              <Mini color={C.ink2} style={{ marginTop: 3 }}>Integridade, auditabilidade e verificação pública.</Mini>
+            </div>
+          </Card>
+        </div>
+      </Section>
+
+      {/* CTA FINAL */}
+      <Section soft>
+        <div style={{ textAlign: "center", maxWidth: 720, margin: "0 auto" }}>
+          <H2>Entre na operação e veja o caso circular.</H2>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 32, flexWrap: "wrap" }}>
+            <Btn size="lg" iconRight={ArrowRight} onClick={() => nav("exportador")}>Entrar como Exportador / Trader</Btn>
+            <Btn size="lg" kind="ghost" icon={ShieldCheck} onClick={() => nav("auditoria")}>Ver auditoria on-chain</Btn>
+          </div>
+        </div>
+      </Section>
+
+      <Footer nav={nav} />
+    </div>
+  );
+}
+
+function HeroCaseChip() {
+  return (
+    <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, minWidth: 270 }}>
+      <div style={{ width: 36, height: 36, borderRadius: 10, background: C.okSoft, border: `1px solid ${C.okBd}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <CircleCheck size={17} color={C.ok} strokeWidth={2} />
+      </div>
+      <div>
+        <Mini color={C.ink3}>STATUS DO CASO</Mini>
+        <p style={{ fontFamily: UI, fontSize: 14, fontWeight: 600, color: C.ok, margin: "3px 0 0", letterSpacing: "-0.01em" }}>Pronto para due diligence</p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   DADOS DO CASO
+   ============================================================ */
+const CASO = {
+  nome: "Caso RST-2026-0042", car: "MT-5107925-86C0695A126C43B3BEDBA700698AFA9C",
+  propriedade: "Fazenda São Mateus", produtor: "Agropecuária São Mateus Ltda",
+  uf: "MT", municipio: "Sorriso", bioma: "Cerrado", hectares: 3490,
+  dataReferencia: "2026-04-20", ultimaAtualizacao: "2026-04-20 09:14 UTC",
+  selo: "pronto", risco: "Baixo", origemValidada: true, statusTerritorial: "Validado",
+  desmatamento: false, alertas: 0, hectaresAnalisados: 3490,
+  embargo: false, statusEmbargo: "Nenhum embargo ativo",
+  fontes: ["MapBiomas", "IBAMA", "SICAR"],
+  completude: { territorial: "pronto", ambiental: "pronto", documental: "pendente", compartilhamento: "pronto" },
+  pendencias: [
+    { tipo: "pronto", texto: "Análise ambiental concluída." },
+    { tipo: "pronto", texto: "Caso pronto para compartilhamento com importador autorizado." },
+    { tipo: "pendente", texto: "Revisão documental necessária antes do envio." },
+    { tipo: "pendente", texto: "Documento principal ainda não vinculado em versão final." },
+    { tipo: "pendente", texto: "Aguardando fechamento do lote." },
+  ],
+  lote: "LOT-2026-0042 · Soja · 2.400 t · destino Roterdã/NL",
+  documento: "DDS_LOT-0042.pdf · Declaração de Diligência",
+  hashDoc: "0x1a9f3e4b7c8d2e5f6a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f",
+  versao: "v6 · 2026-04-20", statusVinculo: "Documento conferido", compartilhadoEm: "2026-04-20 10:02 UTC",
+  narrativa: {
+    justificativa: "A área da Fazenda São Mateus foi avaliada com base em fontes oficiais de monitoramento. Não foram identificados alertas de desmatamento na geometria da propriedade após a data de corte, nem embargos ambientais ativos. A origem foi validada via CAR e a base territorial conferida.",
+    compliance: "Para fins da EUDR, o caso sustenta origem e geolocalização no nível da propriedade, condição livre de desmatamento conforme leitura do MapBiomas, e ausência de embargo conforme IBAMA. A submissão formal da Declaração de Diligência (DDS) permanece como etapa regulatória final.",
+    interpretacao: "O conjunto de evidências aponta para baixo risco socioambiental. A leitura consolidada é consistente entre as fontes e não há divergência que exija revisão ambiental adicional neste momento.",
+    resumoImportador: "Lote de soja com origem validada, sem desmatamento e sem embargo, classificado como baixo risco. Documentação anexada e prova mínima disponível para verificação independente.",
+  },
+  prova: { hash: "0x3c7a8d2f1e9b4c5a6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c", data: "2026-04-20 09:14:02 UTC", bloco: "#48291038" },
+  evidencias: [
+    { camada: "Registro", hash: "0x7f3a2c8b1d4e5f6a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a", status: "Conferido", quando: "2026-04-20 09:10 UTC" },
+    { camada: "MapBiomas", hash: "0xa2b7f4e8c1d9b3a5e6c4d2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1", status: "Conferido", quando: "2026-04-20 09:11 UTC" },
+    { camada: "IBAMA", hash: "0xb8e3d5a7c2f1b9d4e6a8c0d2e4f6a8b0c2d4e6f8a1b3c5d7e9f1a3b5c7d9e1f3", status: "Conferido", quando: "2026-04-20 09:12 UTC" },
+    { camada: "Gemini", hash: "0xc1d3e5f7a9b1c3d5e7f9a1b3c5d7e9f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3", status: "Conferido", quando: "2026-04-20 09:13 UTC" },
+  ],
+};
+const LINKS = { plataforma: "https://armanfm.github.io/Rastro/", auditoria: "https://armanfm.github.io/Rastro/rastro.html", repo: "https://github.com/izalaw/Rastro" };
+const EUDR_ITENS = [
+  { titulo: "Origem e geolocalização", status: "parcial", texto: "Identificação do CAR, propriedade, estado, área e base territorial validada. No MVP, a origem está sustentada no nível da propriedade; o refinamento para lote/plot of land é evolução." },
+  { titulo: "Condição ambiental", status: "atende", texto: "Leitura estruturada de desmatamento, alertas, hectares e embargo, sustentando a condição ambiental do caso." },
+  { titulo: "Lote e documentação", status: "parcial", texto: "O caso vincula lote e documento no MVP. A cadeia de custódia completa no nível do lote permanece como evolução de produção." },
+  { titulo: "Completude do caso", status: "atende", texto: "Prontidão, pendências e narrativa permitem revisar o que está pronto e o que ainda falta completar." },
+  { titulo: "Verificabilidade", status: "atende", texto: "A prova mínima já pode ser auditada de forma separada, com hash, selo e referência temporal." },
+  { titulo: "Entrega regulatória final UE", status: "naoatende", texto: "A submissão formal da DDS / fluxo final europeu permanece como etapa futura. O MVP organiza o caso e a prova, mas não fecha sozinho toda a obrigação regulatória da UE." },
+];
+const EUDR_STATUS = {
+  atende: { label: "Atende", c: C.ok, bg: C.okSoft, bd: C.okBd },
+  parcial: { label: "Atende parcialmente", c: C.warn, bg: C.warnSoft, bd: C.warnBd },
+  naoatende: { label: "Ainda não atende", c: C.bad, bg: C.badSoft, bd: C.badBd },
+};
+
+/* cabeçalho do caso (compartilhado entre dashboards, com ações variáveis) */
+function CasoHeader({ c, actions, tint = C.forestSoft }) {
+  return (
+    <Card pad={32} style={{ marginBottom: 20, background: `linear-gradient(135deg, ${C.surface} 0%, ${tint} 130%)`, borderColor: C.lineHi }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 24 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <Mini color={C.ink3}>CASO DE DUE DILIGENCE</Mini>
+          <h1 style={{ fontFamily: DISPLAY, fontSize: 34, fontWeight: 400, color: C.ink, margin: "8px 0 0", letterSpacing: "-0.02em" }}>{c.nome}</h1>
+          <p style={{ fontFamily: UI, fontSize: 14, color: C.ink2, margin: "10px 0 0" }}>{c.propriedade} · {c.municipio}/{c.uf} · {c.bioma} · {c.hectares.toLocaleString("pt-BR")} ha</p>
+          <p style={{ fontFamily: MONO, fontSize: 11.5, color: C.ink3, margin: "8px 0 0" }}>CAR · {c.car}</p>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <Selo kind={c.selo} size="lg" />
+          <div style={{ marginTop: 12 }}><Mini color={C.ink3}>CLASSIFICAÇÃO DE RISCO</Mini><p style={{ fontFamily: UI, fontSize: 16, fontWeight: 600, color: C.forestHi, margin: "4px 0 0" }}>{c.risco}</p></div>
+          <Mini color={C.ink3} style={{ marginTop: 6 }}>Última atualização: {c.ultimaAtualizacao}</Mini>
+        </div>
+      </div>
+      {actions && <div style={{ display: "flex", gap: 10, flexWrap: "wrap", paddingTop: 24, marginTop: 24, borderTop: `1px solid ${C.line}` }}>{actions}</div>}
+    </Card>
+  );
+}
+
+/* ============================================================
+   DASHBOARD EXPORTADOR / TRADER
+   ============================================================ */
+function DashExportador({ nav }) {
+  const c = CASO;
+  const [exportOpen, setExportOpen] = useState(false);
+  return (
+    <div style={{ animation: "fade .3s ease" }}>
+      <div style={{ ...wrap, padding: "32px 32px 80px" }}>
+        <ActorBar rota="exportador" nav={nav} />
+        <CasoHeader c={c} actions={<>
+          <Btn icon={Briefcase} onClick={() => setExportOpen(true)}>Exportar due diligence</Btn>
+          <Btn kind="ghost" icon={Share2} onClick={() => nav("importador")}>Compartilhar com importador</Btn>
+          <Btn kind="ghost" icon={ShieldCheck} onClick={() => nav("auditoria")}>Ver auditoria on-chain</Btn>
+        </>} />
+
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 20, marginBottom: 20 }} className="grid-2">
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <Card pad={28}>
+              <BlocoHead icon={MapPin} eyebrow="ORIGEM" titulo="Base territorial e propriedade vinculada" />
+              <Row k="Propriedade vinculada" v={c.propriedade} />
+              <Row k="CAR" v={c.car} mono /><Row k="Estado" v={c.uf} /><Row k="Área" v={`${c.hectares.toLocaleString("pt-BR")} ha`} />
+              <Row k="Status territorial" v={<span style={{ color: C.ok, fontWeight: 600 }}>{c.statusTerritorial}</span>} />
+              <Row k="Origem" v={<span style={{ color: C.ok, fontWeight: 600 }}>Validada</span>} last />
+            </Card>
+            <Card pad={28}>
+              <BlocoHead icon={Leaf} eyebrow="CONDIÇÃO AMBIENTAL" titulo="Leitura consolidada da área" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }} className="grid-2">
+                <div style={{ background: C.bg1, border: `1px solid ${C.line}`, borderRadius: 10, padding: "14px 16px" }}>
+                  <Mini color={C.forestHi}>MAPBIOMAS</Mini>
+                  <div style={{ marginTop: 10 }}>
+                    <Row k="Desmatamento" v={<span style={{ color: C.ok, fontWeight: 600 }}>Não detectado</span>} />
+                    <Row k="Alertas" v={c.alertas} /><Row k="Hectares" v={`${c.hectaresAnalisados.toLocaleString("pt-BR")} ha`} last />
+                  </div>
+                </div>
+                <div style={{ background: C.bg1, border: `1px solid ${C.line}`, borderRadius: 10, padding: "14px 16px" }}>
+                  <Mini color={C.forestHi}>IBAMA</Mini>
+                  <div style={{ marginTop: 10 }}>
+                    <Row k="Embargo" v={<span style={{ color: C.ok, fontWeight: 600 }}>Nenhum</span>} />
+                    <Row k="Status" v={c.statusEmbargo} last />
+                  </div>
+                </div>
+              </div>
+              <Row k="Risco consolidado" v={<span style={{ color: C.ok, fontWeight: 600 }}>{c.risco}</span>} />
+              <Row k="Fontes analisadas" v={c.fontes.join(" · ")} last />
+            </Card>
+          </div>
+          <Card pad={28}>
+            <BlocoHead icon={CircleCheck} eyebrow="COMPLETUDE" titulo="Prontidão por dimensão" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+              <Indicador label="Territorial" status={c.completude.territorial} />
+              <Indicador label="Ambiental" status={c.completude.ambiental} />
+              <Indicador label="Documental" status={c.completude.documental} />
+              <Indicador label="Compartilhamento" status={c.completude.compartilhamento} />
+            </div>
+            <Mini color={C.ink3}>PENDÊNCIAS DO CASO</Mini>
+            <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+              {c.pendencias.map((p, i) => {
+                const cor = p.tipo === "pronto" ? C.ok : C.warn; const Ic = p.tipo === "pronto" ? CircleCheck : CircleAlert;
+                return (<div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "7px 0" }}>
+                  <Ic size={15} color={cor} style={{ marginTop: 2, flexShrink: 0 }} />
+                  <p style={{ fontFamily: UI, fontSize: 13, color: C.ink1, margin: 0, lineHeight: 1.5 }}>{p.texto}</p>
+                </div>);
+              })}
+            </div>
+          </Card>
+        </div>
+
+        <Card pad={28} style={{ marginBottom: 20 }}>
+          <BlocoHead icon={FileCheck} eyebrow="LOTE E DOCUMENTO" titulo="Vínculo documental" />
+          <Row k="Lote associado" v={c.lote} /><Row k="Documento vinculado" v={c.documento} />
+          <Row k="Hash do documento" v={c.hashDoc} mono /><Row k="Versão do caso" v={c.versao} />
+          <Row k="Status do vínculo" v={<span style={{ color: C.ok, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}><Check size={13} strokeWidth={2.5} />{c.statusVinculo}</span>} last />
+        </Card>
+
+        <Card pad={32} style={{ marginBottom: 20 }}>
+          <BlocoHead icon={Sparkles} eyebrow="NARRATIVA DO CASO" titulo="Leitura sintética para revisão" />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginTop: 8 }} className="grid-2">
+            <NarrBlock title="Resumo executivo" body={c.narrativa.resumoImportador} />
+            <NarrBlock title="Justificativa" body={c.narrativa.justificativa} />
+            <NarrBlock title="Compliance EUDR" body={c.narrativa.compliance} />
+            <NarrBlock title="Interpretação" body={c.narrativa.interpretacao} />
+          </div>
+        </Card>
+
+        <Card pad={28}>
+          <BlocoHead icon={ShieldCheck} eyebrow="PROVA E AUDITORIA" titulo="Camada verificável do caso" />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "center" }} className="grid-2">
+            <div>
+              <Row k="Selo do caso" v={<Selo kind={c.selo} size="sm" />} />
+              <Row k="Hash de referência" v={c.prova.hash} mono /><Row k="Data de referência" v={c.prova.data} mono />
+              <Row k="Status verificável" v={<span style={{ color: C.ok, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}><ShieldCheck size={13} strokeWidth={2} />Conferível on-chain</span>} last />
+            </div>
+            <div style={{ background: C.bg1, border: `1px solid ${C.line}`, borderRadius: 12, padding: 24 }}>
+              <Mini color={C.ink3}>VERIFIQUE A PROVA MÍNIMA</Mini>
+              <p style={{ fontFamily: UI, fontSize: 14, color: C.ink1, lineHeight: 1.55, margin: "10px 0 18px" }}>Consulte a camada pública de auditoria e confira a integridade do caso sem expor dados sensíveis.</p>
+              <Btn full kind="ghost" icon={ShieldCheck} iconRight={ArrowRight} onClick={() => nav("auditoria")}>Ver auditoria on-chain</Btn>
+            </div>
+          </div>
+        </Card>
+      </div>
+      {exportOpen && <ModalExportacao c={c} nav={nav} onClose={() => setExportOpen(false)} />}
+      <Footer nav={nav} />
+    </div>
+  );
+}
+
+/* ============================================================
+   DASHBOARD IMPORTADOR — conferência (mais executivo, mais limpo)
+   ============================================================ */
+function DashImportador({ nav }) {
+  const c = CASO;
+  const [exportOpen, setExportOpen] = useState(false);
+  return (
+    <div style={{ animation: "fade .3s ease" }}>
+      <div style={{ ...wrap, padding: "32px 32px 80px" }}>
+        <ActorBar rota="importador" nav={nav} />
+        <CasoHeader c={c} tint={C.infoSoft} actions={<>
+          <Btn icon={Download} onClick={() => setExportOpen(true)}>Baixar pacote</Btn>
+          <Btn kind="ghost" icon={ShieldCheck} onClick={() => nav("auditoria")}>Ver prova</Btn>
+          <Btn kind="ghost" icon={CircleAlert} onClick={() => {}}>Solicitar revisão</Btn>
+        </>} />
+
+        <div style={{ background: C.infoSoft, border: `1px solid ${C.infoBd}`, borderRadius: 12, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+          <Eye size={15} color={C.info} />
+          <Mini color={C.ink2}>Você está revisando um caso recebido. Esta visão mostra apenas o que foi compartilhado pelo exportador, sem o detalhe operacional interno.</Mini>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 20 }} className="grid-2">
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <Card pad={28}>
+              <BlocoHead icon={FileCheck} eyebrow="RESUMO DO CASO" titulo="O que foi compartilhado com você" />
+              <Row k="Caso" v={c.nome} />
+              <Row k="Origem validada" v={<span style={{ color: C.ok, fontWeight: 600 }}>Sim · {c.propriedade}</span>} />
+              <Row k="Condição ambiental" v={<span style={{ color: C.ok, fontWeight: 600 }}>Sem desmatamento · sem embargo</span>} />
+              <Row k="Documento vinculado" v={c.documento} />
+              <Row k="Hash do documento" v={c.hashDoc} mono />
+              <Row k="Status geral" v={<Selo kind={c.selo} size="sm" />} />
+              <Row k="Prontidão para revisão" v={<span style={{ color: C.ok, fontWeight: 600 }}>Pronto para revisão</span>} />
+              <Row k="Compartilhado em" v={c.compartilhadoEm} mono last />
+            </Card>
+            <Card pad={28}>
+              <BlocoHead icon={Sparkles} eyebrow="NARRATIVA" titulo="Leitura legível do caso" />
+              <p style={{ fontFamily: DISPLAY, fontSize: 16, color: C.ink1, lineHeight: 1.65, margin: 0, fontStyle: "italic" }}>{c.narrativa.resumoImportador}</p>
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${C.lineSoft}` }}>
+                <Mini color={C.ink3} style={{ marginBottom: 6 }}>COMPLIANCE EUDR</Mini>
+                <Body size={13.5}>{c.narrativa.compliance}</Body>
+              </div>
+            </Card>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <Card pad={28}>
+              <BlocoHead icon={Leaf} eyebrow="CONDIÇÃO AMBIENTAL" titulo="Resumo" />
+              <Row k="Desmatamento" v={<span style={{ color: C.ok, fontWeight: 600 }}>Não detectado</span>} />
+              <Row k="Embargo" v={<span style={{ color: C.ok, fontWeight: 600 }}>Nenhum</span>} />
+              <Row k="Risco" v={<span style={{ color: C.ok, fontWeight: 600 }}>{c.risco}</span>} last />
+            </Card>
+            <Card pad={28}>
+              <Mini color={C.ink3}>O QUE FOI COMPARTILHADO</Mini>
+              <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+                {["Resumo e status do caso", "Origem e condição ambiental", "Documento vinculado e hash", "Narrativa e compliance EUDR", "Prova mínima verificável"].map((x) => (
+                  <div key={x} style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                    <Check size={14} color={C.ok} strokeWidth={2.5} />
+                    <span style={{ fontFamily: UI, fontSize: 13, color: C.ink1 }}>{x}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            <Card pad={28}>
+              <Mini color={C.ink3}>AÇÕES</Mini>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
+                <Btn full icon={Download} onClick={() => setExportOpen(true)}>Baixar pacote</Btn>
+                <Btn full kind="ghost" icon={ShieldCheck} onClick={() => nav("auditoria")}>Ver prova</Btn>
+                <Btn full kind="ghost" icon={CircleAlert} onClick={() => {}}>Solicitar revisão</Btn>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+      {exportOpen && <ModalExportacao c={c} nav={nav} onClose={() => setExportOpen(false)} importador />}
+      <Footer nav={nav} />
+    </div>
+  );
+}
+
+/* ============================================================
+   DASHBOARD AUDITOR — consistência e integridade
+   ============================================================ */
+function DashAuditor({ nav }) {
+  const c = CASO;
+  const trilha = [
+    { etapa: "Registro do caso", quando: "2026-04-20 09:10 UTC", det: "Propriedade vinculada ao CAR e base territorial registrada." },
+    { etapa: "Análise MapBiomas", quando: "2026-04-20 09:11 UTC", det: "Leitura de desmatamento e alertas sobre a geometria." },
+    { etapa: "Verificação IBAMA", quando: "2026-04-20 09:12 UTC", det: "Checagem de embargos ativos pelo perímetro." },
+    { etapa: "Narrativa Gemini", quando: "2026-04-20 09:13 UTC", det: "Consolidação da leitura do caso a partir das fontes." },
+    { etapa: "Prova mínima ancorada", quando: "2026-04-20 09:14 UTC", det: "Hash principal e selo gravados on-chain." },
+  ];
+  return (
+    <div style={{ animation: "fade .3s ease" }}>
+      <div style={{ ...wrap, padding: "32px 32px 80px" }}>
+        <ActorBar rota="auditor" nav={nav} />
+        <CasoHeader c={c} tint={C.sandSoft} actions={<>
+          <Btn kind="sand" icon={ShieldCheck} onClick={() => nav("auditoria")}>Abrir auditoria on-chain</Btn>
+        </>} />
+
+        <div style={{ background: C.sandSoft, border: `1px solid ${C.sandBd}`, borderRadius: 12, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+          <ShieldCheck size={15} color={C.sand} />
+          <Mini color={C.ink2}>Revisão de consistência e integridade. Confere se o que foi compartilhado corresponde à prova mínima ancorada on-chain.</Mini>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 20 }} className="grid-2">
+          <Card pad={28}>
+            <BlocoHead icon={Clock} eyebrow="TRILHA DO CASO" titulo="Sequência de eventos" />
+            <div style={{ position: "relative", paddingLeft: 22, marginTop: 4 }}>
+              <div style={{ position: "absolute", left: 5, top: 6, bottom: 6, width: 2, background: C.line }} />
+              {trilha.map((t, i) => (
+                <div key={i} style={{ position: "relative", paddingBottom: i < trilha.length - 1 ? 18 : 0 }}>
+                  <div style={{ position: "absolute", left: -22, top: 3, width: 12, height: 12, borderRadius: "50%", background: C.surface, border: `3px solid ${i === trilha.length - 1 ? C.sand : C.forest}` }} />
+                  <p style={{ fontFamily: UI, fontSize: 13.5, fontWeight: 600, color: C.ink, margin: 0 }}>{t.etapa}</p>
+                  <p style={{ fontFamily: MONO, fontSize: 10.5, color: C.ink3, margin: "3px 0 0" }}>{t.quando}</p>
+                  <p style={{ fontFamily: UI, fontSize: 12.5, color: C.ink2, margin: "4px 0 0", lineHeight: 1.5 }}>{t.det}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <Card pad={28}>
+              <BlocoHead icon={ShieldCheck} eyebrow="EVIDÊNCIAS POR CAMADA" titulo="Provas ancoradas" />
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {c.evidencias.map((e) => (
+                  <div key={e.camada} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: C.bg1, border: `1px solid ${C.line}`, borderRadius: 10 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontFamily: UI, fontSize: 13, fontWeight: 600, color: C.ink, margin: 0 }}>{e.camada}</p>
+                      <p style={{ fontFamily: MONO, fontSize: 10, color: C.ink3, margin: "2px 0 0" }}>{e.hash.slice(0, 26)}…</p>
+                    </div>
+                    <span style={{ fontFamily: UI, fontSize: 11, fontWeight: 600, color: C.ok, display: "inline-flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: C.ok }} />{e.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            <Card pad={28}>
+              <BlocoHead icon={CircleCheck} eyebrow="CONSISTÊNCIA" titulo="Pacote compartilhado x prova" />
+              <Row k="Referência temporal" v={c.prova.data} mono />
+              <Row k="Selo do caso" v={<Selo kind={c.selo} size="sm" />} />
+              <Row k="Status verificável" v={<span style={{ color: C.ok, fontWeight: 600 }}>Consistente</span>} />
+              <Row k="Divergências" v={<span style={{ color: C.ok, fontWeight: 600 }}>Nenhuma</span>} last />
+              <div style={{ marginTop: 16 }}>
+                <Btn full kind="ghost" icon={ShieldCheck} iconRight={ArrowRight} onClick={() => nav("auditoria")}>Abrir auditoria on-chain</Btn>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+      <Footer nav={nav} />
+    </div>
+  );
+}
+
+/* ============================================================
+   MODAL DE EXPORTAÇÃO DO PACOTE
+   ============================================================ */
+function ModalExportacao({ c, nav, onClose, importador }) {
+  const Bloco = ({ titulo, children }) => (
+    <div style={{ marginBottom: 22 }}>
+      <Mini color={C.sand} style={{ letterSpacing: "0.1em", marginBottom: 12 }}>{titulo}</Mini>{children}
+    </div>
+  );
+  const footer = (<>
+    {!importador && <Btn icon={Share2} onClick={() => { onClose(); nav("importador"); }}>Compartilhar com importador</Btn>}
+    <Btn kind={importador ? "primary" : "ghost"} icon={Download} onClick={() => {}}>Baixar pacote</Btn>
+    <Btn kind="ghost" icon={ShieldCheck} onClick={() => { onClose(); nav("auditoria"); }}>Ver auditoria on-chain</Btn>
+  </>);
+  return (
+    <Modal wide title="Pacote de due diligence" subtitle="Versão exportável do caso para revisão e compartilhamento." eyebrow="EXPORTAÇÃO" onClose={onClose} footer={footer}>
+      <Bloco titulo="1 · IDENTIFICAÇÃO">
+        <Row k="CAR" v={c.car} mono /><Row k="Propriedade" v={c.propriedade} /><Row k="Estado" v={c.uf} />
+        <Row k="Área" v={`${c.hectares.toLocaleString("pt-BR")} ha`} /><Row k="Data de referência" v={c.dataReferencia} last />
+      </Bloco>
+      <Bloco titulo="2 · STATUS DO CASO">
+        <Row k="Status geral" v={<Selo kind={c.selo} size="sm" />} /><Row k="Risco" v={<span style={{ color: C.ok, fontWeight: 600 }}>{c.risco}</span>} />
+        <Row k="Prontidão" v="3 de 4 dimensões prontas" /><Row k="Pendências" v={`${c.pendencias.filter(p => p.tipo !== "pronto").length} em aberto`} last />
+      </Bloco>
+      <Bloco titulo="3 · ORIGEM E CONDIÇÃO AMBIENTAL">
+        <Row k="Origem validada" v={<span style={{ color: C.ok, fontWeight: 600 }}>Sim</span>} /><Row k="Status territorial" v={c.statusTerritorial} />
+        <Row k="Desmatamento" v={<span style={{ color: C.ok, fontWeight: 600 }}>Não detectado</span>} /><Row k="Alertas" v={c.alertas} />
+        <Row k="Hectares afetados" v="0 ha" /><Row k="Embargo" v={<span style={{ color: C.ok, fontWeight: 600 }}>Nenhum</span>} /><Row k="Status do embargo" v={c.statusEmbargo} last />
+      </Bloco>
+      <Bloco titulo="4 · DOCUMENTO E LOTE">
+        <Row k="Lote associado" v={c.lote} /><Row k="Documento vinculado" v={c.documento} />
+        <Row k="Hash do documento" v={c.hashDoc} mono /><Row k="Versão do caso" v={c.versao} last />
+      </Bloco>
+      <Bloco titulo="5 · NARRATIVA DO CASO">
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <NarrBlock title="Justificativa" body={c.narrativa.justificativa} />
+          <NarrBlock title="Compliance EUDR" body={c.narrativa.compliance} />
+          <NarrBlock title="Interpretação" body={c.narrativa.interpretacao} />
+          <NarrBlock title="Resumo para importador" body={c.narrativa.resumoImportador} />
+        </div>
+      </Bloco>
+      <Bloco titulo="6 · PROVA MÍNIMA VERIFICÁVEL">
+        <Row k="Selo do caso" v={<Selo kind={c.selo} size="sm" />} /><Row k="Hash principal" v={c.prova.hash} mono /><Row k="Data de referência" v={c.prova.data} mono last />
+        <div style={{ marginTop: 12 }}>
+          <span onClick={() => { onClose(); nav("auditoria"); }} style={{ fontFamily: UI, fontSize: 13, fontWeight: 600, color: C.forestHi, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 }}>Ver auditoria on-chain <ArrowRight size={13} /></span>
+        </div>
+      </Bloco>
+      <div style={{ background: C.bg1, border: `1px solid ${C.line}`, borderRadius: 14, padding: 24, marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+          <ShieldCheck size={16} color={C.sand} />
+          <span style={{ fontFamily: DISPLAY, fontSize: 19, fontWeight: 400, color: C.ink, letterSpacing: "-0.01em" }}>Relatório de prontidão EUDR</span>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {EUDR_ITENS.map((it) => {
+            const s = EUDR_STATUS[it.status];
+            return (
+              <div key={it.titulo} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 10, padding: "14px 16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 6 }}>
+                  <p style={{ fontFamily: UI, fontSize: 13.5, fontWeight: 600, color: C.ink, margin: 0 }}>{it.titulo}</p>
+                  <span style={{ fontFamily: UI, fontSize: 11, fontWeight: 600, color: s.c, background: s.bg, border: `1px solid ${s.bd}`, padding: "3px 9px", borderRadius: 999, whiteSpace: "nowrap", flexShrink: 0 }}>{s.label}</span>
+                </div>
+                <Body size={12.5} color={C.ink2}>{it.texto}</Body>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ marginTop: 18, padding: "16px 18px", background: C.forestSoft, border: `1px solid ${C.forestBd}`, borderRadius: 10 }}>
+          <Mini color={C.forestHi} style={{ marginBottom: 6 }}>SÍNTESE</Mini>
+          <Body size={13} color={C.ink1}>A Rastro já organiza a due diligence como caso estruturado e verificável. O que ainda falta para o fechamento regulatório completo no padrão europeu está principalmente na camada de lote, cadeia de custódia e submissão final formal.</Body>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function BlocoHead({ icon: Ic, eyebrow, titulo }) {
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Ic size={15} color={C.sand} strokeWidth={1.8} /><Mini color={C.ink3} style={{ letterSpacing: "0.1em" }}>{eyebrow}</Mini>
+      </div>
+      <h3 style={{ fontFamily: UI, fontSize: 17, fontWeight: 600, color: C.ink, margin: "8px 0 0", letterSpacing: "-0.01em" }}>{titulo}</h3>
+    </div>
+  );
+}
+function Indicador({ label, status }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 14px", background: C.bg1, border: `1px solid ${C.line}`, borderRadius: 10 }}>
+      <p style={{ fontFamily: UI, fontSize: 13.5, fontWeight: 500, color: C.ink1, margin: 0 }}>{label}</p><Selo kind={status} size="sm" />
+    </div>
+  );
+}
+function NarrBlock({ title, body }) {
+  return (
+    <div>
+      <p style={{ fontFamily: UI, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: C.ink3, margin: 0 }}>{title}</p>
+      <p style={{ fontFamily: DISPLAY, fontSize: 15, color: C.ink1, lineHeight: 1.6, margin: "8px 0 0", fontStyle: "italic", letterSpacing: "-0.005em" }}>{body}</p>
+    </div>
+  );
+}
+
+/* ============================================================
+   AUDITORIA ON-CHAIN
+   ============================================================ */
+const AUD = {
+  car: "MT-5107925-86C0695A126C43B3BEDBA700698AFA9C",
+  statusCadastral: "Ativo no SICAR", risco: "Baixo", area: "3.490 ha", data: "2026-04-20 09:14:02 UTC", selo: "pronto",
+  hashPrincipal: "0x3c7a8d2f1e9b4c5a6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c",
+  evidencias: [
+    { camada: "Registro", hash: "0x7f3a2c8b1d4e5f6a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a", status: "Conferido" },
+    { camada: "MapBiomas", hash: "0xa2b7f4e8c1d9b3a5e6c4d2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1", status: "Conferido" },
+    { camada: "IBAMA", hash: "0xb8e3d5a7c2f1b9d4e6a8c0d2e4f6a8b0c2d4e6f8a1b3c5d7e9f1a3b5c7d9e1f3", status: "Conferido" },
+    { camada: "Gemini", hash: "0xc1d3e5f7a9b1c3d5e7f9a1b3c5d7e9f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3", status: "Conferido" },
+  ],
+};
+function Auditoria({ nav }) {
+  const [q, setQ] = useState("");
+  const [resultado, setResultado] = useState(null);
+  const [erro, setErro] = useState(false);
+  const buscar = () => {
+    const v = q.trim();
+    if (!v) { setErro(false); setResultado(null); return; }
+    if (v.toLowerCase() === AUD.car.toLowerCase()) { setResultado(AUD); setErro(false); } else { setResultado(null); setErro(true); }
+  };
+  return (
+    <div style={{ animation: "fade .3s ease" }}>
+      <div style={{ position: "relative", overflow: "hidden", borderBottom: `1px solid ${C.line}` }}>
+        <div style={{ position: "absolute", top: -150, right: -100, width: 600, height: 500, pointerEvents: "none", background: `radial-gradient(ellipse, ${C.sandSoft} 0%, transparent 60%)`, filter: "blur(50px)" }} />
+        <div style={{ ...wrap, padding: "64px 32px 52px", position: "relative" }}>
+          <span onClick={() => nav("home")} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: UI, fontSize: 13, color: C.ink3, cursor: "pointer", marginBottom: 24 }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = C.ink)} onMouseLeave={(e) => (e.currentTarget.style.color = C.ink3)}>
+            <ArrowLeft size={14} /> Voltar para a plataforma
+          </span>
+          <Eyebrow accent={C.sand}>Camada pública de verificação</Eyebrow>
+          <H1 size={50}>Auditoria on-chain</H1>
+          <Lead max={680}>Verifique a prova mínima do caso sem expor dados sensíveis.</Lead>
+        </div>
+      </div>
+      <div style={{ ...wrap, padding: "44px 32px 0" }}>
+        <Card pad={28} style={{ marginBottom: 28 }}>
+          <Mini color={C.ink3}>BUSCAR PELO CAR COMPLETO</Mini>
+          <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+            <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && buscar()} placeholder={`Ex.: ${AUD.car}`}
+              style={{ flex: 1, minWidth: 260, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, padding: "13px 16px", fontFamily: MONO, fontSize: 13, color: C.ink, outline: "none", transition: "border-color .15s" }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = C.forest)} onBlur={(e) => (e.currentTarget.style.borderColor = C.line)} />
+            <Btn icon={Search} onClick={buscar}>Verificar</Btn>
+          </div>
+          <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+            <span onClick={() => setQ(AUD.car)} style={{ fontFamily: MONO, fontSize: 11.5, color: C.forestHi, cursor: "pointer" }}>↳ usar CAR de exemplo</span>
+            {erro && <p style={{ fontFamily: UI, fontSize: 12.5, color: C.bad, margin: 0, fontWeight: 500 }}>CAR não encontrado. Confira o valor.</p>}
+          </div>
+        </Card>
+
+        {resultado && (
+          <>
+            <Card pad={32} style={{ marginBottom: 20, background: `linear-gradient(135deg, ${C.surface} 0%, ${C.forestSoft} 120%)`, borderColor: C.lineHi }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 24, marginBottom: 24 }}>
+                <div><Mini color={C.ink3}>RESULTADO DA AUDITORIA</Mini><p style={{ fontFamily: MONO, fontSize: 14, color: C.ink1, margin: "8px 0 0", wordBreak: "break-all" }}>{resultado.car}</p></div>
+                <Selo kind={resultado.selo} size="lg" />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 0 }} className="grid-2">
+                <div>
+                  <Row k="Status cadastral" v={<span style={{ color: C.ok, fontWeight: 600 }}>{resultado.statusCadastral}</span>} />
+                  <Row k="Risco" v={<span style={{ color: C.forestHi, fontWeight: 600 }}>{resultado.risco}</span>} />
+                  <Row k="Área" v={resultado.area} /><Row k="Data de referência" v={resultado.data} mono last />
+                </div>
+                <div>
+                  <Row k="Selo do caso" v={<Selo kind={resultado.selo} size="sm" />} />
+                  <Row k="Hash principal" v={resultado.hashPrincipal.slice(0, 22) + "…"} mono />
+                  <Row k="Status verificável" v={<span style={{ color: C.ok, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}><ShieldCheck size={13} />Conferido</span>} last />
+                </div>
+              </div>
+              <div style={{ marginTop: 20, padding: "14px 18px", background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10 }}>
+                <Mini color={C.ink3}>HASH PRINCIPAL COMPLETO</Mini>
+                <p style={{ fontFamily: MONO, fontSize: 12, color: C.ink1, margin: "8px 0 0", wordBreak: "break-all", lineHeight: 1.5 }}>{resultado.hashPrincipal}</p>
+              </div>
+            </Card>
+            <div style={{ marginBottom: 28 }}>
+              <Mini color={C.ink3}>EVIDÊNCIAS POR CAMADA</Mini>
+              <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }} className="grid-2">
+                {resultado.evidencias.map((e) => (
+                  <div key={e.camada} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 12, padding: 20, transition: "border-color .15s" }}
+                    onMouseEnter={(ev) => (ev.currentTarget.style.borderColor = C.lineHi)} onMouseLeave={(ev) => (ev.currentTarget.style.borderColor = C.line)}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <p style={{ fontFamily: UI, fontSize: 14, fontWeight: 600, color: C.ink, margin: 0, letterSpacing: "-0.01em" }}>{e.camada}</p>
+                      <span style={{ fontFamily: UI, fontSize: 11, fontWeight: 600, color: C.ok, display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 9px", background: C.okSoft, border: `1px solid ${C.okBd}`, borderRadius: 999 }}>
+                        <span style={{ width: 5, height: 5, borderRadius: "50%", background: C.ok }} />{e.status}
+                      </span>
+                    </div>
+                    <p style={{ fontFamily: MONO, fontSize: 11.5, color: C.ink2, margin: "0 0 14px", wordBreak: "break-all", lineHeight: 1.45 }}>{e.hash.slice(0, 36)}…</p>
+                    <Btn size="sm" kind="ghost" iconRight={ExternalLink} onClick={() => { try { window.open(LINKS.auditoria, "_blank"); } catch (e) {} }}>Ver no Etherscan</Btn>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ padding: "20px 24px", background: C.bg1, border: `1px solid ${C.line}`, borderRadius: 12, display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 40 }}>
+              <Lock size={16} color={C.ink3} style={{ marginTop: 3, flexShrink: 0 }} />
+              <p style={{ fontFamily: UI, fontSize: 13.5, color: C.ink2, margin: 0, lineHeight: 1.6, maxWidth: 720 }}>
+                Esta página não mostra o dossiê completo. Ela mostra a <span style={{ color: C.ink, fontWeight: 600 }}>prova mínima verificável</span> do caso. O conteúdo rico do caso permanece na camada operacional da plataforma.
+              </p>
+            </div>
+          </>
+        )}
+        {!resultado && !erro && (
+          <Card pad={48} style={{ textAlign: "center", borderStyle: "dashed", background: "transparent" }}>
+            <ShieldCheck size={28} color={C.ink3} style={{ marginBottom: 14 }} />
+            <p style={{ fontFamily: UI, fontSize: 14, color: C.ink2, margin: 0 }}>Cole o CAR completo no campo acima para verificar a prova mínima do caso.</p>
+          </Card>
+        )}
+        <div style={{ textAlign: "center", padding: "40px 0 60px" }}>
+          <Btn kind="ghost" icon={ArrowLeft} onClick={() => nav("home")}>Voltar para a plataforma</Btn>
+        </div>
+      </div>
+      <Footer nav={nav} />
+    </div>
+  );
+}
+
+/* ============================================================
+   APP — 5 rotas
+   ============================================================ */
+function DashTerritorio({ nav }) {
+  const iframeRef = React.useRef(null);
+  React.useEffect(function () {
+    var fonte = document.getElementById("teu-front-rastro");
+    if (fonte && iframeRef.current) {
+      iframeRef.current.srcdoc = fonte.textContent;
+    }
+  }, []);
+  return (
+    <div style={{ background: C.bg, minHeight: "calc(100vh - 56px)" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 24px 8px" }}>
+        <div style={{ fontFamily: UI, fontSize: 12.5, color: C.ink3, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>Camada territorial</div>
+        <div style={{ fontFamily: DISPLAY, fontSize: 26, color: C.ink, marginBottom: 2 }}>Mapa e verificação por CAR</div>
+        <div style={{ fontFamily: UI, fontSize: 13.5, color: C.ink2 }}>Exploração territorial, filtros e verificação on-chain das propriedades.</div>
+      </div>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "8px 24px 28px" }}>
+        <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid " + C.line, boxShadow: "0 10px 40px rgba(0,0,0,0.35)", background: C.bg }}>
+          <iframe ref={iframeRef} title="Rastro Territorio"
+            style={{ width: "100%", height: "calc(100vh - 180px)", minHeight: 600, border: "none", display: "block" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [route, setRoute] = useState("home");
+  const [walletConnected, setWalletConnected] = useState(false);
+  const scrollRef = React.useRef(null);
+  const nav = (to) => {
+    setRoute(to);
+    // rola o container interno do app para o topo (o window pode não rolar dentro do iframe)
+    try { if (scrollRef.current) scrollRef.current.scrollTop = 0; } catch (e) {}
+    try { window.scrollTo(0, 0); } catch (e) {}
+    try { document.documentElement.scrollTop = 0; document.body.scrollTop = 0; } catch (e) {}
+  };
+  return (
+    <div ref={scrollRef} style={{ background: C.bg, height: "100vh", overflowY: "auto", overflowX: "hidden" }}>
+      <TopNav nav={nav} route={route} walletConnected={walletConnected} onConnectWallet={() => setWalletConnected((v) => !v)} />
+      {route === "home" && <Home nav={nav} />}
+      {route === "exportador" && <DashExportador nav={nav} />}
+      {route === "importador" && <DashImportador nav={nav} />}
+      {route === "auditor" && <DashAuditor nav={nav} />}
+      {route === "territorio" && <DashTerritorio nav={nav} />}
+      {route === "auditoria" && <Auditoria nav={nav} />}
+    </div>
+  );
+}
+
+
+const _root = ReactDOM.createRoot(document.getElementById("root"));
+_root.render(React.createElement(App));
+</script>
+<script type="text/html" id="teu-front-rastro">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Rastro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* TEMA DELA (verde-escuro premium) */
+  --v:#54B07E;--v2:#3D9968;--v3:rgba(61,153,104,0.16);--v4:#101A14;
+  --t:#EDE8DB;--t2:#A6AD9C;--t3:#7B8377;
+  --b:#27362D;--sup:#18261E;--r:8px;--r2:12px;
+  --surfaceUp:#1F2F26;--lineHi:#35473B;--sand:#C9A86A;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--v4);color:var(--t);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+nav{height:52px;background:var(--sup);border-bottom:1px solid var(--b);padding:0 1.2rem;display:flex;align-items:center;flex-shrink:0;z-index:999}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+.logo-box{width:26px;height:26px;border:1.5px solid var(--v2);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:15px;color:var(--v2);font-style:italic}
+.logo-nome{font-family:'DM Serif Display',serif;font-size:17px;color:var(--t);font-style:italic}
+.nav-sub{font-size:11.5px;color:var(--t3);margin-left:auto}
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:310px;flex-shrink:0;background:var(--sup);border-right:1px solid var(--b);display:flex;flex-direction:column;overflow:hidden}
+.abas{display:flex;border-bottom:1px solid var(--b);flex-shrink:0}
+.aba{flex:1;height:38px;background:none;border:none;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;transition:all .15s}
+.aba:hover{color:var(--t2)}
+.aba.ativa{color:var(--v);border-bottom-color:var(--v2)}
+.painel{display:none;flex-direction:column;flex-shrink:0}
+.painel.ativo{display:flex}
+.p-inner{padding:.75rem 1rem;border-bottom:1px solid var(--b);display:flex;flex-direction:column;gap:.45rem}
+.inp{width:100%;height:36px;border:1px solid var(--b);border-radius:var(--r);padding:0 .7rem;font-family:'DM Sans',sans-serif;font-size:12.5px;color:var(--t);background:var(--v4);outline:none;transition:border-color .15s,box-shadow .15s}
+.inp::placeholder{color:var(--t3);opacity:0.7;font-size:12px}
+.inp:focus{border-color:var(--v2);box-shadow:0 0 0 2px rgba(45,102,69,.1)}
+.sel{width:100%;height:36px;border:1px solid var(--b);border-radius:var(--r);padding:0 .7rem;font-family:'DM Sans',sans-serif;font-size:12.5px;color:var(--t);background:var(--v4);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238aaa98' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;padding-right:2rem}
+.sel:focus{border-color:var(--v2)}
+.row{display:flex;gap:6px}
+.btn{height:36px;padding:0 14px;border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;white-space:nowrap}
+.btn-p{background:var(--v);color:#fff;flex:1}
+.btn-p:hover{background:var(--v2)}
+.btn-p:disabled{opacity:.6;cursor:not-allowed}
+.btn-s{background:none;border:1px solid var(--b);color:var(--t3)}
+.btn-s:hover{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+.btn-g{background:none;border:1px solid var(--b);color:var(--t2);width:100%}
+.btn-g:hover{background:var(--v3);border-color:var(--v2);color:var(--v)}
+.btn-mm{height:36px;width:100%;background:none;border:1.5px solid var(--v2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--v2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.btn-mm:hover{background:var(--v3)}
+.btn-mm.conectado{background:var(--v3);border-color:var(--v2)}
+.wallet-addr{font-size:10.5px;color:var(--t3);font-family:'Courier New',monospace;text-align:center;padding:3px 0}
+.cad-ok{display:none;font-size:12px;color:#14532d;background:#dcfce7;border-radius:var(--r);padding:7px 10px;text-align:center}
+.cad-ok.show{display:block}
+.cad-err{display:none;font-size:12px;color:#991b1b;background:#fee2e2;border-radius:var(--r);padding:7px 10px;text-align:center}
+.cad-err.show{display:block}
+.tx-info{display:none;font-size:10.5px;color:var(--t3);background:var(--v4);border:1px solid var(--b);border-radius:var(--r);padding:6px 8px;word-break:break-all}
+.tx-info.show{display:block}
+.tx-info a{color:var(--v2);text-decoration:none;font-weight:500}
+.res-wrap{display:none;padding:.7rem 1rem;border-bottom:1px solid var(--b);background:var(--v4);flex-shrink:0}
+.res-wrap.show{display:block}
+.res-topo{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+.res-tit{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3)}
+.btn-fechar{background:none;border:none;font-size:12px;color:var(--t3);cursor:pointer;padding:2px 6px;border-radius:4px}
+.btn-fechar:hover{background:#fee2e2;color:#991b1b}
+.res-erro{display:none;font-size:12px;color:#991b1b;background:#fee2e2;border-radius:var(--r);padding:7px 10px}
+.res-erro.show{display:block}
+.lista-hdr{display:none;padding:.5rem 1rem;border-bottom:1px solid var(--b);background:var(--v4);flex-shrink:0;align-items:center;justify-content:space-between}
+.lista-hdr.show{display:flex}
+.lista-hdr span{font-size:11.5px;font-weight:500;color:var(--t2)}
+.lista-hdr small{font-size:10.5px;color:var(--t3)}
+.sb-lista{overflow-y:auto;flex:1}
+.sb-lista::-webkit-scrollbar{width:3px}
+.sb-lista::-webkit-scrollbar-thumb{background:var(--b)}
+.grupo-h{display:flex;align-items:center;justify-content:space-between;padding:.45rem 1rem;cursor:pointer;user-select:none}
+.grupo-h:hover{background:var(--v4)}
+.g-esq{display:flex;align-items:center;gap:6px}
+.gdot{width:7px;height:7px;border-radius:50%}
+.glbl{font-size:12px;font-weight:600}
+.gcnt{font-size:10px;font-weight:600;padding:1px 6px;border-radius:999px}
+.garr{font-size:8px;color:var(--t3);transition:transform .18s}
+.garr.ab{transform:rotate(90deg)}
+.g-itens{display:none}
+.g-itens.ab{display:block}
+.fitem{padding:.42rem 1rem .42rem 1.8rem;cursor:pointer;border-left:3px solid transparent;transition:all .12s}
+.fitem:hover{background:var(--v4);border-left-color:var(--v2)}
+.fitem.sel{background:var(--v3);border-left-color:var(--v2)}
+.fcar{font-size:10.5px;font-weight:500;font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t)}
+.fmeta{font-size:10px;color:var(--t3);margin-top:1px}
+.vazio{padding:1.5rem 1rem;text-align:center;font-size:12px;color:var(--t3);line-height:1.6}
+.dp{background:#f59e0b}.lp{color:#92400e}.cp{background:#fef3c7;color:#92400e}
+.di{background:#ef4444}.li{color:#991b1b}.ci{background:#fee2e2;color:#991b1b}
+.db{background:#22c55e}.lb{color:#14532d}.cb{background:#dcfce7;color:#14532d}
+.dm{background:#f97316}.lm{color:#7c2d12}.cm{background:#ffedd5;color:#7c2d12}
+.da{background:#dc2626}.la{color:#7f1d1d}.ca{background:#fee2e2;color:#7f1d1d}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.bv{background:#dcfce7;color:#14532d}.bp{background:#fef3c7;color:#92400e}.bi{background:#fee2e2;color:#991b1b}
+.rbadge{display:inline-flex;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600}
+.rb-b{background:#dcfce7;color:#14532d}.rb-m{background:#ffedd5;color:#7c2d12}.rb-a{background:#fee2e2;color:#991b1b}
+.direita{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#map{width:100%;flex:1}
+.legenda{position:absolute;bottom:18px;right:10px;z-index:500;background:var(--sup);border:1px solid var(--b);border-radius:var(--r2);padding:.6rem .85rem;font-size:11px;box-shadow:0 2px 12px rgba(10,26,16,.08)}
+.legenda p{font-size:9.5px;font-weight:600;color:var(--t2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:.35rem}
+.leg-i{display:flex;align-items:center;gap:5px;color:var(--t2);margin-bottom:2px}
+.leg-d{width:7px;height:7px;border-radius:50%}
+.detalhe{display:none;flex:1;overflow-y:auto;background:var(--sup)}
+.detalhe.show{display:block}
+.detalhe::-webkit-scrollbar{width:4px}
+.detalhe::-webkit-scrollbar-thumb{background:var(--b)}
+.det-topo{padding:.9rem 1.2rem;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:.6rem;position:sticky;top:0;background:var(--sup);z-index:10}
+.det-voltar{background:none;border:1px solid var(--b);border-radius:var(--r);padding:5px 10px;font-size:12px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s;font-family:'DM Sans',sans-serif}
+.det-voltar:hover{background:var(--v3);border-color:var(--v2);color:var(--v)}
+.det-car{font-family:'Courier New',monospace;font-size:11px;color:var(--v2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.det-mapa{width:100%;height:220px;object-fit:cover;background:var(--v4);display:block}
+#det-leaflet-map{height:260px;object-fit:initial}
+.det-mapa-load{width:100%;height:220px;background:var(--v4);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3)}
+.det-sec{padding:.9rem 1.2rem;border-bottom:1px solid var(--b)}
+.det-sec-tit{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin-bottom:.65rem}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.det-cell{background:var(--v4);border:1px solid var(--b);border-radius:var(--r);padding:8px 10px}
+.det-cell-l{font-size:10px;color:var(--t3);margin-bottom:2px}
+.det-cell-v{font-size:12.5px;font-weight:500;color:var(--t)}
+.gemini-card{background:var(--v4);border:1px solid var(--b);border-radius:var(--r2);padding:.9rem 1rem}
+.gemini-risco{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem}
+.gemini-label{font-size:10.5px;font-weight:600;color:var(--t2)}
+.gemini-campo{margin-bottom:.6rem}
+.gemini-campo-l{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);margin-bottom:3px}
+.gemini-campo-v{font-size:12px;color:var(--t2);line-height:1.6}
+.fontes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fonte-card{background:var(--v4);border:1px solid var(--b);border-radius:var(--r);padding:.7rem .85rem}
+.fonte-tit{font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:.45rem;display:flex;align-items:center;gap:5px}
+.fonte-item{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:2px}
+.fonte-item span:last-child{color:var(--t);font-weight:500}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:.5rem}
+.mc{background:var(--sup);border:1px solid var(--b);border-radius:6px;padding:6px 8px}
+.mc-l{font-size:10px;color:var(--t3);margin-bottom:2px}
+.mc-v{font-size:12px;font-weight:500;color:var(--t)}
+.leaflet-popup-content-wrapper{border-radius:10px!important;border:1px solid var(--b)!important;background:var(--sup)!important;color:var(--t)!important;box-shadow:0 2px 14px rgba(10,26,16,.1)!important;padding:0!important}
+.leaflet-popup-content{margin:0!important;font-family:'DM Sans',sans-serif!important}
+.pop{padding:9px 12px;min-width:160px;cursor:pointer}
+.pop-car{font-family:'Courier New',monospace;font-size:9.5px;color:var(--v2);margin-bottom:3px}
+.pop-loc{font-size:11px;color:var(--t2);margin-bottom:5px}
+.pop-hint{font-size:10px;color:var(--t3);margin-top:4px}
+.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+footer{height:36px;background:var(--sup);border-top:1px solid var(--b);padding:0 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ft-s{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t3)}
+.ft-c{font-size:10.5px;color:var(--t3)}
+.sep{color:var(--b)}
+
+/* ====== ESTRELAS / HISTÓRICO MAPBIOMAS ====== */
+.estrelas{display:inline-flex;align-items:center;gap:2px;flex-wrap:wrap;min-height:14px}
+.estrela{position:relative;font-size:14px;line-height:1;cursor:default}
+.estrela.verde{color:#22c55e}
+.estrela.vermelha{color:#dc2626}
+.estrela .tip{visibility:hidden;opacity:0;position:absolute;bottom:140%;left:50%;transform:translateX(-50%);background:var(--t);color:#fff;font-size:10px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;z-index:9999;transition:opacity .12s;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.estrela .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--t)}
+.estrela:hover .tip{visibility:visible;opacity:1}
+.estrelas-bloco{display:flex;flex-direction:column;gap:5px}
+.estrelas-linha{display:flex;align-items:center;gap:8px}
+.estrelas-linha small{font-size:10.5px;color:var(--t3);min-width:74px}
+.hist-msg{display:none;font-size:11px;margin-top:6px;padding:6px 8px;border-radius:var(--r)}
+.hist-msg.ok{display:block;background:#dcfce7;color:#14532d}
+.hist-msg.err{display:block;background:#fee2e2;color:#991b1b}
+.saldo-card{background:var(--v4);border:1px solid var(--b);border-radius:var(--r2);padding:.75rem .85rem;margin:.35rem 0 .65rem}
+.saldo-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:.55rem}
+.saldo-status{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--t2)}
+.saldo-icone{font-size:18px;line-height:1}.saldo-icone.pos{color:#22c55e}.saldo-icone.neg{color:#dc2626}.saldo-icone.neu{color:var(--t3)}
+.saldo-num{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;background:#edf7f1;color:var(--v)}
+.saldo-num.neg{background:#fee2e2;color:#991b1b}.saldo-num.neu{background:#f1f5f1;color:#6b897a}
+.saldo-bar{position:relative;height:14px;border-radius:999px;background:#eef6f1;border:1px solid var(--b);display:flex;overflow:hidden}
+.saldo-bar::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(13,31,22,.25);transform:translateX(-1px)}
+.saldo-left,.saldo-right{width:50%;position:relative}.saldo-left{display:flex;justify-content:flex-end}.saldo-right{display:flex;justify-content:flex-start}
+.saldo-fill-red{height:100%;background:#dc2626;border-radius:999px 0 0 999px}.saldo-fill-green{height:100%;background:#22c55e;border-radius:0 999px 999px 0}
+.saldo-leg{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:var(--t3)}
+.saldo-leg strong{color:var(--t2);font-weight:600}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-box">R</div>
+    <span class="logo-nome">astro</span>
+  </a>
+  <span class="nav-sub">Due Diligence Ambiental · EUDR · Ethereum Sepolia</span>
+</nav>
+
+<div class="main">
+  <div class="sidebar" id="sidebar">
+
+    <div class="abas">
+      <button class="aba ativa" onclick="setAba('car',this)">Verificar</button>
+      <button class="aba" onclick="setAba('filtro',this)">Filtrar</button>
+      <button class="aba" onclick="setAba('contrato',this)">Contrato</button>
+    </div>
+
+    <!-- ABA: VERIFICAR CAR -->
+    <div class="painel ativo" id="p-car">
+      <div class="p-inner">
+        <div class="row">
+          <input class="inp" id="inp-car" type="text" placeholder="Código CAR completo…" style="flex:1"/>
+          <button class="btn btn-p" id="btn-car" onclick="buscarCAR()" style="flex:0 0 auto;padding:0 12px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Verificar
+          </button>
+          <button class="btn btn-s" onclick="limparCAR()" title="Limpar" style="flex:0 0 36px">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA: FILTRAR -->
+    <div class="painel" id="p-filtro">
+      <div class="p-inner">
+        <select class="sel" id="sel-estado">
+          <option value="">Selecione o estado (obrigatório)</option>
+          <option>Acre (AC)</option><option>Alagoas (AL)</option><option>Amapá (AP)</option>
+          <option>Amazonas (AM)</option><option>Bahia (BA)</option><option>Ceará (CE)</option>
+          <option>Distrito Federal (DF)</option><option>Espírito Santo (ES)</option><option>Goiás (GO)</option>
+          <option>Maranhão (MA)</option><option>Mato Grosso (MT)</option><option>Mato Grosso do Sul (MS)</option>
+          <option>Minas Gerais (MG)</option><option>Pará (PA)</option><option>Paraíba (PB)</option>
+          <option>Paraná (PR)</option><option>Pernambuco (PE)</option><option>Piauí (PI)</option>
+          <option>Rio de Janeiro (RJ)</option><option>Rio Grande do Norte (RN)</option>
+          <option>Rio Grande do Sul (RS)</option><option>Rondônia (RO)</option><option>Roraima (RR)</option>
+          <option>Santa Catarina (SC)</option><option>São Paulo (SP)</option><option>Sergipe (SE)</option>
+          <option>Tocantins (TO)</option>
+        </select>
+        <select class="sel" id="sel-risco">
+          <option value="">Todos os riscos (opcional)</option>
+          <option value="BAIXO">Risco Baixo</option>
+          <option value="MEDIO">Risco Médio</option>
+          <option value="ALTO">Risco Alto</option>
+          <option value="PENDENTE">Pendente</option>
+          <option value="INATIVO">Inválido</option>
+        </select>
+        <select class="sel" id="sel-segmento">
+          <option value="">Todos os segmentos (opcional)</option>
+          <option value="SOJA">Soja</option>
+          <option value="PECUARIA">Pecuária</option>
+          <option value="CAFE">Café</option>
+          <option value="CANA">Cana</option>
+          <option value="ALGODAO">Algodão</option>
+          <option value="ARROZ">Arroz</option>
+          <option value="SILVICULTURA">Silvicultura</option>
+          <option value="AGRICULTURA">Agricultura</option>
+          <option value="LAVOURA_TEMPORARIA">Lavoura temporária</option>
+          <option value="MOSAICO_DE_USOS">Mosaico de usos</option>
+        </select>
+        <div class="row">
+          <button class="btn btn-p" onclick="filtrar()">Buscar</button>
+          <button class="btn btn-s" onclick="limparFiltro()" style="padding:0 14px">Limpar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA: CONTRATO -->
+    <div class="painel" id="p-contrato">
+      <div class="p-inner">
+
+        <!-- Endereço do contrato -->
+        <p style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:2px">Endereço do contrato</p>
+        <input class="inp" id="inp-contrato" type="text" value="0x865724ffd417f5B696f31a8Af67541585fd2a262" style="font-family:'Courier New',monospace;font-size:11px"/>
+        <button class="btn btn-g" id="btn-salvar-contrato" onclick="salvarContratoAtual()" style="margin-top:4px">
+          Salvar contrato localmente
+        </button>
+
+        <!-- Conectar wallet -->
+        <button class="btn-mm" id="btn-mm" onclick="conectarWallet()" style="margin-top:4px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          Conectar MetaMask
+        </button>
+        <p class="wallet-addr" id="wallet-addr" style="display:none"></p>
+
+        <!-- Cadastrar CAR -->
+        <p style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin:6px 0 2px">Cadastrar novo CAR</p>
+        <div class="row">
+          <input class="inp" id="inp-cad" type="text" placeholder="Código CAR completo…" style="flex:1"/>
+          <button class="btn btn-p" id="btn-cad" onclick="cadastrar()" style="flex:0 0 auto;padding:0 12px" disabled>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Cadastrar
+          </button>
+        </div>
+        <div class="cad-ok" id="cad-ok">✓ CAR cadastrado! Workflow iniciará a análise em breve.</div>
+        <div class="cad-err" id="cad-err"></div>
+        <div class="tx-info" id="tx-info"></div>
+      </div>
+    </div>
+
+    <!-- RESULTADO BUSCA CAR -->
+    <div class="res-wrap" id="res-wrap">
+      <div class="res-topo">
+        <span class="res-tit">Resultado</span>
+        <button class="btn-fechar" onclick="limparCAR()">✕ fechar</button>
+      </div>
+      <div id="res-conteudo"></div>
+      <div class="res-erro" id="res-erro">CAR não encontrado no Supabase.</div>
+    </div>
+
+    <!-- LISTA HEADER -->
+    <div class="lista-hdr" id="lista-hdr">
+      <span id="lista-lbl">—</span>
+      <small id="lista-cnt">—</small>
+    </div>
+
+    <!-- LISTA -->
+    <div class="sb-lista" id="sb-lista">
+      <div class="vazio">Selecione um estado para listar propriedades<br/>ou use "Verificar CAR" para busca individual.</div>
+    </div>
+  </div>
+
+  <!-- ÁREA DIREITA -->
+  <div class="direita" id="direita">
+    <div id="map"></div>
+    <div class="legenda" id="legenda">
+      <p>Legenda</p>
+      <div class="leg-i"><div class="leg-d" style="background:#f59e0b"></div>Pendente</div>
+      <div class="leg-i"><div class="leg-d" style="background:#ef4444"></div>Inválido</div>
+      <div class="leg-i"><div class="leg-d" style="background:#22c55e"></div>Risco Baixo</div>
+      <div class="leg-i"><div class="leg-d" style="background:#f97316"></div>Risco Médio</div>
+      <div class="leg-i"><div class="leg-d" style="background:#dc2626"></div>Risco Alto</div>
+    </div>
+
+    <!-- DETALHE -->
+    <div class="detalhe" id="detalhe">
+      <div class="det-topo">
+        <button class="det-voltar" onclick="fecharDetalhe()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          Voltar ao mapa
+        </button>
+        <span class="det-car" id="det-car-cod">—</span>
+      </div>
+      <div id="det-mapa-wrap">
+        <div class="det-mapa-load" id="det-mapa-load">Carregando território…</div>
+        <img id="det-mapa-img" class="det-mapa" style="display:none" alt="Território"/>
+        <div id="det-leaflet-map" class="det-mapa" style="display:none"></div>
+      </div>
+      <div class="det-sec">
+        <p class="det-sec-tit">Histórico</p>
+        <div class="saldo-card">
+          <div class="saldo-top">
+            <div class="saldo-status"><span id="d-saldo-icone" class="saldo-icone neu">•</span><span id="d-saldo-texto">Saldo ambiental neutro</span></div>
+            <span id="d-saldo-num" class="saldo-num neu">0.0 ha</span>
+          </div>
+          <div class="saldo-bar">
+            <div class="saldo-left"><div id="d-barra-perda" class="saldo-fill-red" style="width:0%"></div></div>
+            <div class="saldo-right"><div id="d-barra-ganho" class="saldo-fill-green" style="width:0%"></div></div>
+          </div>
+          <div class="saldo-leg"><span>Desmatamento <strong id="d-perda-ha">0.0 ha</strong></span><span>Recuperação <strong id="d-ganho-ha">0.0 ha</strong></span></div>
+        </div>
+        <div class="estrelas-bloco">
+          <div class="estrelas-linha"><small>Classificação</small><span id="d-estrelas-verde" class="estrelas">—</span><span id="d-estrelas-vermelha" class="estrelas" style="display:none">—</span></div>
+          <div class="estrelas-linha"><small>Segmento</small><span id="d-segmento" class="det-cell-v" style="font-size:12px">—</span></div>
+        </div>
+        <button class="btn btn-g" id="btn-atualizar-hist" onclick="atualizarHistorico()" style="margin-top:.75rem">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          Atualizar histórico
+        </button>
+        <div id="hist-msg" class="hist-msg"></div>
+      </div>
+
+      <div class="det-sec">
+        <p class="det-sec-tit">Propriedade</p>
+        <div class="det-grid">
+          <div class="det-cell"><p class="det-cell-l">Status</p><span id="d-status" class="badge bv">—</span></div>
+          <div class="det-cell"><p class="det-cell-l">Risco ambiental</p><span id="d-risco" class="rbadge rb-b">—</span></div>
+          <div class="det-cell"><p class="det-cell-l">Estado</p><p class="det-cell-v" id="d-estado">—</p></div>
+          <div class="det-cell"><p class="det-cell-l">Área</p><p class="det-cell-v" id="d-area">—</p></div>
+          <div class="det-cell"><p class="det-cell-l">Registrado em</p><p class="det-cell-v" id="d-data">—</p></div>
+          <div class="det-cell"><p class="det-cell-l">Sigla</p><p class="det-cell-v" id="d-sigla">—</p></div>
+        </div>
+      </div>
+      <div class="det-sec">
+        <p class="det-sec-tit">Análise Gemini</p>
+        <div class="gemini-card">
+          <div class="gemini-risco">
+            <span class="gemini-label">Risco calculado pelos dados estruturados</span>
+            <span id="d-g-risco" class="rbadge rb-b">—</span>
+          </div>
+          <div class="gemini-campo"><p class="gemini-campo-l">Justificativa</p><p class="gemini-campo-v" id="d-g-just">—</p></div>
+          <div class="gemini-campo"><p class="gemini-campo-l">Compliance EUDR</p><p class="gemini-campo-v" id="d-g-comp">—</p></div>
+          <div class="gemini-campo"><p class="gemini-campo-l">Interpretação</p><p class="gemini-campo-v" id="d-g-int">—</p></div>
+          <div class="gemini-campo"><p class="gemini-campo-l">Resumo para importador</p><p class="gemini-campo-v" id="d-g-res">—</p></div>
+        </div>
+      </div>
+      <div class="det-sec">
+        <p class="det-sec-tit">Fontes de dados estado atual</p>
+        <div class="fontes-grid">
+          <div class="fonte-card">
+            <div class="fonte-tit">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+              MapBiomas
+            </div>
+            <div class="fonte-item"><span>Desmatamento</span><span id="d-mb-def">—</span></div>
+            <div class="fonte-item"><span>Alertas</span><span id="d-mb-alerts">—</span></div>
+            <div class="fonte-item"><span>Hectares</span><span id="d-mb-ha">—</span></div>
+          </div>
+          <div class="fonte-card">
+            <div class="fonte-tit">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              IBAMA
+            </div>
+            <div class="fonte-item"><span>Embargo</span><span id="d-ib-emb">—</span></div>
+            <div class="fonte-item"><span>Status</span><span id="d-ib-st">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="ft-s">
+    <span>MapBiomas</span><span class="sep">·</span>
+    <span>IBAMA</span><span class="sep">·</span>
+    <span>SICAR</span><span class="sep">·</span>
+    <span>Chainlink CRE</span><span class="sep">·</span>
+    <span>Ethereum Sepolia</span>
+  </div>
+  <p class="ft-c">© 2026 Rastro · IusChain</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"><\/script>
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const GEOAPIFY_KEY   = 'dc783b9c4d184a4f95d4a7999f44ef13';
+const SUPABASE_URL   = 'https://tqsoopgmzdwttwvedngk.supabase.co';
+const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxc29vcGdtemR3dHR3dmVkbmdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjIxNTEsImV4cCI6MjA5NDUzODE1MX0.LaHuxJVFJI9SkGHFmapSpkUYBC5plB9oPuDXIXJXsN0';
+const CONTRACT_ADDR_PADRAO = '0x865724ffd417f5B696f31a8Af67541585fd2a262';
+const SEPOLIA_ID     = '0xaa36a7';
+const dbLocal = new PouchDB('rastro_config_local');
+
+async function carregarContratoSalvo(){
+  const input = document.getElementById('inp-contrato');
+  try {
+    const doc = await dbLocal.get('contrato_ativo');
+    if(doc?.address && ethers.isAddress(doc.address)){
+      input.value = doc.address;
+      return doc.address;
+    }
+  } catch(e) {}
+  input.value = CONTRACT_ADDR_PADRAO;
+  return CONTRACT_ADDR_PADRAO;
+}
+
+async function salvarContratoAtual(){
+  const input = document.getElementById('inp-contrato');
+  const addr = input.value.trim();
+  const err = document.getElementById('cad-err');
+  const ok = document.getElementById('cad-ok');
+  err.classList.remove('show');
+  ok.classList.remove('show');
+  if(!ethers.isAddress(addr)){
+    err.textContent = 'Endereço de contrato inválido.';
+    err.classList.add('show');
+    return null;
+  }
+  let antigo = null;
+  try { antigo = await dbLocal.get('contrato_ativo'); } catch(e) {}
+  const doc = {
+    _id: 'contrato_ativo',
+    address: addr,
+    updated_at: new Date().toISOString(),
+  };
+  if(antigo?._rev) doc._rev = antigo._rev;
+  await dbLocal.put(doc);
+  ok.textContent = '✓ Contrato salvo localmente neste navegador.';
+  ok.classList.add('show');
+  return addr;
+}
+
+function getContratoAtual(){
+  const addr = document.getElementById('inp-contrato').value.trim();
+  if(!ethers.isAddress(addr)){
+    throw new Error('Endereço de contrato inválido.');
+  }
+  return addr;
+}
+
+
+// Escopo do contrato ativo ----------------------------------------------------
+// O contrato salvo no PouchDB agora também controla o que a tela considera
+// como análise válida. Sem isso, o front buscava o resultado antigo do Supabase
+// apenas pelo codigo_car e podia mostrar uma análise gerada em outro contrato.
+let _cacheCarsPorContrato = {};
+
+async function listarCarsDoContratoAtual(force=false){
+  const addr = getContratoAtual();
+  const key = addr.toLowerCase();
+  if(!force && Array.isArray(_cacheCarsPorContrato[key])) return _cacheCarsPorContrato[key];
+
+  if(!window.ethereum){
+    throw new Error('MetaMask não encontrada. Conecte a carteira para validar o contrato ativo.');
+  }
+
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const contrato = new ethers.Contract(addr, CONTRACT_ABI, provider);
+  const lista = await contrato.listarTodos();
+  const normalizada = Array.from(lista || []).map(x => String(x).trim().toUpperCase());
+  _cacheCarsPorContrato[key] = normalizada;
+  return normalizada;
+}
+async function carEstaNoContratoAtual(codigoCar){
+  const lista = await listarCarsDoContratoAtual(false);
+  return lista.includes(String(codigoCar || '').trim().toUpperCase());
+}
+async function aplicarEscopoContratoAtual(f){
+  if(!f) return f;
+  const pertence = await carEstaNoContratoAtual(f.codigo_car);
+  f._noContratoAtual = pertence;
+
+  // Se o CAR não está no contrato ativo, não mostramos risco/Gemini antigo.
+  // Mantemos os dados básicos apenas quando a tela decidir exibir detalhe público.
+  if(pertence === false){
+    f.rastro_resultados = [];
+  }
+  return f;
+}
+function mostrarAvisoContratoAtual(f){
+  let aviso = document.getElementById('aviso-contrato-atual');
+  const alvo = document.querySelector('#detalhe .det-sec:nth-of-type(3)') || document.getElementById('detalhe');
+  if(!aviso){
+    aviso = document.createElement('div');
+    aviso.id = 'aviso-contrato-atual';
+    aviso.style.cssText = 'display:none;margin:.75rem 1.2rem 0;padding:8px 10px;border-radius:8px;font-size:12px;background:var(--sup)7ed;color:#7c2d12;border:1px solid #fed7aa';
+    if(alvo && alvo.parentNode) alvo.parentNode.insertBefore(aviso, alvo);
+  }
+
+  if(f?._noContratoAtual === false){
+    const addr = (()=>{ try{return getContratoAtual()}catch{return ''} })();
+    aviso.style.display='block';
+    aviso.textContent = `Este CAR não consta no contrato ativo ${addr ? addr.slice(0,6)+'...'+addr.slice(-4) : ''}. Risco/Gemini antigos foram ocultados.`;
+  } else {
+    aviso.style.display='none';
+    aviso.textContent='';
+  }
+}
+
+// ABI mínimo do contrato ativo.
+// Importante: listarTodos() precisa estar aqui, senão o front não consegue
+// saber quais CARs pertencem ao contrato selecionado e acaba mostrando dados
+// antigos do Supabase de outro contrato.
+const CONTRACT_ABI = [
+  {
+    name: 'cadastrarCAR',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'codigoCAR', type: 'string' }],
+    outputs: [],
+  },
+  {
+    name: 'listarTodos',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'string[]' }],
+  },
+  {
+    name: 'totalFazendas',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    name: 'fazendas',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: '', type: 'string' }],
+    outputs: [
+      { name: 'dono', type: 'address' },
+      { name: 'status', type: 'uint8' },
+      { name: 'cadastradoEm', type: 'uint256' },
+      { name: 'atualizadoEm', type: 'uint256' },
+      { name: 'existe', type: 'bool' },
+    ],
+  }
+];
+
+// ── SUPABASE HELPER ───────────────────────────────────────────────────────────
+async function sbFetch(path, params=''){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}${params}`, {
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': `Bearer ${SUPABASE_ANON}`,
+    }
+  });
+  return r.json();
+}
+
+
+// ── HISTÓRICO MAPBIOMAS / ESTRELAS ───────────────────────────────────────────
+function nnum(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function primeiro(v){
+  return Array.isArray(v) ? (v[0] || null) : (v || null);
+}
+
+async function buscarHistoricoMapbiomas(car){
+  const rows = await sbFetch('rastro_mapbiomas_historico_numeros',
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*`);
+  return Array.isArray(rows) && rows.length ? rows[0] : null;
+}
+
+async function buscarHistoricosMapbiomasPorCars(cars){
+  const unicos = [...new Set((cars || []).filter(Boolean))];
+  const mapa = {};
+  if(!unicos.length) return mapa;
+
+  // Supabase REST aceita filtro in.(a,b,c). Em lotes evita URL gigante.
+  for(let i=0;i<unicos.length;i+=80){
+    const lote = unicos.slice(i, i+80);
+    const filtro = lote.map(c => encodeURIComponent(c)).join(',');
+    try{
+      const rows = await sbFetch('rastro_mapbiomas_historico_numeros',
+        `?codigo_car=in.(${filtro})&select=*`);
+      if(Array.isArray(rows)){
+        rows.forEach(h => { if(h?.codigo_car) mapa[h.codigo_car] = h; });
+      }
+    }catch(e){
+      console.warn('Histórico por lote indisponível:', e);
+    }
+  }
+  return mapa;
+}
+
+function calcularEstrelas(territorio){
+  const fontes = Array.isArray(territorio?.rastro_analises_fontes) ? territorio.rastro_analises_fontes : [];
+
+  const histFonte = fontes.find(x => x?.origem === 'MAPBIOMAS_HISTORICO') || null;
+  const mbFonte = fontes.find(x => x?.origem === 'MAPBIOMAS') || null;
+  const histPayload = histFonte?.payload || {};
+  const histCol = histPayload?.colunas || {};
+  const mbPayload = mbFonte?.payload || {};
+
+  const totalAlertas = nnum(
+    histFonte?.total_alertas ??
+    histCol?.total_alertas ??
+    histPayload?.total_alertas ??
+    histPayload?.numberOfAlerts ??
+    histPayload?.numero_alertas ??
+    mbPayload?.numberOfAlerts
+  );
+
+  const areaDesmatada = nnum(
+    histFonte?.area_desmatada_ha ??
+    histCol?.area_desmatada_ha ??
+    histPayload?.area_desmatada_ha ??
+    histPayload?.areaHaAlertas ??
+    mbPayload?.areaHaAlertas
+  );
+
+  const gee = primeiro(territorio?.rastro_mapbiomas_historico_numeros) || {};
+  const segmento = gee.segmento_atual || gee.segmento || gee.segmento_dominante || null;
+  const variacao = nnum(gee.variacao_nativa_2020_2024_ha ?? gee.variacao_nativa_ha);
+
+  const ganho = Math.max(0, variacao);
+  const perda = Math.max(0, areaDesmatada);
+  const saldo = ganho - perda;
+  const tolerancia = 0; // qualquer saldo positivo ja mostra estrela; qualquer saldo negativo mostra fogo
+
+  let classificacao = 'NEUTRO';
+  if(saldo > tolerancia) classificacao = 'POSITIVO';
+  else if(saldo < -tolerancia) classificacao = 'NEGATIVO';
+
+  return {
+    ganho,
+    perda,
+    saldo,
+    classificacao,
+    totalAlertas: Math.max(0, Math.round(totalAlertas)),
+    segmento,
+  };
+}
+
+function htmlIconeHistorico(est){
+  const saldoAbs = Math.abs(nnum(est.saldo)).toFixed(1);
+  if(est.classificacao === 'POSITIVO'){
+    return `<span class="estrela verde">★<span class="tip">Saldo positivo: +${saldoAbs} ha</span></span>`;
+  }
+  if(est.classificacao === 'NEGATIVO'){
+    return `<span class="estrela vermelha">🔥<span class="tip">Saldo negativo: -${saldoAbs} ha</span></span>`;
+  }
+  return '<span style="font-size:11px;color:var(--t3)">neutro</span>';
+}
+
+function preencherBlocoEstrelas(est){
+  const classificacaoEl = document.getElementById('d-estrelas-verde');
+  const legadoVermelho = document.getElementById('d-estrelas-vermelha');
+  const segmento = document.getElementById('d-segmento');
+  const icone = document.getElementById('d-saldo-icone');
+  const texto = document.getElementById('d-saldo-texto');
+  const saldoNum = document.getElementById('d-saldo-num');
+  const barraPerda = document.getElementById('d-barra-perda');
+  const barraGanho = document.getElementById('d-barra-ganho');
+  const perdaHa = document.getElementById('d-perda-ha');
+  const ganhoHa = document.getElementById('d-ganho-ha');
+
+  const ganho = nnum(est.ganho);
+  const perda = nnum(est.perda);
+  const saldo = nnum(est.saldo);
+  const total = Math.max(ganho + perda, 1);
+  const pctGanho = Math.min(100, (ganho / total) * 100);
+  const pctPerda = Math.min(100, (perda / total) * 100);
+
+  if(classificacaoEl) classificacaoEl.innerHTML = htmlIconeHistorico(est);
+  if(legadoVermelho) legadoVermelho.innerHTML = '';
+  if(segmento) segmento.textContent = est.segmento || '—';
+
+  if(barraGanho) barraGanho.style.width = `${pctGanho}%`;
+  if(barraPerda) barraPerda.style.width = `${pctPerda}%`;
+  if(ganhoHa) ganhoHa.textContent = `${ganho.toFixed(1)} ha`;
+  if(perdaHa) perdaHa.textContent = `${perda.toFixed(1)} ha`;
+
+  if(icone && texto && saldoNum){
+    icone.className = 'saldo-icone neu';
+    saldoNum.className = 'saldo-num neu';
+    icone.textContent = '•';
+    texto.textContent = 'Saldo ambiental neutro';
+    saldoNum.textContent = `${saldo.toFixed(1)} ha`;
+
+    if(est.classificacao === 'POSITIVO'){
+      icone.className = 'saldo-icone pos';
+      saldoNum.className = 'saldo-num';
+      icone.textContent = '★';
+      texto.textContent = 'Recuperação vencendo';
+      saldoNum.textContent = `+${saldo.toFixed(1)} ha`;
+    } else if(est.classificacao === 'NEGATIVO'){
+      icone.className = 'saldo-icone neg';
+      saldoNum.className = 'saldo-num neg';
+      icone.textContent = '🔥';
+      texto.textContent = 'Desmatamento vencendo';
+      saldoNum.textContent = `${saldo.toFixed(1)} ha`;
+    }
+  }
+}
+
+
+// ── GRUPOS ────────────────────────────────────────────────────────────────────
+const GRUPOS=[
+  {k:'pendente',l:'Pendente',dc:'dp',lc:'lp',cc:'cp',cor:'#f59e0b',fn:f=>f.status==='PENDENTE'},
+  {k:'invalido',l:'Inválido',dc:'di',lc:'li',cc:'ci',cor:'#ef4444',fn:f=>f.status==='INATIVO'},
+  {k:'baixo',l:'Risco Baixo',dc:'db',lc:'lb',cc:'cb',cor:'#22c55e',fn:f=>f.status==='ATIVO'&&f._risco==='BAIXO'},
+  {k:'medio',l:'Risco Médio',dc:'dm',lc:'lm',cc:'cm',cor:'#f97316',fn:f=>f.status==='ATIVO'&&f._risco==='MEDIO'},
+  {k:'alto',l:'Risco Alto',dc:'da',lc:'la',cc:'ca',cor:'#dc2626',fn:f=>f.status==='ATIVO'&&f._risco==='ALTO'},
+];
+
+let map, mkrs={}, wallet=null, detalheMap=null, detalheAreaLayer=null;
+
+// ── MAPA ──────────────────────────────────────────────────────────────────────
+function initMap(){
+  map=L.map('map').setView([-14,-52],5);
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`,
+    {attribution:'© OpenStreetMap · CARTO',maxZoom:20}).addTo(map);
+}
+
+function plotarFazenda(f){
+  if(!f.centroid_lat||!f.centroid_lon) return;
+  const g=GRUPOS.find(g=>g.fn(f));
+  const cor=g?g.cor:'#888';
+  if(mkrs[f.codigo_car]) mkrs[f.codigo_car].remove();
+  const m=L.circleMarker([f.centroid_lat,f.centroid_lon],
+    {radius:9,fillColor:cor,color:'#fff',weight:2,fillOpacity:.92}).addTo(map);
+  const risco=f._risco||f.status;
+  const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
+  const rb=f._risco?`rb-${f._risco[0].toLowerCase()}`:'';
+  const badge=f._risco
+    ?`<span class="rbadge ${rb}" style="font-size:10px">${f._risco}</span>`
+    :`<span class="badge ${sc}" style="font-size:10px">${f.status}</span>`;
+  m.bindPopup(`<div class="pop" onclick="abrirDetalhe('${f.codigo_car}')">
+    <p class="pop-car">${f.codigo_car.substring(0,34)}…</p>
+    <p class="pop-loc">${f.estado||''} · ${f.area_ha?f.area_ha+' ha':''}</p>
+    ${badge}<p class="pop-hint">Clique para ver detalhes</p>
+  </div>`,{maxWidth:240});
+  m.on('click',()=>destacarSidebar(f.codigo_car));
+  mkrs[f.codigo_car]=m;
+}
+
+function destacarMapa(fazendas){
+  Object.keys(mkrs).forEach(car=>{
+    const v=fazendas.find(f=>f.codigo_car===car);
+    mkrs[car].setStyle({fillOpacity:v?.92:.08,opacity:v?1:.2});
+  });
+  if(fazendas.length>0){
+    const b=L.latLngBounds(fazendas.filter(f=>f.centroid_lat).map(f=>[f.centroid_lat,f.centroid_lon]));
+    if(b.isValid()) map.fitBounds(b,{padding:[40,40]});
+  }
+}
+
+function resetMapa(){
+  Object.values(mkrs).forEach(m=>m.setStyle({fillOpacity:.92,opacity:1}));
+}
+
+function normalizarBoundingBox(bb){
+  if(Array.isArray(bb) && bb.length >= 4){
+    const west=Number(bb[0]), south=Number(bb[1]), east=Number(bb[2]), north=Number(bb[3]);
+    if([west,south,east,north].every(Number.isFinite)) return {west,south,east,north};
+  }
+  if(bb && typeof bb === 'object'){
+    const west=Number(bb.west ?? bb.minLon ?? bb.xmin);
+    const south=Number(bb.south ?? bb.minLat ?? bb.ymin);
+    const east=Number(bb.east ?? bb.maxLon ?? bb.xmax);
+    const north=Number(bb.north ?? bb.maxLat ?? bb.ymax);
+    if([west,south,east,north].every(Number.isFinite)) return {west,south,east,north};
+  }
+  return null;
+}
+
+function normalizarGeoJSON(geojson){
+  if(!geojson) return null;
+
+  let gj=geojson;
+  if(typeof gj === 'string'){
+    try{
+      gj=JSON.parse(gj);
+    }catch{
+      return null;
+    }
+  }
+
+  if(!gj || typeof gj !== 'object') return null;
+
+  if(gj.type === 'Feature' || gj.type === 'FeatureCollection'){
+    return gj;
+  }
+
+  if(['Polygon','MultiPolygon','LineString','MultiLineString','Point','MultiPoint'].includes(gj.type)){
+    return {
+      type:'Feature',
+      properties:{},
+      geometry:gj,
+    };
+  }
+
+  return null;
+}
+
+function limparMapaDetalhe(){
+  if(detalheMap){
+    detalheMap.remove();
+    detalheMap=null;
+    detalheAreaLayer=null;
+  }
+  const el=document.getElementById('det-leaflet-map');
+  if(el){
+    el.style.display='none';
+    el.innerHTML='';
+  }
+}
+
+function criarHachuraMapa(){
+  if(!detalheMap) return;
+  const svg = detalheMap.getPanes().overlayPane.querySelector('svg');
+  if(!svg) return;
+  let defs = svg.querySelector('defs');
+  if(!defs){
+    defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    svg.insertBefore(defs, svg.firstChild);
+  }
+  if(!defs.querySelector('#rastro-hachura-verde')){
+    const pattern = document.createElementNS('http://www.w3.org/2000/svg','pattern');
+    pattern.setAttribute('id','rastro-hachura-verde');
+    pattern.setAttribute('patternUnits','userSpaceOnUse');
+    pattern.setAttribute('width','10');
+    pattern.setAttribute('height','10');
+    pattern.setAttribute('patternTransform','rotate(45)');
+    const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bg.setAttribute('width','10');
+    bg.setAttribute('height','10');
+    bg.setAttribute('fill','rgba(34,197,94,0.12)');
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1','0');
+    line.setAttribute('y1','0');
+    line.setAttribute('x2','0');
+    line.setAttribute('y2','10');
+    line.setAttribute('stroke','#22c55e');
+    line.setAttribute('stroke-width','3');
+    line.setAttribute('stroke-opacity','0.55');
+    pattern.appendChild(bg);
+    pattern.appendChild(line);
+    defs.appendChild(pattern);
+  }
+}
+
+function aplicarHachuraLayer(layer){
+  setTimeout(()=>{
+    criarHachuraMapa();
+    const path = layer?._path;
+    if(path){
+      path.setAttribute('fill','url(#rastro-hachura-verde)');
+      path.setAttribute('fill-opacity','1');
+      path.setAttribute('stroke','#1a3828');
+      path.setAttribute('stroke-width','3');
+    }
+  }, 60);
+}
+
+function wktParaGeoJSON(wkt){
+  if(!wkt || typeof wkt !== 'string') return null;
+  let texto = wkt.trim();
+  const idx = texto.indexOf(';');
+  if(texto.toUpperCase().startsWith('SRID=') && idx >= 0) texto = texto.slice(idx + 1).trim();
+  const up = texto.toUpperCase();
+  const ehMulti = up.startsWith('MULTIPOLYGON');
+  const ehPoly = up.startsWith('POLYGON');
+  if(!ehMulti && !ehPoly) return null;
+  const inicio = texto.indexOf('(');
+  const fim = texto.lastIndexOf(')');
+  if(inicio < 0 || fim < 0) return null;
+  const corpo = texto.slice(inicio, fim + 1);
+  const parseAnel = anel => anel.split(',')
+    .map(par => par.trim().split(/\s+/).map(Number))
+    .filter(c => c.length >= 2 && c.every(Number.isFinite))
+    .map(c => [c[0], c[1]]);
+  try{
+    if(ehMulti){
+      let m = corpo.replace(/^\(/,'').replace(/\)$/,'');
+      const fimPrimeiro = m.indexOf(')),');
+      const primeiro = fimPrimeiro >= 0 ? m.slice(0, fimPrimeiro + 2) : m;
+      const p = primeiro.replace(/^\(/,'').replace(/\)$/,'');
+      const aneis = p.split(/\)\s*,\s*\(/).map(a => a.replace(/^\(/,'').replace(/\)$/,''));
+      return {type:'Polygon', coordinates: aneis.map(parseAnel)};
+    }
+    const p = corpo.replace(/^\(/,'').replace(/\)$/,'');
+    const aneis = p.split(/\)\s*,\s*\(/).map(a => a.replace(/^\(/,'').replace(/\)$/,''));
+    return {type:'Polygon', coordinates: aneis.map(parseAnel)};
+  }catch{
+    return null;
+  }
+}
+
+function extrairGeoJSONDoTerritorio(f){
+  const porWkt = wktParaGeoJSON(f?.geometry_wkt || f?.payload?.geometryWkt || f?.payload?.geometry_wkt);
+  if(porWkt) return porWkt;
+  return f?.geojson || f?.geometry || f?.payload?.geometry || f?.payload?.geojson || null;
+}
+
+function renderMapaDetalhe(geojson, bb, f=null){
+  const load=document.getElementById('det-mapa-load');
+  const img=document.getElementById('det-mapa-img');
+  const el=document.getElementById('det-leaflet-map');
+  const bbox=normalizarBoundingBox(bb);
+  const gj=normalizarGeoJSON(geojson);
+
+  limparMapaDetalhe();
+  img.style.display='none';
+  load.style.display='none';
+  el.style.display='block';
+
+  detalheMap=L.map('det-leaflet-map',{
+    zoomControl:true,
+    attributionControl:false,
+    scrollWheelZoom:false,
+  });
+
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`,{
+    maxZoom:20,
+  }).addTo(detalheMap);
+
+  let bounds=null;
+
+  if(gj){
+    detalheAreaLayer=L.geoJSON(gj,{
+      style:{
+        color:'#1a3828',
+        weight:3,
+        fillColor:'#22c55e',
+        fillOpacity:.20,
+        opacity:1,
+      },
+      pointToLayer:(_feature,latlng)=>L.circleMarker(latlng,{
+        radius:8,
+        color:'#1a3828',
+        fillColor:'#22c55e',
+        fillOpacity:.9,
+        weight:2,
+      }),
+    }).addTo(detalheMap);
+
+    bounds=detalheAreaLayer.getBounds();
+    detalheAreaLayer.eachLayer(aplicarHachuraLayer);
+  }
+
+  if((!bounds || !bounds.isValid()) && bbox){
+    bounds=L.latLngBounds([[bbox.south,bbox.west],[bbox.north,bbox.east]]);
+    detalheAreaLayer=L.rectangle(bounds,{
+      color:'#1a3828',
+      weight:3,
+      fillColor:'#22c55e',
+      fillOpacity:.18,
+      dashArray:'7 5',
+    }).addTo(detalheMap);
+    aplicarHachuraLayer(detalheAreaLayer);
+  }
+
+  // Fallback: se nao houver poligono nem bounding box, mostra so a localizacao aproximada.
+  // Sem mensagem "indisponivel" e sem segundo mapa duplicado.
+  if(!bounds || !bounds.isValid()){
+    const lat = Number(f?.centroid_lat);
+    const lon = Number(f?.centroid_lon);
+    if(Number.isFinite(lat) && Number.isFinite(lon)){
+      const areaHa = Number(f?.area_ha || 0);
+      const raioM = areaHa > 0 ? Math.max(500, Math.sqrt(areaHa * 10000 / Math.PI)) : 1500;
+      const centro = L.latLng(lat, lon);
+      detalheAreaLayer=L.circle(centro,{
+        radius:raioM,
+        color:'#1a3828',
+        weight:2,
+        fillColor:'#22c55e',
+        fillOpacity:.10,
+        dashArray:'7 5',
+      }).addTo(detalheMap);
+      aplicarHachuraLayer(detalheAreaLayer);
+      L.circleMarker(centro,{radius:6,fillColor:'#1a3828',color:'#fff',weight:2,fillOpacity:1}).addTo(detalheMap);
+      bounds=detalheAreaLayer.getBounds();
+    }
+  }
+
+  if(!bounds || !bounds.isValid()){
+    el.style.display='none';
+    load.style.display='none';
+    return false;
+  }
+
+  detalheMap.fitBounds(bounds,{padding:[28,28]});
+  setTimeout(()=>detalheMap.invalidateSize(),80);
+  return true;
+}
+
+function preencherPropriedadeEGemini(f){
+  if(!f) return;
+
+  const resultado = Array.isArray(f.rastro_resultados) ? f.rastro_resultados[0] : null;
+
+  const sc = f.status === 'ATIVO' ? 'bv' : f.status === 'PENDENTE' ? 'bp' : 'bi';
+  const se = document.getElementById('d-status');
+  if(se){
+    se.className = 'badge ' + sc;
+    se.textContent = f.status || '—';
+  }
+
+  const re = document.getElementById('d-risco');
+  if(re){
+    re.style.cssText = '';
+    if(resultado?.risco){
+      re.className = 'rbadge rb-' + resultado.risco[0].toLowerCase();
+      re.textContent = resultado.risco;
+    } else {
+      re.className = 'rbadge';
+      re.style.cssText = 'background:#f1f5f1;color:#6b897a';
+      re.textContent = 'N/A';
+    }
+  }
+
+  const estado = document.getElementById('d-estado');
+  const area = document.getElementById('d-area');
+  const data = document.getElementById('d-data');
+  const sigla = document.getElementById('d-sigla');
+
+  if(estado) estado.textContent = f.estado || f.state_acronym || '—';
+  if(area) area.textContent = f.area_ha ? (f.area_ha + ' ha') : '—';
+  if(data) data.textContent = f.created_at ? new Date(f.created_at).toLocaleDateString('pt-BR') : '—';
+  if(sigla) sigla.textContent = f.state_acronym || '—';
+
+  if(resultado){
+    const gr = document.getElementById('d-g-risco');
+    if(gr){
+      gr.className = 'rbadge rb-' + (resultado.risco?.[0]?.toLowerCase() || 'b');
+      gr.textContent = resultado.risco || '—';
+    }
+    const just = document.getElementById('d-g-just');
+    const comp = document.getElementById('d-g-comp');
+    const inter = document.getElementById('d-g-int');
+    const resumo = document.getElementById('d-g-res');
+    if(just) just.textContent = resultado.justificativa || '—';
+    if(comp) comp.textContent = resultado.compliance || '—';
+    if(inter) inter.textContent = resultado.interpretacao || '—';
+    if(resumo) resumo.textContent = resultado.resumo || '—';
+  } else {
+    ['d-g-risco','d-g-just','d-g-comp','d-g-int','d-g-res'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){ el.textContent='Análise pendente'; el.className='gemini-campo-v'; }
+    });
+  }
+
+  const fontes = Array.isArray(f.rastro_analises_fontes) ? f.rastro_analises_fontes : [];
+  const mb = fontes.find(x=>x.origem==='MAPBIOMAS');
+  const ib = fontes.find(x=>x.origem==='IBAMA');
+
+  const mbDef = document.getElementById('d-mb-def');
+  const mbAlerts = document.getElementById('d-mb-alerts');
+  const mbHa = document.getElementById('d-mb-ha');
+  const ibEmb = document.getElementById('d-ib-emb');
+  const ibSt = document.getElementById('d-ib-st');
+
+  if(mbDef) mbDef.textContent = mb?.payload?.deforestationStatus === 1 ? 'Sim' : 'Não';
+  if(mbAlerts) mbAlerts.textContent = mb?.payload?.numberOfAlerts ?? '—';
+  if(mbHa) mbHa.textContent = mb?.payload?.areaHaAlertas ? (mb.payload.areaHaAlertas + ' ha') : '—';
+  if(ibEmb) ibEmb.textContent = ib?.payload?.embargoStatus === 1 ? 'Sim' : 'Não';
+  if(ibSt) ibSt.textContent = ib?.payload?.embargoStatus === 1 ? 'Embargado' : 'Regular';
+}
+
+// ── DETALHE ───────────────────────────────────────────────────────────────────
+async function abrirDetalhe(car){
+  document.getElementById('map').style.display='none';
+  document.getElementById('legenda').style.display='none';
+  document.getElementById('detalhe').classList.add('show');
+  document.getElementById('det-car-cod').textContent=car;
+
+  // Mapa estático
+  const img=document.getElementById('det-mapa-img');
+  const miniMap=document.getElementById('det-leaflet-map');
+  const load=document.getElementById('det-mapa-load');
+  img.style.display='none';
+  miniMap.style.display='none';
+  limparMapaDetalhe();
+  load.style.display='flex';
+  load.textContent='Carregando território…';
+
+  // Busca dados completos no Supabase
+  const rows = await sbFetch('rastro_territorios',
+    `?codigo_car=eq.${encodeURIComponent(car)}&select=*,rastro_analises_fontes(*),rastro_resultados(*)`);
+  const f = rows?.[0];
+
+  if(!f){ load.textContent='Propriedade não encontrada.'; return; }
+
+  await aplicarEscopoContratoAtual(f);
+  mostrarAvisoContratoAtual(f);
+
+  // Preenche a aba PROPRIEDADE imediatamente, antes de qualquer mapa/histórico.
+  // Assim, se Leaflet, GeoJSON ou Edge Function falhar, Estado/Área/Sigla/Risco não somem.
+  preencherPropriedadeEGemini(f);
+
+  // Estrelas/segmento: usa tabela histórica separada, sem alterar os dados da propriedade.
+  try{
+    const hist = await buscarHistoricoMapbiomas(car);
+    if(hist) f.rastro_mapbiomas_historico_numeros = hist;
+  }catch(e){
+    console.warn('Histórico MapBiomas indisponível:', e);
+  }
+  window._detalheAtual = f;
+  preencherBlocoEstrelas(calcularEstrelas(f));
+
+  // Mapa territorial
+  const bb=normalizarBoundingBox(f.bounding_box);
+  const gj=extrairGeoJSONDoTerritorio(f);
+  try{
+    renderMapaDetalhe(gj, bb, f);
+  }catch(e){
+    console.error('Erro ao renderizar mapa do detalhe:', e);
+    limparMapaDetalhe();
+    load.style.display='none';
+  }
+
+  // Reforço: o mapa nunca pode apagar/travar a seção Propriedade.
+  preencherPropriedadeEGemini(f);
+
+  // Status
+  const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
+  const se=document.getElementById('d-status');
+  se.className='badge '+sc; se.textContent=f.status;
+
+  // Risco (vem de rastro_resultados)
+  const resultado=f.rastro_resultados?.[0];
+  const re=document.getElementById('d-risco');
+  if(resultado?.risco){
+    const rc='rb-'+resultado.risco[0].toLowerCase();
+    re.className='rbadge '+rc; re.textContent=resultado.risco;
+  } else {
+    re.className='rbadge'; re.style.cssText='background:#f1f5f1;color:#6b897a'; re.textContent='N/A';
+  }
+
+  document.getElementById('d-estado').textContent=f.estado||'—';
+  document.getElementById('d-area').textContent=f.area_ha?(f.area_ha+' ha'):'—';
+  document.getElementById('d-data').textContent=f.created_at?new Date(f.created_at).toLocaleDateString('pt-BR'):'—';
+  document.getElementById('d-sigla').textContent=f.state_acronym||'—';
+
+  // Gemini
+  if(resultado){
+    const gr=document.getElementById('d-g-risco');
+    gr.className='rbadge rb-'+resultado.risco?.[0]?.toLowerCase();
+    gr.textContent=resultado.risco||'—';
+    document.getElementById('d-g-just').textContent=resultado.justificativa||'—';
+    document.getElementById('d-g-comp').textContent=resultado.compliance||'—';
+    document.getElementById('d-g-int').textContent=resultado.interpretacao||'—';
+    document.getElementById('d-g-res').textContent=resultado.resumo||'—';
+  } else {
+    ['d-g-risco','d-g-just','d-g-comp','d-g-int','d-g-res'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.textContent='Análise pendente';el.className='gemini-campo-v';}
+    });
+  }
+
+  // Fontes MapBiomas e IBAMA
+  const mb=f.rastro_analises_fontes?.find(x=>x.origem==='MAPBIOMAS');
+  const ib=f.rastro_analises_fontes?.find(x=>x.origem==='IBAMA');
+  document.getElementById('d-mb-def').textContent=mb?.payload?.deforestationStatus===1?'Sim':'Não';
+  document.getElementById('d-mb-alerts').textContent=mb?.payload?.numberOfAlerts??'—';
+  document.getElementById('d-mb-ha').textContent=mb?.payload?.areaHaAlertas?(mb.payload.areaHaAlertas+' ha'):'—';
+  document.getElementById('d-ib-emb').textContent=ib?.payload?.embargoStatus===1?'Sim':'Não';
+  document.getElementById('d-ib-st').textContent=ib?.payload?.embargoStatus===1?'Embargado':'Regular';
+
+  document.getElementById('detalhe').scrollTop=0;
+}
+
+
+async function atualizarHistorico(){
+  const car = document.getElementById('det-car-cod').textContent.trim();
+  if(!car || car === '—') return;
+
+  const btn = document.getElementById('btn-atualizar-hist');
+  const msg = document.getElementById('hist-msg');
+  const original = btn.innerHTML;
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin" style="border-top-color:var(--v2)"></div> Buscando no MapBiomas…';
+  msg.className = 'hist-msg';
+  msg.textContent = '';
+
+  try{
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/mapibioma`, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${SUPABASE_ANON}`,
+      },
+      body: JSON.stringify({ codigo_car: car }),
+    });
+
+    let data = {};
+    try{ data = await resp.json(); }catch(_){ data = {}; }
+
+    if(!resp.ok || data?.status !== 'OK'){
+      throw new Error(data?.detalhe || data?.erro || data?.status || `HTTP ${resp.status}`);
+    }
+
+    const hist = {
+      codigo_car: car,
+      segmento_atual: data.segmento_atual,
+      vegetacao_nativa_atual_ha: data.vegetacao_nativa_atual_ha,
+      variacao_nativa_2020_2024_ha: data.variacao_nativa_2020_2024_ha,
+      estrela_verde: data.estrela_verde === true,
+    };
+
+    // Atualiza só o bloco Histórico, usando também as fontes já carregadas
+    // para comparar recuperação x desmatamento. Não mexe na aba Propriedade.
+    const base = window._detalheAtual || {};
+    base.rastro_mapbiomas_historico_numeros = hist;
+    window._detalheAtual = base;
+    preencherBlocoEstrelas(calcularEstrelas(base));
+
+    msg.className = 'hist-msg ok';
+    msg.textContent = `✓ Atualizado. Segmento: ${data.segmento_atual || '—'} · Veg. nativa: ${nnum(data.vegetacao_nativa_atual_ha).toFixed(1)} ha`;
+  }catch(e){
+    msg.className = 'hist-msg err';
+    msg.textContent = 'Erro ao atualizar histórico: ' + (e.message || e);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = original;
+}
+
+function fecharDetalhe(){
+  limparMapaDetalhe();
+  document.getElementById('detalhe').classList.remove('show');
+  document.getElementById('map').style.display='block';
+  document.getElementById('legenda').style.display='block';
+  setTimeout(()=>map.invalidateSize(),50);
+}
+
+// ── ABAS ──────────────────────────────────────────────────────────────────────
+function setAba(id,btn){
+  document.querySelectorAll('.aba').forEach(a=>a.classList.remove('ativa'));
+  document.querySelectorAll('.painel').forEach(p=>p.classList.remove('ativo'));
+  btn.classList.add('ativa');
+  document.getElementById('p-'+id).classList.add('ativo');
+}
+
+// ── SIDEBAR LISTA ─────────────────────────────────────────────────────────────
+function buildLista(fazendas,label){
+  const el=document.getElementById('sb-lista');
+  el.innerHTML='';
+  const hdr=document.getElementById('lista-hdr');
+  if(fazendas===null){
+    hdr.classList.remove('show');
+    el.innerHTML='<div class="vazio">Selecione um estado para listar propriedades<br/>ou use "Verificar CAR" para busca individual.</div>';
+    return;
+  }
+  hdr.classList.add('show');
+  document.getElementById('lista-lbl').textContent=label||'Resultados';
+  document.getElementById('lista-cnt').textContent=`${fazendas.length} propriedade${fazendas.length!==1?'s':''}`;
+  if(!fazendas.length){
+    el.innerHTML='<div class="vazio">Nenhuma propriedade encontrada.</div>';
+    return;
+  }
+  GRUPOS.forEach(g=>{
+    const items=fazendas.filter(g.fn);
+    if(!items.length) return;
+    const div=document.createElement('div');
+    div.innerHTML=`
+      <div class="grupo-h" onclick="toggleG(this,'grp-${g.k}')">
+        <div class="g-esq"><div class="gdot ${g.dc}"></div><span class="glbl ${g.lc}">${g.l}</span></div>
+        <div style="display:flex;align-items:center;gap:4px"><span class="gcnt ${g.cc}">${items.length}</span><span class="garr ab">▶</span></div>
+      </div>
+      <div class="g-itens ab" id="grp-${g.k}">
+        ${items.map(f=>`
+          <div class="fitem" id="fi-${f.codigo_car.replace(/[^a-zA-Z0-9]/g,'_')}" onclick="selFaz('${f.codigo_car}')">
+            <div class="fcar">${f.codigo_car}</div>
+            <div class="fmeta">${f.estado||''} · ${f.area_ha?(f.area_ha+' ha'):''}</div>
+          </div>`).join('')}
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+function toggleG(h,id){
+  const el=document.getElementById(id);
+  const arr=h.querySelector('.garr');
+  el.classList.toggle('ab');
+  arr.classList.toggle('ab',el.classList.contains('ab'));
+}
+
+function selFaz(car){
+  document.querySelectorAll('.fitem').forEach(e=>e.classList.remove('sel'));
+  const id='fi-'+car.replace(/[^a-zA-Z0-9]/g,'_');
+  const el=document.getElementById(id);
+  if(el){el.classList.add('sel');el.scrollIntoView({behavior:'smooth',block:'nearest'})}
+  const m=mkrs[car];
+  if(m){fecharDetalhe();m.openPopup();map.setView(m.getLatLng(),10,{animate:true});}
+}
+
+function destacarSidebar(car){
+  document.querySelectorAll('.fitem').forEach(e=>e.classList.remove('sel'));
+  const id='fi-'+car.replace(/[^a-zA-Z0-9]/g,'_');
+  const el=document.getElementById(id);
+  if(el){el.classList.add('sel');el.scrollIntoView({behavior:'smooth',block:'nearest'})}
+}
+
+// ── BUSCA CAR ─────────────────────────────────────────────────────────────────
+async function buscarCAR(){
+  const v=document.getElementById('inp-car').value.trim();
+  if(!v) return;
+  const btn=document.getElementById('btn-car');
+  btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  document.getElementById('res-wrap').classList.remove('show');
+  document.getElementById('res-erro').classList.remove('show');
+  document.getElementById('res-conteudo').innerHTML='';
+
+  const rows=await sbFetch('rastro_territorios',
+    `?codigo_car=eq.${encodeURIComponent(v)}&select=*,rastro_resultados(*)`);
+  const f=rows?.[0];
+
+  btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Verificar';
+  btn.disabled=false;
+
+  if(!f){
+    document.getElementById('res-erro').classList.add('show');
+    document.getElementById('res-wrap').classList.add('show');
+    return;
+  }
+
+  try{
+    await aplicarEscopoContratoAtual(f);
+  }catch(e){
+    document.getElementById('res-erro').textContent = e.message || String(e);
+    document.getElementById('res-erro').classList.add('show');
+    document.getElementById('res-wrap').classList.add('show');
+    return;
+  }
+
+  if(f._noContratoAtual === false){
+    const addr = getContratoAtual();
+    document.getElementById('res-conteudo').innerHTML = `
+      <div style="font-size:12px;line-height:1.55;padding:9px 10px;border-radius:8px;background:var(--sup)7ed;color:#7c2d12;border:1px solid #fed7aa">
+        Este CAR existe na base pública do Rastro, mas <b>não está cadastrado no contrato ativo</b><br>
+        <span style="font-family:'Courier New',monospace;font-size:10.5px">${addr}</span>
+      </div>`;
+    document.getElementById('res-wrap').classList.add('show');
+    return;
+  }
+
+  const resultado=f.rastro_resultados?.[0];
+  const risco=resultado?.risco;
+  const sc=f.status==='ATIVO'?'bv':f.status==='PENDENTE'?'bp':'bi';
+  const rb=risco?'rb-'+risco[0].toLowerCase():'';
+
+  document.getElementById('res-conteudo').innerHTML=`
+    <div class="mini-grid">
+      <div class="mc"><p class="mc-l">Status</p><span class="badge ${sc}">${f.status}</span></div>
+      <div class="mc"><p class="mc-l">Risco</p><span class="rbadge ${rb}" style="${!risco?'background:#f1f5f1;color:#6b897a':''}">${risco||'N/A'}</span></div>
+      <div class="mc"><p class="mc-l">Estado</p><p class="mc-v">${f.estado||'—'}</p></div>
+      <div class="mc"><p class="mc-l">Área</p><p class="mc-v">${f.area_ha?(f.area_ha+' ha'):'—'}</p></div>
+    </div>
+    ${f._noContratoAtual === false ? '<div style="font-size:11px;margin:6px 0 8px;padding:7px 9px;border-radius:8px;background:var(--sup)7ed;color:#7c2d12;border:1px solid #fed7aa">CAR não encontrado no contrato ativo. Risco/Gemini ocultados.</div>' : ''}
+    <button class="btn btn-g" onclick="abrirDetalhe('${f.codigo_car}');document.getElementById('res-wrap').classList.remove('show')">
+      Ver análise completa →
+    </button>`;
+  document.getElementById('res-wrap').classList.add('show');
+
+  // Plota no mapa se tiver coordenadas
+  if(f.centroid_lat&&!mkrs[f.codigo_car]){
+    f._risco=risco;
+    plotarFazenda(f);
+  }
+  resetMapa();
+  if(mkrs[f.codigo_car]){
+    mkrs[f.codigo_car].openPopup();
+    map.setView(mkrs[f.codigo_car].getLatLng(),10,{animate:true});
+  }
+}
+
+function limparCAR(){
+  document.getElementById('inp-car').value='';
+  document.getElementById('res-wrap').classList.remove('show');
+  document.getElementById('res-conteudo').innerHTML='';
+  document.getElementById('res-erro').classList.remove('show');
+  fecharDetalhe();
+  resetMapa();
+}
+
+// ── FILTRO ────────────────────────────────────────────────────────────────────
+async function filtrar(){
+  const estadoSel=document.getElementById('sel-estado').value;
+  const riscoSel=document.getElementById('sel-risco').value;
+  const segSel=document.getElementById('sel-segmento').value;
+  if(!estadoSel){alert('Selecione um estado para filtrar.');return;}
+  const sigla=estadoSel.match(/\(([A-Z]+)\)/)?.[1]||'';
+
+  const rows=await sbFetch('rastro_territorios',
+    `?state_acronym=eq.${sigla}&select=*,rastro_resultados(risco)`);
+
+  const base = Array.isArray(rows) ? rows : [];
+  const historicos = await buscarHistoricosMapbiomasPorCars(base.map(f => f.codigo_car));
+
+  // Normaliza risco e junta o histórico MapBiomas, que é de onde vem o segmento.
+  let fazendas=base.map(f=>{
+    const hist = historicos[f.codigo_car] || null;
+    if(hist) f.rastro_mapbiomas_historico_numeros = hist;
+    return {
+      ...f,
+      _risco:f.rastro_resultados?.[0]?.risco||null,
+      _estrelas:calcularEstrelas(f),
+    };
+  });
+
+  if(riscoSel==='PENDENTE') fazendas=fazendas.filter(f=>f.status==='PENDENTE');
+  else if(riscoSel==='INATIVO') fazendas=fazendas.filter(f=>f.status==='INATIVO');
+  else if(riscoSel) fazendas=fazendas.filter(f=>f._risco===riscoSel);
+
+  // Segmento só existe quando o histórico já foi calculado/alimentado.
+  if(segSel) fazendas=fazendas.filter(f=>f._estrelas?.segmento===segSel);
+
+  // Plota no mapa
+  Object.values(mkrs).forEach(m=>m.remove());
+  mkrs={};
+  fazendas.forEach(plotarFazenda);
+
+  let label=estadoSel;
+  if(riscoSel) label+=` · ${riscoSel}`;
+  if(segSel) label+=` · ${segSel}`;
+  buildLista(fazendas,label);
+  destacarMapa(fazendas);
+}
+function limparFiltro(){
+  document.getElementById('sel-estado').value='';
+  document.getElementById('sel-risco').value='';
+  document.getElementById('sel-segmento').value='';
+  buildLista(null);
+  Object.values(mkrs).forEach(m=>m.remove());
+  mkrs={};
+  resetMapa();
+}
+
+// ── METAMASK ──────────────────────────────────────────────────────────────────
+async function conectarWallet(){
+  if(!window.ethereum){
+    alert('MetaMask não encontrada. Instale a extensão MetaMask no seu navegador.');
+    return;
+  }
+  try {
+    const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
+    wallet=accounts[0];
+
+    // Verifica se está na Sepolia
+    const chainId=await window.ethereum.request({method:'eth_chainId'});
+    if(chainId!==SEPOLIA_ID){
+      try {
+        await window.ethereum.request({
+          method:'wallet_switchEthereumChain',
+          params:[{chainId:SEPOLIA_ID}]
+        });
+      } catch(e) {
+        alert('Por favor, mude para a rede Ethereum Sepolia no MetaMask.');
+        return;
+      }
+    }
+
+    const btn=document.getElementById('btn-mm');
+    btn.classList.add('conectado');
+    btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Conectado`;
+    document.getElementById('wallet-addr').style.display='block';
+    document.getElementById('wallet-addr').textContent=wallet.slice(0,6)+'...'+wallet.slice(-4);
+    document.getElementById('btn-cad').disabled=false;
+  } catch(e) {
+    alert('Erro ao conectar MetaMask: '+e.message);
+  }
+}
+
+async function cadastrar(){
+  const car=document.getElementById('inp-cad').value.trim();
+  if(!car){alert('Digite o código CAR.');return;}
+  if(!wallet){alert('Conecte o MetaMask primeiro.');return;}
+
+  const btn=document.getElementById('btn-cad');
+  btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  document.getElementById('cad-ok').classList.remove('show');
+  document.getElementById('cad-err').classList.remove('show');
+  document.getElementById('tx-info').classList.remove('show');
+
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const addr = getContratoAtual();
+    await salvarContratoAtual();
+    const contrato = new ethers.Contract(addr, [
+      'function cadastrarCAR(string codigoCAR)',
+      'function totalFazendas() view returns (uint256)',
+      'function listarTodos() view returns (string[])'
+    ], signer);
+
+    const tx = await contrato.cadastrarCAR(car);
+
+    document.getElementById('tx-info').classList.add('show');
+    document.getElementById('tx-info').innerHTML=`Transação enviada, aguardando confirmação: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
+
+    const receipt = await tx.wait();
+
+    if(receipt.status !== 1){
+      throw new Error('A transação foi minerada, mas falhou no contrato.');
+    }
+
+    const total = await contrato.totalFazendas();
+    _cacheCarsPorContrato = {};
+    await listarCarsDoContratoAtual(true);
+
+    document.getElementById('cad-ok').classList.add('show');
+    document.getElementById('cad-ok').textContent=`✓ CAR cadastrado on-chain. Total de fazendas: ${total.toString()}.`;
+    document.getElementById('tx-info').innerHTML=`Confirmada: <a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank">${tx.hash.slice(0,18)}… ↗</a>`;
+    document.getElementById('inp-cad').value='';
+  } catch(e) {
+    document.getElementById('cad-err').classList.add('show');
+    document.getElementById('cad-err').textContent='Erro: '+(e.shortMessage||e.reason||e.message||'transação cancelada');
+  }
+
+  btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Cadastrar';
+  btn.disabled=false;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', async ()=>{
+  initMap();
+  buildLista(null);
+  await carregarContratoSalvo();
+  document.getElementById('inp-car').addEventListener('keydown',e=>{if(e.key==='Enter')buscarCAR();});
+});
+<\/script>
+</body>
+</html>
+
+</script>
+</body>
+</html>
